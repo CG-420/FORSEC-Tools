@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rental vs. Mileage Calculator | FORSEC</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 14px; color: #1a1a1a; background: #f4f6f4; min-height: 100vh; padding: 32px 16px; }
+  .page { max-width: 720px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid #3B6E4D; }
+  .header-text h1 { font-size: 20px; font-weight: bold; color: #3B6E4D; }
+  .header-text p { font-size: 12px; color: #666; margin-top: 3px; }
+  .logo-text { font-size: 22px; font-weight: bold; color: #3B6E4D; white-space: nowrap; }
+  .card { background: #fff; border-radius: 8px; border: 1px solid #d8e4da; padding: 20px 24px; margin-bottom: 16px; }
+  .section-label { font-size: 11px; font-weight: bold; color: #3B6E4D; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .input-group { display: flex; flex-direction: column; gap: 5px; }
+  .input-group label { font-size: 12px; color: #555; line-height: 1.4; }
+  .input-group input[type=number] { padding: 8px 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; font-family: Arial, sans-serif; width: 100%; }
+  .input-group input[type=number]:focus { outline: none; border-color: #3B6E4D; box-shadow: 0 0 0 2px rgba(59,110,77,0.15); }
+  .km-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .km-row label { font-size: 12px; color: #555; white-space: nowrap; }
+  .km-row input[type=range] { flex: 1; accent-color: #3B6E4D; }
+  .km-row span { font-size: 12px; font-weight: bold; min-width: 80px; text-align: right; color: #3B6E4D; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f0f5f1; border-radius: 6px; cursor: pointer; border: 1px solid #c8dccb; margin-bottom: 0; }
+  .toggle-row label { font-size: 13px; color: #1a1a1a; cursor: pointer; flex: 1; }
+  .toggle-row input[type=checkbox] { width: 16px; height: 16px; accent-color: #3B6E4D; cursor: pointer; }
+  .pickup-section { margin-top: 14px; padding: 14px; background: #f9fbf9; border: 1px solid #c8dccb; border-radius: 6px; }
+  .pickup-note { font-size: 11px; color: #666; margin-top: 8px; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .result-card { background: #f4f6f4; border-radius: 8px; padding: 16px 18px; border: 1px solid #d8e4da; }
+  .result-card.winner { background: #eaf3ec; border: 2px solid #3B6E4D; }
+  .result-card .label { font-size: 11px; color: #666; margin-bottom: 4px; }
+  .result-card.winner .label { color: #2a5438; }
+  .result-card .amount { font-size: 28px; font-weight: bold; color: #1a1a1a; }
+  .result-card.winner .amount { color: #2a5438; }
+  .result-card .sub { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.5; }
+  .result-card.winner .sub { color: #3B6E4D; }
+  .verdict { border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.6; font-weight: 500; }
+  .verdict.rental { background: #eaf3ec; color: #2a5438; border: 1px solid #b2d4b8; }
+  .verdict.mileage { background: #e8f0fb; color: #1a3f7a; border: 1px solid #b0c8f0; }
+  .verdict.close { background: #fef8e7; color: #7a5a00; border: 1px solid #f0d878; }
+  .breakdown-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .breakdown-title { font-size: 11px; font-weight: bold; color: #666; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  table.bdown { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.bdown td { padding: 3px 6px 3px 0; color: #555; }
+  table.bdown td:last-child { text-align: right; font-weight: bold; color: #1a1a1a; white-space: nowrap; }
+  table.bdown tr.total td { border-top: 1px solid #ccc; padding-top: 6px; color: #1a1a1a; font-weight: bold; }
+  .footer-note { font-size: 11px; color: #666; line-height: 1.7; padding-top: 8px; border-top: 1px solid #e0e0e0; margin-top: 4px; }
+  .footer-note strong { color: #3B6E4D; }
+  @media (max-width: 540px) {
+    .grid2, .grid3, .result-grid, .breakdown-wrap { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo-text">FORSEC</div>
+    <div class="header-text">
+      <h1>Rental vs. Mileage Calculator</h1>
+      <p>Travel Expense Policy  |  Use before each trip to determine the most cost-effective option</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="section-label">Trip Details</p>
+    <div class="grid2">
+      <div class="input-group">
+        <label for="dist">Round-trip work distance (km)</label>
+        <input type="number" id="dist" value="300" min="1" step="10" oninput="calc()">
+      </div>
+      <div class="input-group">
+        <label for="days">Rental days needed</label>
+        <input type="number" id="days" value="1" min="1" step="1" oninput="calc()">
+      </div>
+    </div>
+
+    <p class="section-label">Current Prices</p>
+    <div class="grid2">
+      <div class="input-group">
+        <label for="fuel">Fuel price ($/L)</label>
+        <input type="number" id="fuel" value="1.75" min="0.50" step="0.01" oninput="calc()">
+      </div>
+      <div class="input-group">
+        <label for="rentalday">Enterprise daily rate ($) — check live rate before booking</label>
+        <input type="number" id="rentalday" value="55" min="20" step="5" oninput="calc()">
+      </div>
+    </div>
+
+    <div class="km-row">
+      <label for="kmused">Km already driven this calendar year</label>
+      <input type="range" id="kmused" min="0" max="16000" value="0" step="500" oninput="document.getElementById('kmused-out').textContent=this.value+' km';calc();">
+      <span id="kmused-out">0 km</span>
+    </div>
+
+    <div class="toggle-row">
+      <input type="checkbox" id="pickup-toggle" checked onchange="document.getElementById('pickup-section').style.display=this.checked?'block':'none';calc();">
+      <label for="pickup-toggle">Include personal vehicle km to pick up and return the rental</label>
+    </div>
+
+    <div class="pickup-section" id="pickup-section">
+      <p class="section-label">Rental Pickup / Dropoff Mileage</p>
+      <div class="grid2">
+        <div class="input-group">
+          <label for="pickup-km">Distance from home to Enterprise, one way (km)</label>
+          <input type="number" id="pickup-km" value="20" min="0" step="5" oninput="calc()">
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px;">
+          <p class="pickup-note" style="margin:0;">You drive to Enterprise to pick up the rental, leave your car there, then drive home after dropping it off. Total personal km = one way &times; 2.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="result-grid">
+      <div class="result-card" id="card-mileage">
+        <p class="label">Personal vehicle total</p>
+        <p class="amount" id="mileage-total">--</p>
+        <p class="sub" id="mileage-sub">--</p>
+      </div>
+      <div class="result-card" id="card-rental">
+        <p class="label">Enterprise rental total</p>
+        <p class="amount" id="rental-total">--</p>
+        <p class="sub" id="rental-sub">--</p>
+      </div>
+    </div>
+
+    <div class="verdict" id="verdict"></div>
+
+    <div class="breakdown-wrap">
+      <div>
+        <p class="breakdown-title">Personal vehicle breakdown</p>
+        <table class="bdown" id="mileage-breakdown"></table>
+      </div>
+      <div>
+        <p class="breakdown-title">Rental breakdown</p>
+        <table class="bdown" id="rental-breakdown"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>NS mileage rates:</strong> $0.5890/km for first 16,000 km per calendar year; $0.5199/km after that. &nbsp;|&nbsp;
+    <strong>Fuel estimate:</strong> 10 L/100 km average consumption. &nbsp;|&nbsp;
+    <strong>Enterprise:</strong> Corporate acct XVC98QQ &nbsp;|&nbsp; Billing 18323500 &nbsp;|&nbsp; Compact/standard vehicles only &nbsp;|&nbsp; Decline additional insurance (covered by FORSEC credit card). &nbsp;|&nbsp;
+    For questions contact Ariel, Office &amp; Program Administrator.
+  </div>
+
+</div>
+
+<script>
+const RATE1 = 0.5890, RATE2 = 0.5199, THRESHOLD = 16000, CONSUMPTION = 10;
+
+function mileageCost(kmUsed, km) {
+  const r1 = Math.max(0, THRESHOLD - kmUsed);
+  const km1 = Math.min(km, r1);
+  const km2 = Math.max(0, km - r1);
+  return { total: km1 * RATE1 + km2 * RATE2, km1, km2 };
+}
+
+function row(label, value) {
+  return '<tr><td>' + label + '</td><td>$' + value.toFixed(2) + '</td></tr>';
+}
+function totalRow(label, value) {
+  return '<tr class="total"><td>' + label + '</td><td>$' + value.toFixed(2) + '</td></tr>';
+}
+
+function calc() {
+  var dist      = parseFloat(document.getElementById('dist').value) || 0;
+  var days      = parseInt(document.getElementById('days').value) || 1;
+  var fuel      = parseFloat(document.getElementById('fuel').value) || 1.75;
+  var rentalDay = parseFloat(document.getElementById('rentalday').value) || 55;
+  var kmUsed    = parseInt(document.getElementById('kmused').value) || 0;
+  var pickupOn  = document.getElementById('pickup-toggle').checked;
+  var pickupKm  = parseFloat(document.getElementById('pickup-km').value) || 0;
+
+  var mv = mileageCost(kmUsed, dist);
+  var rentalBase = rentalDay * days;
+  var fuelL      = (dist / 100) * CONSUMPTION;
+  var fuelCost   = fuelL * fuel;
+
+  var pickupCost = 0, pickupKmTotal = 0;
+  if (pickupOn && pickupKm > 0) {
+    pickupKmTotal = pickupKm * 2;
+    var pv = mileageCost(kmUsed + dist, pickupKmTotal);
+    pickupCost = pv.total;
+  }
+
+  var personalTotal = mv.total;
+  var rentalTotal   = rentalBase + fuelCost + pickupCost;
+
+  document.getElementById('mileage-total').textContent = '$' + personalTotal.toFixed(2);
+  document.getElementById('rental-total').textContent  = '$' + rentalTotal.toFixed(2);
+
+  var mSub = [];
+  if (mv.km1 > 0) mSub.push(mv.km1.toFixed(0) + ' km @ $' + RATE1);
+  if (mv.km2 > 0) mSub.push(mv.km2.toFixed(0) + ' km @ $' + RATE2);
+  document.getElementById('mileage-sub').textContent = mSub.join(' + ');
+  document.getElementById('rental-sub').textContent =
+    '$' + rentalBase.toFixed(2) + ' rental + $' + fuelCost.toFixed(2) + ' fuel' +
+    (pickupOn && pickupCost > 0 ? ' + $' + pickupCost.toFixed(2) + ' pickup/dropoff' : '');
+
+  var mBreak = '';
+  if (mv.km1 > 0) mBreak += row(mv.km1.toFixed(0) + ' km @ $' + RATE1 + '/km', mv.km1 * RATE1);
+  if (mv.km2 > 0) mBreak += row(mv.km2.toFixed(0) + ' km @ $' + RATE2 + '/km', mv.km2 * RATE2);
+  mBreak += totalRow('Total', personalTotal);
+  document.getElementById('mileage-breakdown').innerHTML = mBreak;
+
+  var rBreak = row('Rental (' + days + ' day' + (days > 1 ? 's' : '') + ' @ $' + rentalDay.toFixed(0) + '/day)', rentalBase);
+  rBreak += row('Fuel est. (' + fuelL.toFixed(1) + ' L @ $' + fuel.toFixed(2) + '/L)', fuelCost);
+  if (pickupOn && pickupCost > 0) rBreak += row('Pickup/dropoff mileage (' + pickupKmTotal.toFixed(0) + ' km)', pickupCost);
+  rBreak += totalRow('Total', rentalTotal);
+  document.getElementById('rental-breakdown').innerHTML = rBreak;
+
+  var diff    = Math.abs(rentalTotal - personalTotal);
+  var pct     = (diff / Math.max(rentalTotal, personalTotal)) * 100;
+  var cardM   = document.getElementById('card-mileage');
+  var cardR   = document.getElementById('card-rental');
+  var verdict = document.getElementById('verdict');
+  cardM.className = 'result-card';
+  cardR.className = 'result-card';
+
+  if (pct < 5) {
+    verdict.className = 'verdict close';
+    verdict.textContent = 'These options are within $' + diff.toFixed(2) + ' of each other (' + pct.toFixed(0) + '%). If you live far from an Enterprise location, your personal vehicle may be more practical.';
+  } else if (personalTotal < rentalTotal) {
+    cardM.className = 'result-card winner';
+    verdict.className = 'verdict mileage';
+    verdict.textContent = 'Personal vehicle is $' + diff.toFixed(2) + ' cheaper. Submit mileage via the Mileage Claim form in DEXT.';
+  } else {
+    cardR.className = 'result-card winner';
+    verdict.className = 'verdict rental';
+    verdict.textContent = 'Enterprise rental is $' + diff.toFixed(2) + ' cheaper. Book through Ariel or directly using the FORSEC corporate account.';
+  }
+}
+
+// Run on load - setTimeout ensures DOM is ready in SharePoint iframe
+setTimeout(function() { calc(); }, 100);
+</script>
+</body>
+</html>
