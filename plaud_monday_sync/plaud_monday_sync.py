@@ -13,14 +13,17 @@ Routing:
       Directory board, a parent "Interaction" item is drafted on
       CI Activity Log, with every action item as a subitem there -
       contractor meetings stay together as one interaction record.
+      (Task Tracking, also in the CI Folder, is CI-only and has no
+      automatic trigger of its own right now - see PARENT_SUBITEM_ROUTES.)
     - Otherwise, each action item is routed individually: a safety
       concern or event/demo idea (by keyword) goes to Safety Feedback
-      & Ideas; else an item owned by Kyle/Ariel/Kerri goes to their
-      board (Communications / Office & Program Administration / Board
-      of Directors); everything else goes to Task Tracking. Items
-      sharing a destination board are grouped under one parent item
-      per meeting (or created as flat items on boards with no subitem
-      structure).
+      & Ideas; else an item owned by Kyle/Ariel/Kerri/Samantha goes to
+      their board (Communications / Office & Program Administration /
+      Board of Directors / Training Projects & Programs); everything
+      else is left UNROUTED for manual placement rather than guessed
+      onto a board it may not belong on. Items sharing a destination
+      board are grouped under one parent item per meeting (or created
+      as flat items on boards with no subitem structure).
 
 Usage:
     python3 plaud_monday_sync.py --file meeting.md
@@ -136,16 +139,38 @@ SAFETY_FEEDBACK_COLUMNS = {
     "submitted_by": "multiple_person_mm4fay1w",
 }
 
+# Training Projects & Programs' own groups are all specific named programs
+# (Pilot Placement Initiative, Mentorship Coaching, etc.) with no generic
+# catch-all, so "Incoming from Meetings" was created (2026-07-28) as a
+# holding group for freshly parsed items pending Samantha's triage - same
+# pattern as CI Activity Log's "To Log" group. Its subitems use a Timeline
+# (date range) column instead of a single date, unlike the other boards.
+TRAINING_BOARD_ID = 18407621067
+TRAINING_GROUPS = {"incoming": "group_mm5pb87v"}
+TRAINING_COLUMNS = {
+    "lead": "person",
+    "status": "color_mm27eh5n",  # Working on it / Done / Stuck / Upcoming
+    "timeline": "timerange_mm26mnv8",
+    "comments": "text_mm2f14wz",
+}
+TRAINING_SUBITEM_DATE_COLUMN = "timerange_mm26mvs0"  # different id than the parent's Timeline column
+
 # Action items owned by these people default to their department board
-# instead of Task Tracking (overridden by a safety/demo-idea keyword match).
+# instead of falling through to "unrouted" (overridden by a safety/
+# demo-idea keyword match, which always wins regardless of owner).
 OWNER_DEFAULT_ROUTE = {
-    "81506714": "communications",     # Kyle MacKay
-    "82580584": "office_admin",       # Ariel Durning
+    "81506714": "communications",      # Kyle MacKay
+    "82580584": "office_admin",        # Ariel Durning
     "80632035": "board_of_directors",  # Kerri Marshall
+    "97947987": "training",            # Samantha Chu
 }
 
 # Routes that use a parent item (the meeting) with action items as subitems.
-PARENT_SUBITEM_ROUTES = {"task_tracking", "communications", "office_admin"}
+# Task Tracking is CI-only (it lives in the CI Folder) and currently has no
+# automatic trigger of its own now that contractor meetings go entirely to
+# CI Activity Log - it stays wired up here for whenever a "CI but no named
+# contractor" signal gets defined, but the router never sends items there today.
+PARENT_SUBITEM_ROUTES = {"task_tracking", "communications", "office_admin", "training"}
 
 CONTRACTOR_DIRECTORY_BOARD_ID = 18403133772
 
@@ -203,7 +228,7 @@ class ActionItem:
     owner_user_id: Optional[str] = None
     owner_user_name: Optional[str] = None
     owner_warning: Optional[str] = None
-    route: str = "task_tracking"
+    route: str = "unrouted"
     route_reason: Optional[str] = None
     safety_submission_type: Optional[str] = None
 
@@ -428,8 +453,9 @@ def route_action_item(item: ActionItem) -> None:
 
     A safety/demo-idea keyword match wins regardless of owner, since a
     safety concern shouldn't get buried on someone's department board.
-    Otherwise, items owned by Kyle/Ariel/Kerri default to their board;
-    everything else falls back to Task Tracking.
+    Otherwise, items owned by Kyle/Ariel/Kerri/Samantha default to their
+    board; everything else is left "unrouted" for manual placement rather
+    than guessed onto a board it may not belong on.
     """
     label, matched = infer_field(item.task, SAFETY_OR_DEMO_KEYWORDS)
     if matched:
@@ -441,7 +467,8 @@ def route_action_item(item: ActionItem) -> None:
         item.route = OWNER_DEFAULT_ROUTE[item.owner_user_id]
         item.route_reason = f"owner: {item.owner_user_name}"
         return
-    item.route = "task_tracking"
+    item.route = "unrouted"
+    item.route_reason = "no matching department board - place manually"
 
 
 def group_items_by_route(action_items: list) -> dict:
@@ -610,6 +637,10 @@ def dropdown_value(*labels: str) -> dict:
     return {"labels": list(labels)}
 
 
+def timeline_value(iso: str) -> dict:
+    return {"from": iso, "to": iso}
+
+
 def build_task_tracking_parent_columns(summary: MeetingSummary, items: list) -> dict:
     cols = {TASK_TRACKING_COLUMNS["status"]: status_value("Not Started")}
     due_dates = [i.due_iso for i in items if i.due_iso]
@@ -648,6 +679,28 @@ def build_board_of_directors_item_columns(item: ActionItem) -> dict:
         cols[BOARD_OF_DIRECTORS_COLUMNS["date"]] = date_value(item.due_iso)
     if item.owner_user_id:
         cols[BOARD_OF_DIRECTORS_COLUMNS["person"]] = people_value(item.owner_user_id)
+    return cols
+
+
+def build_training_parent_columns(summary: MeetingSummary, items: list) -> dict:
+    cols = {
+        TRAINING_COLUMNS["status"]: status_value("Working on it"),
+        TRAINING_COLUMNS["lead"]: people_value("97947987"),  # Samantha Chu
+    }
+    due_dates = [i.due_iso for i in items if i.due_iso]
+    if due_dates:
+        cols[TRAINING_COLUMNS["timeline"]] = timeline_value(min(due_dates))
+    comments_lines = [f"Source: {summary.source}", f"Meeting date: {summary.meeting_date_iso}"]
+    cols[TRAINING_COLUMNS["comments"]] = "\n".join(comments_lines)
+    return cols
+
+
+def build_training_subitem_columns(item: ActionItem) -> dict:
+    cols = {SUBITEM_COLUMNS["status"]: status_value("Working on it")}
+    if item.owner_user_id:
+        cols[SUBITEM_COLUMNS["owner"]] = people_value(item.owner_user_id)
+    if item.due_iso:
+        cols[TRAINING_SUBITEM_DATE_COLUMN] = timeline_value(item.due_iso)
     return cols
 
 
@@ -707,6 +760,8 @@ BOARD_LABELS = {
     "office_admin": "Office & Program Administration",
     "board_of_directors": "Board of Directors (ED)",
     "safety": "Safety Feedback & Ideas",
+    "training": "Training Projects & Programs",
+    "unrouted": "UNROUTED - place manually",
 }
 
 
@@ -754,7 +809,8 @@ def print_draft(summaries: list) -> None:
         groups = group_items_by_route(summary.action_items)
         print(f"Action items ({len(summary.action_items)}), routed across {len(groups)} board(s):")
         for route, items in groups.items():
-            print(f"\n  Board: {BOARD_LABELS[route]}")
+            prefix = "⚠ " if route == "unrouted" else ""
+            print(f"\n  Board: {prefix}{BOARD_LABELS[route]}")
             if route in PARENT_SUBITEM_ROUTES:
                 print(f"  Parent item: {summary.title}")
             for item in items:
@@ -796,6 +852,7 @@ PARENT_SUBITEM_BOARDS = {
     "task_tracking": (TASK_TRACKING_BOARD_ID, TASK_TRACKING_GROUPS["this_week"]),
     "communications": (COMMUNICATIONS_BOARD_ID, COMMUNICATIONS_GROUPS["tasks"]),
     "office_admin": (OFFICE_ADMIN_BOARD_ID, OFFICE_ADMIN_GROUPS["team_requests"]),
+    "training": (TRAINING_BOARD_ID, TRAINING_GROUPS["incoming"]),
 }
 
 
@@ -807,7 +864,10 @@ def push(client: MondayClient, summaries: list, logged_by_user_id: str) -> None:
                 continue
 
             for route, items in group_items_by_route(summary.action_items).items():
-                if route in PARENT_SUBITEM_BOARDS:
+                if route == "unrouted":
+                    for item in items:
+                        print(f"Skipped (unrouted, place manually): {item.task}")
+                elif route in PARENT_SUBITEM_BOARDS:
                     _push_parent_and_subitems(client, summary, route, items)
                 elif route == "board_of_directors":
                     _push_board_of_directors(client, items)
@@ -832,13 +892,16 @@ def _push_parent_and_subitems(client: MondayClient, summary: MeetingSummary, rou
         cols = build_task_tracking_parent_columns(summary, items)
     elif route == "communications":
         cols = build_communications_parent_columns(items)
+    elif route == "training":
+        cols = build_training_parent_columns(summary, items)
     else:
         cols = build_office_admin_parent_columns(summary, items)
 
     parent_id = client.create_item(board_id, group_id, summary.title, cols)
     print(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS[route]}")
     for item in items:
-        sub_id = client.create_subitem(parent_id, item.task, build_subitem_columns(item))
+        sub_cols = build_training_subitem_columns(item) if route == "training" else build_subitem_columns(item)
+        sub_id = client.create_subitem(parent_id, item.task, sub_cols)
         print(f"  Created subitem {sub_id}: {item.task}")
 
 

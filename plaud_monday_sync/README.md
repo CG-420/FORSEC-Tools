@@ -49,18 +49,31 @@ Routing happens in two stages:
       owner.
    2. An item owned by Kyle MacKay → **Communications**; Ariel Durning →
       **Office & Program Administration**; Kerri Marshall → **Board of
-      Directors (ED)** (see `OWNER_DEFAULT_ROUTE`).
-   3. Everything else → **Task Tracking** (the default/catch-all).
+      Directors (ED)**; Samantha Chu → **Training Projects & Programs** (see
+      `OWNER_DEFAULT_ROUTE`).
+   3. Everything else → **UNROUTED**. It is *not* defaulted to Task Tracking
+      — Task Tracking lives in the CI Folder and Chris wants it CI-only, so
+      an item with no matching department board is left for manual
+      placement rather than guessed onto a board it may not belong on. The
+      draft flags these clearly with a `⚠`, and the push step skips them
+      entirely (prints what was skipped, creates nothing for them).
 
-   Items that land on a board with a subitems column (Task Tracking,
-   Communications, Office & Program Administration) are grouped under one
-   parent item per meeting, same as before. Boards without a subitems column
-   (Board of Directors, Safety Feedback & Ideas) get flat items instead — one
-   item per action item, no parent.
+   Items that land on a board with a subitems column (Communications,
+   Office & Program Administration, Training Projects & Programs) are
+   grouped under one parent item per meeting. Boards without a subitems
+   column (Board of Directors, Safety Feedback & Ideas) get flat items
+   instead — one item per action item, no parent. Unrouted items are never
+   pushed anywhere.
 
-### Task Tracking (board `18403136567`)
+### Task Tracking (board `18403136567`) — CI-only, no active trigger
 
-One parent item per meeting summary, one subitem per action item.
+Task Tracking sits in the CI Folder alongside CI Activity Log, and per Chris
+it should only ever contain CI-related content. Since contractor meetings
+already route entirely to CI Activity Log, there's currently no rule that
+sends anything to Task Tracking automatically — it's wired up in the script
+(`build_task_tracking_parent_columns`, `PARENT_SUBITEM_BOARDS`) for whenever
+a "CI work, but no named contractor" signal gets defined, but the router
+doesn't reach it today. If/when that signal exists:
 
 | Plaud field | monday.com target |
 |---|---|
@@ -73,9 +86,7 @@ One parent item per meeting summary, one subitem per action item.
 | Due | Subitem Date |
 | — | Subitem Status → `Working on it` |
 
-Parent items land in the **This Week** group. Task Tracking has no top-level
-Owner/People column — only its subitems do — so per-task ownership only
-shows up at the subitem level, matching the board's existing structure.
+Parent items would land in the **This Week** group.
 
 ### CI Activity Log (board `18403818341`)
 
@@ -106,12 +117,25 @@ rather than guessed, and the draft says so explicitly.
 
 ### Communications (board `18336748732`) and Office & Program Administration (board `18381184971`)
 
-Same parent-item-per-meeting + subitems-per-action-item pattern as Task
-Tracking. Communications only has a Status/Date on the parent (no notes
-column); Office & Program Administration also gets a Notes column with the
-source/meeting date, and its parent Date Due is set to the earliest action
-item due date. Parent items land in Communications' **Tasks** group and
-Office Admin's **Team Requests** group.
+Same parent-item-per-meeting + subitems-per-action-item pattern described
+for Task Tracking above. Communications only has a Status/Date on the
+parent (no notes column); Office & Program Administration also gets a
+Notes column with the source/meeting date, and its parent Date Due is set
+to the earliest action item due date. Parent items land in Communications'
+**Tasks** group and Office Admin's **Team Requests** group.
+
+### Training Projects & Programs (board `18407621067`)
+
+Same parent+subitems pattern, with two differences: its own groups are all
+specific named programs (Pilot Placement Initiative, Mentorship Coaching,
+C2C-GIS, ROOT, Recognition of Prior Learning Fund 2.0, Dendro Learning
+Series) with no generic catch-all, so a new **"Incoming from Meetings"**
+group was created (2026-07-28, mirroring CI Activity Log's "To Log" holding
+group) as the landing spot for freshly parsed items pending Samantha's
+triage into the right program. It also uses a **Timeline** (date range)
+column instead of a single date — the parser sets `{"from": due, "to":
+due}` since it only has one date to work with, on both the parent (earliest
+due date) and each subitem. The parent's Lead column defaults to Samantha.
 
 ### Board of Directors (ED) (board `18386660346`)
 
@@ -181,24 +205,33 @@ python3 plaud_monday_sync.py --file samples/contractor_site_visit.md --no-push
 python3 plaud_monday_sync.py --file samples/team_meeting_mixed.md --no-push
 ```
 
-The first has no contractor mention and routes to Task Tracking; the second
-mentions "S&S Forestry" (a real Contractor Directory entry) and routes to CI
-Activity Log; the third has action items for Kyle, Ariel, Kerri, a safety
-concern, and a demo idea all in one meeting, and shows the per-item routing
-splitting them across five different boards. All three need
-`MONDAY_API_TOKEN` set to see contractor/owner matching (and therefore
-department routing) in the draft — without it you'll still see the parsed
-tasks/owners/dates, just unmatched and defaulted to Task Tracking (safety/
-demo-idea keyword routing works even without a token, since it doesn't
-depend on live owner matching).
+The first has no contractor mention, has no owner mapped to a department
+board, and routes entirely to UNROUTED; the second mentions "S&S Forestry"
+(a real Contractor Directory entry) and routes to CI Activity Log; the
+third has action items for Kyle, Ariel, Kerri, Samantha, a safety concern,
+a demo idea, and one person with no department mapping, and shows the
+per-item routing splitting across six boards plus one unrouted item. All
+three need `MONDAY_API_TOKEN` set to see contractor/owner matching (and
+therefore department routing) in the draft — without it, owned items fall
+through to UNROUTED since there's no live user data to match against
+(safety/demo-idea keyword routing still works without a token, since it
+doesn't depend on owner matching).
 
 ## If your boards change
 
 Board and column IDs are hardcoded as constants at the top of
 `plaud_monday_sync.py` (`TASK_TRACKING_*`, `CI_ACTIVITY_LOG_*`,
 `COMMUNICATIONS_*`, `OFFICE_ADMIN_*`, `BOARD_OF_DIRECTORS_*`,
-`SAFETY_FEEDBACK_*`, `CONTRACTOR_DIRECTORY_BOARD_ID`,
+`SAFETY_FEEDBACK_*`, `TRAINING_*`, `CONTRACTOR_DIRECTORY_BOARD_ID`,
 `OWNER_DEFAULT_ROUTE`). If you rename/add columns in monday.com, update the
 relevant column ID there — get the current IDs from monday's board settings
 or the API's `boards { columns { id title } }` query. If department leads
 change, update `OWNER_DEFAULT_ROUTE` (monday user id → route key).
+
+**Chris expects most of these boards to get a proper cleanup/revision in
+the next few weeks**, now that the note-taker devices make it realistic to
+actually keep them current. When that happens, this whole mapping will
+likely need a review pass — group IDs, column IDs, and possibly which
+boards exist at all may change. Nothing here is designed to be precious;
+re-run the same `get_board_info` discovery process against whatever the
+boards look like afterward and update the constants accordingly.

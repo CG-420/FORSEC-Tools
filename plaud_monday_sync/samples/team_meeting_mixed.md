@@ -11,4 +11,5 @@ Quick round-up meeting covering communications, admin, and safety topics.
 - Task: Prepare the AGM board packet | Owner: Kerri | Due: 2026-08-10
 - Task: Report a safety concern about the chainsaw storage cabinet | Owner: Chris | Due: ASAP
 - Task: Plan a team demo idea for the new PPE kits | Owner: Zoe | Due: TBD
-- Task: Send the weekly status update | Owner: Chris | Due: 2026-07-31
+- Task: Follow up with the Dendro Learning Series cohort | Owner: Samantha | Due: 2026-08-07
+- Task: Send the weekly status update | Owner: Emma | Due: 2026-07-31
