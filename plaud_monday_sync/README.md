@@ -21,6 +21,13 @@ what would be created on monday.com, then pushes it after you confirm.
   gives the meeting's own date (used as the reference date for relative due
   dates like "next Friday", and as the CI Activity Log interaction date).
   Falls back to today if absent or unparseable.
+- Optionally, a `Recorded by:` or `Logged by:` line near the top identifies
+  who ran that particular recording — relevant now that summaries may come
+  from shared office devices or Desktop installs across several people, not
+  just one person's device. Matched against monday.com users the same way
+  Owner is. Used for CI Activity Log's Logged By column and noted in Task
+  Tracking's Notes. Falls back to `--logged-by-user-id` (default: Chris)
+  when absent.
 
 This is deliberately template-agnostic — it doesn't care about the other 11
 headings/sections in your 12 templates, only that this one heading and

@@ -166,6 +166,10 @@ class MeetingSummary:
     adoption_signal_inferred: bool = False
     implementation_stage: Optional[str] = None
     implementation_stage_inferred: bool = False
+    recorded_by_raw: Optional[str] = None
+    recorded_by_user_id: Optional[str] = None
+    recorded_by_user_name: Optional[str] = None
+    recorded_by_warning: Optional[str] = None
 
 
 # --------------------------------------------------------------------------
@@ -175,6 +179,7 @@ class MeetingSummary:
 HEADING_RE = re.compile(r"^(#{1,6})\s*(.+?)\s*$", re.MULTILINE)
 ACTION_ITEMS_HEADING_RE = re.compile(r"^(#{1,6})\s*action\s*items?\b.*$", re.IGNORECASE | re.MULTILINE)
 META_DATE_RE = re.compile(r"^(?:meeting\s*date|date)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
+RECORDED_BY_RE = re.compile(r"^(?:recorded\s*by|logged\s*by)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 FIELD_RE = re.compile(
     r"(Task|Owner|Due)\s*:\s*(.*?)\s*(?=\s*\|\s*(?:Task|Owner|Due)\s*:|$)",
     re.IGNORECASE,
@@ -291,6 +296,12 @@ def extract_meeting_date(text: str, fallback: date):
     return fallback.isoformat(), f"meeting date {m.group(1).strip()!r} unparsed, defaulted to {fallback.isoformat()}"
 
 
+def extract_recorded_by(text: str) -> Optional[str]:
+    head = "\n".join(text.splitlines()[:20])
+    m = RECORDED_BY_RE.search(head)
+    return m.group(1).strip() if m else None
+
+
 # --------------------------------------------------------------------------
 # Matching: contractors and owners against live monday.com data
 # --------------------------------------------------------------------------
@@ -373,6 +384,13 @@ def build_summary(source: str, text: str, contractors: list, users: list, today:
         raw_text=text,
         action_items=action_items,
     )
+
+    recorded_by_raw = extract_recorded_by(text)
+    if recorded_by_raw:
+        summary.recorded_by_raw = recorded_by_raw
+        summary.recorded_by_user_id, summary.recorded_by_user_name, summary.recorded_by_warning = match_owner(
+            recorded_by_raw, users
+        )
 
     contractor_id, contractor_name, others = match_contractor(text, contractors)
     if contractor_id:
@@ -502,14 +520,17 @@ def build_task_tracking_parent_columns(summary: MeetingSummary) -> dict:
     if due_dates:
         cols[TASK_TRACKING_COLUMNS["deadline"]] = date_value(min(due_dates))
     notes_lines = [f"Source: {summary.source}", f"Meeting date: {summary.meeting_date_iso}"]
+    if summary.recorded_by_user_name or summary.recorded_by_raw:
+        notes_lines.append(f"Recorded by: {summary.recorded_by_user_name or summary.recorded_by_raw}")
     if summary.meeting_date_warning:
         notes_lines.append(f"Note: {summary.meeting_date_warning}")
     cols[TASK_TRACKING_COLUMNS["notes"]] = "\n".join(notes_lines)
     return cols
 
 
-def build_ci_activity_log_parent_columns(summary: MeetingSummary, logged_by_user_id: Optional[str]) -> dict:
+def build_ci_activity_log_parent_columns(summary: MeetingSummary, default_logged_by_user_id: Optional[str]) -> dict:
     cols = {}
+    logged_by_user_id = summary.recorded_by_user_id or default_logged_by_user_id
     if summary.contractor_id:
         cols[CI_ACTIVITY_LOG_COLUMNS["contractor"]] = board_relation_value(summary.contractor_id)
     cols[CI_ACTIVITY_LOG_COLUMNS["interaction_date"]] = date_value(summary.meeting_date_iso)
@@ -560,6 +581,14 @@ def print_draft(summaries: list) -> None:
             print(f"  ⚠ {summary.meeting_date_warning}")
         else:
             print()
+
+        if summary.recorded_by_raw:
+            recorded_by_str = summary.recorded_by_user_name or summary.recorded_by_raw
+            print(f"Recorded by:    {recorded_by_str}", end="")
+            if summary.recorded_by_warning:
+                print(f"  ⚠ {summary.recorded_by_warning}")
+            else:
+                print()
 
         if summary.target_board == "ci_activity_log":
             print(f"Contractor:     {summary.contractor_name} (matched item id {summary.contractor_id})")
@@ -656,7 +685,8 @@ def parse_args():
     parser.add_argument("--dir", help="Directory of .md/.txt Plaud summary files (non-recursive)")
     parser.add_argument("--no-push", action="store_true", help="Only print the draft; never prompt to push")
     parser.add_argument("--logged-by-user-id", default=DEFAULT_LOGGED_BY_USER_ID,
-                         help=f"monday.com user id for 'Logged By' on CI Activity Log entries (default: {DEFAULT_LOGGED_BY_USER_ID})")
+                         help="monday.com user id for 'Logged By' on CI Activity Log entries when a summary has "
+                              f"no 'Recorded by:' line of its own (default: {DEFAULT_LOGGED_BY_USER_ID})")
     parser.add_argument("--today", help="Override 'today' as YYYY-MM-DD (mainly for testing relative due dates)")
     return parser.parse_args()
 

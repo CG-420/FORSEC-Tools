@@ -1,5 +1,6 @@
 # Site Visit - S&S Forestry
 Date: 2026-07-24
+Recorded by: Kerri
 
 ## Summary
 Visited the S&S Forestry yard to check in on the new load-tracking process. The
