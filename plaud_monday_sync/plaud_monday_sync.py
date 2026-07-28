@@ -11,9 +11,16 @@ after you review the draft and type CONFIRM.
 Routing:
     - If the summary text mentions a contractor from the Contractor
       Directory board, a parent "Interaction" item is drafted on
-      CI Activity Log, with each action item as a subitem.
-    - Otherwise a parent item is drafted on Task Tracking, with each
-      action item as a subitem.
+      CI Activity Log, with every action item as a subitem there -
+      contractor meetings stay together as one interaction record.
+    - Otherwise, each action item is routed individually: a safety
+      concern or event/demo idea (by keyword) goes to Safety Feedback
+      & Ideas; else an item owned by Kyle/Ariel/Kerri goes to their
+      board (Communications / Office & Program Administration / Board
+      of Directors); everything else goes to Task Tracking. Items
+      sharing a destination board are grouped under one parent item
+      per meeting (or created as flat items on boards with no subitem
+      structure).
 
 Usage:
     python3 plaud_monday_sync.py --file meeting.md
@@ -86,12 +93,59 @@ CI_ACTIVITY_LOG_COLUMNS = {
     "entry_source": "color_mm33cqe6",  # AI Pipeline / Manual
 }
 
-# Both boards' subitem boards share this schema (Name / Owner / Status / Date).
+# Task Tracking / CI Activity Log / Communications / Office & Program
+# Administration all share this subitem schema (Name / Owner / Status / Date).
 SUBITEM_COLUMNS = {
     "owner": "person",
     "status": "status",  # Working on it / Done / Stuck
     "date": "date0",
 }
+
+COMMUNICATIONS_BOARD_ID = 18336748732
+COMMUNICATIONS_GROUPS = {"tasks": "topics"}
+COMMUNICATIONS_COLUMNS = {
+    "status": "status",  # Working on it / Done / Stuck / In Flight / DRAFTED
+    "date": "date4",
+}
+
+OFFICE_ADMIN_BOARD_ID = 18381184971
+OFFICE_ADMIN_GROUPS = {"team_requests": "group_mm0fxafz"}
+OFFICE_ADMIN_COLUMNS = {
+    "status": "status",  # Working on it / Done / Stuck / Started, Paused
+    "date_due": "date_mm3rx92q",
+    "notes": "text_mkxsfve0",
+}
+
+# No subitems column - action items land as flat items directly.
+BOARD_OF_DIRECTORS_BOARD_ID = 18386660346
+BOARD_OF_DIRECTORS_GROUPS = {"other_tasks": "group_mm067c1p"}
+BOARD_OF_DIRECTORS_COLUMNS = {
+    "person": "person",
+    "status": "status",  # Working on it / Done / Stuck
+    "date": "date4",
+}
+
+# A submission-form board, not a task list - flat items, different shape.
+SAFETY_FEEDBACK_BOARD_ID = 18418568346
+SAFETY_FEEDBACK_GROUPS = {"new_submissions": "topics"}
+SAFETY_FEEDBACK_COLUMNS = {
+    "status": "color_mm4fr3me",  # Under Review / Completed / Planned / New
+    "description": "long_text_mm4fwrcz",
+    "date_submitted": "date_mm4f887d",
+    "submission_type": "dropdown_mm4fr66x",  # Safety Feedback / Event or Demo Idea
+    "submitted_by": "multiple_person_mm4fay1w",
+}
+
+# Action items owned by these people default to their department board
+# instead of Task Tracking (overridden by a safety/demo-idea keyword match).
+OWNER_DEFAULT_ROUTE = {
+    "81506714": "communications",     # Kyle MacKay
+    "82580584": "office_admin",       # Ariel Durning
+    "80632035": "board_of_directors",  # Kerri Marshall
+}
+
+# Routes that use a parent item (the meeting) with action items as subitems.
+PARENT_SUBITEM_ROUTES = {"task_tracking", "communications", "office_admin"}
 
 CONTRACTOR_DIRECTORY_BOARD_ID = 18403133772
 
@@ -127,6 +181,11 @@ IMPLEMENTATION_STAGE_KEYWORDS = {
     "Not Started": ["not started", "have not begun", "haven't started", "yet to begin"],
 }
 
+SAFETY_OR_DEMO_KEYWORDS = {
+    "Safety Feedback": ["safety concern", "safety issue", "safety hazard", "unsafe", "near miss", "close call", "ppe issue"],
+    "Event or Demo Idea": ["demo idea", "demonstration idea", "team demo", "host a demo", "event idea", "should demo"],
+}
+
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 
@@ -144,6 +203,9 @@ class ActionItem:
     owner_user_id: Optional[str] = None
     owner_user_name: Optional[str] = None
     owner_warning: Optional[str] = None
+    route: str = "task_tracking"
+    route_reason: Optional[str] = None
+    safety_submission_type: Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -361,6 +423,34 @@ def infer_field(text: str, keyword_map: dict):
     return best_label, True
 
 
+def route_action_item(item: ActionItem) -> None:
+    """Decides which board a non-contractor-meeting action item goes to.
+
+    A safety/demo-idea keyword match wins regardless of owner, since a
+    safety concern shouldn't get buried on someone's department board.
+    Otherwise, items owned by Kyle/Ariel/Kerri default to their board;
+    everything else falls back to Task Tracking.
+    """
+    label, matched = infer_field(item.task, SAFETY_OR_DEMO_KEYWORDS)
+    if matched:
+        item.route = "safety"
+        item.safety_submission_type = label
+        item.route_reason = f"keyword match ({label.lower()})"
+        return
+    if item.owner_user_id and item.owner_user_id in OWNER_DEFAULT_ROUTE:
+        item.route = OWNER_DEFAULT_ROUTE[item.owner_user_id]
+        item.route_reason = f"owner: {item.owner_user_name}"
+        return
+    item.route = "task_tracking"
+
+
+def group_items_by_route(action_items: list) -> dict:
+    groups: dict = {}
+    for item in action_items:
+        groups.setdefault(item.route, []).append(item)
+    return groups
+
+
 # --------------------------------------------------------------------------
 # Build a MeetingSummary from raw text
 # --------------------------------------------------------------------------
@@ -404,6 +494,8 @@ def build_summary(source: str, text: str, contractors: list, users: list, today:
         summary.implementation_stage, summary.implementation_stage_inferred = infer_field(text, IMPLEMENTATION_STAGE_KEYWORDS)
     else:
         summary.target_board = "task_tracking"
+        for item in action_items:
+            route_action_item(item)
 
     return summary
 
@@ -514,9 +606,13 @@ def long_text_value(text: str) -> dict:
     return {"text": text}
 
 
-def build_task_tracking_parent_columns(summary: MeetingSummary) -> dict:
+def dropdown_value(*labels: str) -> dict:
+    return {"labels": list(labels)}
+
+
+def build_task_tracking_parent_columns(summary: MeetingSummary, items: list) -> dict:
     cols = {TASK_TRACKING_COLUMNS["status"]: status_value("Not Started")}
-    due_dates = [i.due_iso for i in summary.action_items if i.due_iso]
+    due_dates = [i.due_iso for i in items if i.due_iso]
     if due_dates:
         cols[TASK_TRACKING_COLUMNS["deadline"]] = date_value(min(due_dates))
     notes_lines = [f"Source: {summary.source}", f"Meeting date: {summary.meeting_date_iso}"]
@@ -525,6 +621,47 @@ def build_task_tracking_parent_columns(summary: MeetingSummary) -> dict:
     if summary.meeting_date_warning:
         notes_lines.append(f"Note: {summary.meeting_date_warning}")
     cols[TASK_TRACKING_COLUMNS["notes"]] = "\n".join(notes_lines)
+    return cols
+
+
+def build_communications_parent_columns(items: list) -> dict:
+    cols = {COMMUNICATIONS_COLUMNS["status"]: status_value("Working on it")}
+    due_dates = [i.due_iso for i in items if i.due_iso]
+    if due_dates:
+        cols[COMMUNICATIONS_COLUMNS["date"]] = date_value(min(due_dates))
+    return cols
+
+
+def build_office_admin_parent_columns(summary: MeetingSummary, items: list) -> dict:
+    cols = {OFFICE_ADMIN_COLUMNS["status"]: status_value("Working on it")}
+    due_dates = [i.due_iso for i in items if i.due_iso]
+    if due_dates:
+        cols[OFFICE_ADMIN_COLUMNS["date_due"]] = date_value(min(due_dates))
+    notes_lines = [f"Source: {summary.source}", f"Meeting date: {summary.meeting_date_iso}"]
+    cols[OFFICE_ADMIN_COLUMNS["notes"]] = "\n".join(notes_lines)
+    return cols
+
+
+def build_board_of_directors_item_columns(item: ActionItem) -> dict:
+    cols = {BOARD_OF_DIRECTORS_COLUMNS["status"]: status_value("Working on it")}
+    if item.due_iso:
+        cols[BOARD_OF_DIRECTORS_COLUMNS["date"]] = date_value(item.due_iso)
+    if item.owner_user_id:
+        cols[BOARD_OF_DIRECTORS_COLUMNS["person"]] = people_value(item.owner_user_id)
+    return cols
+
+
+def build_safety_feedback_item_columns(item: ActionItem, summary: MeetingSummary) -> dict:
+    cols = {
+        SAFETY_FEEDBACK_COLUMNS["status"]: status_value("New"),
+        SAFETY_FEEDBACK_COLUMNS["description"]: long_text_value(item.task),
+        SAFETY_FEEDBACK_COLUMNS["date_submitted"]: date_value(summary.meeting_date_iso),
+    }
+    if item.safety_submission_type:
+        cols[SAFETY_FEEDBACK_COLUMNS["submission_type"]] = dropdown_value(item.safety_submission_type)
+    submitter_id = item.owner_user_id or summary.recorded_by_user_id
+    if submitter_id:
+        cols[SAFETY_FEEDBACK_COLUMNS["submitted_by"]] = people_value(submitter_id)
     return cols
 
 
@@ -563,7 +700,14 @@ def build_subitem_columns(item: ActionItem) -> dict:
 # Draft report
 # --------------------------------------------------------------------------
 
-BOARD_LABELS = {"task_tracking": "Task Tracking", "ci_activity_log": "CI Activity Log"}
+BOARD_LABELS = {
+    "task_tracking": "Task Tracking",
+    "ci_activity_log": "CI Activity Log",
+    "communications": "Communications",
+    "office_admin": "Office & Program Administration",
+    "board_of_directors": "Board of Directors (ED)",
+    "safety": "Safety Feedback & Ideas",
+}
 
 
 def print_draft(summaries: list) -> None:
@@ -572,10 +716,7 @@ def print_draft(summaries: list) -> None:
     print("=" * 78)
 
     for summary in summaries:
-        board_label = BOARD_LABELS[summary.target_board]
         print(f"\n--- {summary.source} " + "-" * max(0, 60 - len(summary.source)))
-        print(f"Board:          {board_label}")
-        print(f"Parent item:    {summary.title}")
         print(f"Meeting date:   {summary.meeting_date_iso}", end="")
         if summary.meeting_date_warning:
             print(f"  ⚠ {summary.meeting_date_warning}")
@@ -590,7 +731,13 @@ def print_draft(summaries: list) -> None:
             else:
                 print()
 
+        if not summary.action_items:
+            print("Action items:   (none parsed - check the 'Action Items' heading in this summary)")
+            continue
+
         if summary.target_board == "ci_activity_log":
+            print(f"Board:          {BOARD_LABELS['ci_activity_log']}")
+            print(f"Parent item:    {summary.title}")
             print(f"Contractor:     {summary.contractor_name} (matched item id {summary.contractor_id})")
             if summary.other_contractor_mentions:
                 print(f"  also mentions: {', '.join(summary.other_contractor_mentions)}")
@@ -599,28 +746,39 @@ def print_draft(summaries: list) -> None:
             print(f"Adoption Signal:{_fmt_inferred(summary.adoption_signal, summary.adoption_signal_inferred)}")
             print(f"Impl. Stage:    {_fmt_inferred(summary.implementation_stage, summary.implementation_stage_inferred)}")
             print("Entry Source:   AI Pipeline")
-
-        if not summary.action_items:
-            print("Action items:   (none parsed - check the 'Action Items' heading in this summary)")
+            print(f"Action items ({len(summary.action_items)}), as subitems:")
+            for item in summary.action_items:
+                _print_action_item(item)
             continue
 
-        print(f"Action items ({len(summary.action_items)}), as subitems:")
-        for item in summary.action_items:
-            print(f"  - Task: {item.task}")
-            owner_str = item.owner_user_name or item.owner_raw or "(none)"
-            print(f"    Owner: {owner_str}", end="")
-            if item.owner_warning:
-                print(f"  ⚠ {item.owner_warning}")
-            else:
-                print()
-            due_str = item.due_iso or item.due_raw or "(none)"
-            print(f"    Due:   {due_str}", end="")
-            if item.due_warning:
-                print(f"  ⚠ {item.due_warning}")
-            else:
-                print()
+        groups = group_items_by_route(summary.action_items)
+        print(f"Action items ({len(summary.action_items)}), routed across {len(groups)} board(s):")
+        for route, items in groups.items():
+            print(f"\n  Board: {BOARD_LABELS[route]}")
+            if route in PARENT_SUBITEM_ROUTES:
+                print(f"  Parent item: {summary.title}")
+            for item in items:
+                _print_action_item(item, indent="  ")
+                if item.route_reason:
+                    print(f"      routed by: {item.route_reason}")
 
     print("\n" + "=" * 78)
+
+
+def _print_action_item(item: ActionItem, indent: str = "") -> None:
+    print(f"{indent}  - Task: {item.task}")
+    owner_str = item.owner_user_name or item.owner_raw or "(none)"
+    print(f"{indent}    Owner: {owner_str}", end="")
+    if item.owner_warning:
+        print(f"  ⚠ {item.owner_warning}")
+    else:
+        print()
+    due_str = item.due_iso or item.due_raw or "(none)"
+    print(f"{indent}    Due:   {due_str}", end="")
+    if item.due_warning:
+        print(f"  ⚠ {item.due_warning}")
+    else:
+        print()
 
 
 def _fmt_inferred(value: Optional[str], inferred: bool) -> str:
@@ -633,27 +791,69 @@ def _fmt_inferred(value: Optional[str], inferred: bool) -> str:
 # Push
 # --------------------------------------------------------------------------
 
+# route -> (board_id, group_id) for routes that use a parent item + subitems.
+PARENT_SUBITEM_BOARDS = {
+    "task_tracking": (TASK_TRACKING_BOARD_ID, TASK_TRACKING_GROUPS["this_week"]),
+    "communications": (COMMUNICATIONS_BOARD_ID, COMMUNICATIONS_GROUPS["tasks"]),
+    "office_admin": (OFFICE_ADMIN_BOARD_ID, OFFICE_ADMIN_GROUPS["team_requests"]),
+}
+
+
 def push(client: MondayClient, summaries: list, logged_by_user_id: str) -> None:
     for summary in summaries:
         try:
             if summary.target_board == "ci_activity_log":
-                board_id = CI_ACTIVITY_LOG_BOARD_ID
-                group_id = CI_ACTIVITY_LOG_GROUPS["to_log"]
-                cols = build_ci_activity_log_parent_columns(summary, logged_by_user_id)
-            else:
-                board_id = TASK_TRACKING_BOARD_ID
-                group_id = TASK_TRACKING_GROUPS["this_week"]
-                cols = build_task_tracking_parent_columns(summary)
+                _push_ci_activity_log(client, summary, logged_by_user_id)
+                continue
 
-            parent_id = client.create_item(board_id, group_id, summary.title, cols)
-            print(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS[summary.target_board]}")
-
-            for item in summary.action_items:
-                sub_cols = build_subitem_columns(item)
-                sub_id = client.create_subitem(parent_id, item.task, sub_cols)
-                print(f"  Created subitem {sub_id}: {item.task}")
+            for route, items in group_items_by_route(summary.action_items).items():
+                if route in PARENT_SUBITEM_BOARDS:
+                    _push_parent_and_subitems(client, summary, route, items)
+                elif route == "board_of_directors":
+                    _push_board_of_directors(client, items)
+                elif route == "safety":
+                    _push_safety_feedback(client, summary, items)
         except RuntimeError as e:
             print(f"FAILED to push {summary.title!r}: {e}", file=sys.stderr)
+
+
+def _push_ci_activity_log(client: MondayClient, summary: MeetingSummary, logged_by_user_id: str) -> None:
+    cols = build_ci_activity_log_parent_columns(summary, logged_by_user_id)
+    parent_id = client.create_item(CI_ACTIVITY_LOG_BOARD_ID, CI_ACTIVITY_LOG_GROUPS["to_log"], summary.title, cols)
+    print(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS['ci_activity_log']}")
+    for item in summary.action_items:
+        sub_id = client.create_subitem(parent_id, item.task, build_subitem_columns(item))
+        print(f"  Created subitem {sub_id}: {item.task}")
+
+
+def _push_parent_and_subitems(client: MondayClient, summary: MeetingSummary, route: str, items: list) -> None:
+    board_id, group_id = PARENT_SUBITEM_BOARDS[route]
+    if route == "task_tracking":
+        cols = build_task_tracking_parent_columns(summary, items)
+    elif route == "communications":
+        cols = build_communications_parent_columns(items)
+    else:
+        cols = build_office_admin_parent_columns(summary, items)
+
+    parent_id = client.create_item(board_id, group_id, summary.title, cols)
+    print(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS[route]}")
+    for item in items:
+        sub_id = client.create_subitem(parent_id, item.task, build_subitem_columns(item))
+        print(f"  Created subitem {sub_id}: {item.task}")
+
+
+def _push_board_of_directors(client: MondayClient, items: list) -> None:
+    for item in items:
+        cols = build_board_of_directors_item_columns(item)
+        item_id = client.create_item(BOARD_OF_DIRECTORS_BOARD_ID, BOARD_OF_DIRECTORS_GROUPS["other_tasks"], item.task, cols)
+        print(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['board_of_directors']}")
+
+
+def _push_safety_feedback(client: MondayClient, summary: MeetingSummary, items: list) -> None:
+    for item in items:
+        cols = build_safety_feedback_item_columns(item, summary)
+        item_id = client.create_item(SAFETY_FEEDBACK_BOARD_ID, SAFETY_FEEDBACK_GROUPS["new_submissions"], item.task, cols)
+        print(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['safety']}")
 
 
 # --------------------------------------------------------------------------
@@ -733,7 +933,7 @@ def main() -> None:
         print("\nMONDAY_API_TOKEN not set - cannot push. Set it and re-run to push these items.")
         return
 
-    print(f"\n{len(summaries)} parent item(s), {total_items} action item(s) parsed above.")
+    print(f"\n{len(summaries)} summary(ies), {total_items} action item(s) parsed above.")
     answer = input("Type CONFIRM to create these on monday.com, or anything else to cancel: ").strip()
     if answer != "CONFIRM":
         print("Cancelled - nothing was created.")
