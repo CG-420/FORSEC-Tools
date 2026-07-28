@@ -287,24 +287,34 @@ class MeetingSummary:
 # --------------------------------------------------------------------------
 
 HEADING_RE = re.compile(r"^(#{1,6})\s*(.+?)\s*$", re.MULTILINE)
-ACTION_ITEMS_HEADING_RE = re.compile(r"^(#{1,6})\s*action\s*items?\b.*$", re.IGNORECASE | re.MULTILINE)
-META_DATE_RE = re.compile(r"^(?:meeting\s*date|date)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
-RECORDED_BY_RE = re.compile(r"^(?:recorded\s*by|logged\s*by)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
+# [*_]* right after the anchor tolerates a fully-bolded/underlined heading or
+# label line (e.g. "## **Action Items**", "**Date:** ..."), since the label
+# text otherwise has to be the very first thing on the line to match.
+ACTION_ITEMS_HEADING_RE = re.compile(r"^(#{1,6})\s*[*_]*\s*action\s*items?\b.*$", re.IGNORECASE | re.MULTILINE)
+META_DATE_RE = re.compile(r"^[*_]*\s*(?:meeting\s*date|date)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
+RECORDED_BY_RE = re.compile(r"^[*_]*\s*(?:recorded\s*by|logged\s*by)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 FIELD_RE = re.compile(
-    r"(Task|Owner|Due)\s*:\s*(.*?)\s*(?=\s*\|\s*(?:Task|Owner|Due)\s*:|$)",
+    r"(Task|Owner|Due)\s*:\s*(.*?)\s*(?=\s*\|\s*[*_]*\s*(?:Task|Owner|Due)\s*:|$)",
     re.IGNORECASE,
 )
 BULLET_PREFIX_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:\[[ xX]\]\s*)?")
 
 
+def _clean_field_value(text: str) -> str:
+    """Strips markdown emphasis (**bold**, __bold__, stray */_ ) so a
+    formatted template (e.g. a bolded 'Task:' label or value) doesn't leak
+    literal markdown characters into what gets pushed to monday.com."""
+    return text.replace("**", "").replace("__", "").strip("* _\t")
+
+
 def extract_title(text: str) -> str:
     m = HEADING_RE.search(text)
     if m:
-        return m.group(2).strip()
+        return _clean_field_value(m.group(2).strip())
     stripped = text.strip()
     if not stripped:
         return "Untitled Meeting"
-    return stripped.splitlines()[0].strip()[:120]
+    return _clean_field_value(stripped.splitlines()[0].strip())[:120]
 
 
 def extract_action_items_section(text: str) -> str:
@@ -323,7 +333,7 @@ def parse_action_items(section_text: str) -> list:
         line = BULLET_PREFIX_RE.sub("", line).strip()
         if not line or ":" not in line or "task" not in line.lower():
             continue
-        fields = {k.lower(): v.strip() for k, v in FIELD_RE.findall(line)}
+        fields = {k.lower(): _clean_field_value(v.strip()) for k, v in FIELD_RE.findall(line)}
         if not fields.get("task"):
             continue
         items.append(ActionItem(
@@ -400,16 +410,17 @@ def extract_meeting_date(text: str, fallback: date):
     m = META_DATE_RE.search(head)
     if not m:
         return fallback.isoformat(), None
-    iso, warning = parse_date_loose(m.group(1).strip(), fallback)
+    raw = _clean_field_value(m.group(1).strip())
+    iso, warning = parse_date_loose(raw, fallback)
     if iso:
         return iso, None
-    return fallback.isoformat(), f"meeting date {m.group(1).strip()!r} unparsed, defaulted to {fallback.isoformat()}"
+    return fallback.isoformat(), f"meeting date {raw!r} unparsed, defaulted to {fallback.isoformat()}"
 
 
 def extract_recorded_by(text: str) -> Optional[str]:
     head = "\n".join(text.splitlines()[:20])
     m = RECORDED_BY_RE.search(head)
-    return m.group(1).strip() if m else None
+    return _clean_field_value(m.group(1).strip()) if m else None
 
 
 # --------------------------------------------------------------------------
