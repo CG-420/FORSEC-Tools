@@ -290,16 +290,18 @@ HEADING_RE = re.compile(r"^(#{1,6})\s*(.+?)\s*$", re.MULTILINE)
 # [*_]* right after the anchor tolerates a fully-bolded/underlined heading or
 # label line (e.g. "## **Action Items**", "**Date:** ..."), since the label
 # text otherwise has to be the very first thing on the line to match.
-# Two forms: a markdown heading ("## Action Items", trailing text tolerated -
-# e.g. an old template's "Action Items - format each one as: ..." heading),
-# or a bare line that's *only* "Action Items" (optionally bold, optional
-# colon) with nothing else - this is what survives copy-pasting rendered
-# text off a webpage, where the "#" and other markdown never existed as
-# literal characters to begin with. The bare form is deliberately strict
-# (whole line, nothing else) so it doesn't false-match ordinary prose that
-# happens to mention "action items" mid-sentence.
+# Matches an optional markdown heading marker, then "Action Items" as the
+# leading phrase of the line, then tolerates anything after it - covers
+# "## Action Items", a bare "Action Items" line (what survives copy-pasting
+# rendered text off a webpage, or a .docx paragraph, where "#" never existed
+# as a literal character), and a heading whose trailing description runs
+# into the same line/paragraph, e.g. "Action Items - format each one
+# exactly as: Task: [x] | Owner: [x] | Due: [x]" (seen in a real template -
+# the whole thing is one Word paragraph, so it's one line once extracted).
+# Anchored so "action items" must lead the line, not appear mid-sentence in
+# ordinary prose.
 ACTION_ITEMS_HEADING_RE = re.compile(
-    r"^(?:(#{1,6})\s*[*_]*\s*action\s*items?\b.*|[*_]*\s*action\s*items?\s*[*_]*\s*:?\s*)$",
+    r"^(#{1,6})?\s*[*_]*\s*action\s*items?\b.*$",
     re.IGNORECASE | re.MULTILINE,
 )
 META_DATE_RE = re.compile(r"^[*_]*\s*(?:meeting\s*date|date)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
@@ -461,7 +463,7 @@ def match_contractor(text: str, contractors: list):
 
 def match_owner(owner_raw: str, users: list):
     """Returns (user_id, user_name, warning)."""
-    if not owner_raw or not owner_raw.strip():
+    if not owner_raw or not owner_raw.strip() or owner_raw.strip().lower() in ("unassigned", "n/a", "none", "tbd"):
         return None, None, "no owner given"
     owner_low = owner_raw.strip().lower()
 
