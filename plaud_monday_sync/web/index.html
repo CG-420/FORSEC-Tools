@@ -2,63 +2,122 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Plaud &rarr; monday.com</title>
+<title>FORSEC Meeting Action Sync</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root {
-    color-scheme: light dark;
-    --bg: #f6f7f9;
+    --forsec-green: #3B6E4D;
+    --forsec-green-dark: #2a5438;
+    --bg: #f4f6f4;
     --card: #ffffff;
-    --border: #dde1e6;
-    --text: #1c2126;
-    --muted: #5b6570;
-    --accent: #0073ea;
+    --border: #d8e4da;
+    --border-strong: #c8dccb;
+    --text: #1a1a1a;
+    --muted: #666;
+    --muted-2: #555;
+    --accent: #3B6E4D;
     --accent-text: #ffffff;
-    --warn: #b9770e;
-    --warn-bg: #fff6e6;
-    --ok: #037f4c;
-    --danger: #d0392a;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #14171a;
-      --card: #1d2226;
-      --border: #333a40;
-      --text: #e7ebee;
-      --muted: #9aa5ad;
-      --warn-bg: #332a12;
-    }
+    --warn: #7a5a00;
+    --warn-bg: #fef8e7;
+    --warn-border: #f0d878;
+    --ok: #2a5438;
+    --ok-bg: #d3f2e3;
+    --danger: #b03a2e;
+    --danger-bg: #fbe3e0;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
+    font-family: Arial, Helvetica, sans-serif;
     color: var(--text);
     line-height: 1.45;
+    /* Subtle topographic contour pattern, tiled - matches FORSEC's forest-green palette */
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%233B6E4D' stroke-width='1' opacity='0.07'%3E%3Cpath d='M-10 30 Q 45 5, 110 30 T 230 30'/%3E%3Cpath d='M-10 65 Q 45 40, 110 65 T 230 65'/%3E%3Cpath d='M-10 100 Q 45 130, 110 100 T 230 100'/%3E%3Cpath d='M-10 135 Q 45 165, 110 135 T 230 135'/%3E%3Cpath d='M-10 170 Q 45 145, 110 170 T 230 170'/%3E%3Cpath d='M-10 200 Q 45 180, 110 200 T 230 200'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 220px 220px;
   }
+
   header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    border-bottom: 3px solid var(--forsec-green);
+    padding: 1.1rem 1.5rem;
+  }
+  .header-inner {
+    max-width: 920px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
-  header h1 { font-size: 1.15rem; margin: 0; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark {
+    font-size: 1.05rem;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    color: var(--forsec-green);
+    border: 2px solid var(--forsec-green);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .brand-text h1 { font-size: 1.25rem; margin: 0; color: var(--text); }
+  .brand-text p { font-size: 0.78rem; color: var(--muted); margin: 2px 0 0 0; }
+  .integrations { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+  .integrations .wordmark {
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--muted-2);
+  }
   #tokenBadge {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     padding: 0.25rem 0.65rem;
     border-radius: 999px;
     font-weight: 600;
+    white-space: nowrap;
   }
-  .badge-ok { background: #d3f2e3; color: var(--ok); }
-  .badge-bad { background: #fbe3e0; color: var(--danger); }
+  .badge-ok { background: var(--ok-bg); color: var(--ok); }
+  .badge-bad { background: var(--danger-bg); color: var(--danger); }
+
+  /* Step indicator - always shows all steps so numbering never looks orphaned */
+  .stepper {
+    max-width: 920px;
+    margin: 1.25rem auto 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    opacity: 0.6;
+  }
+  .step.active { opacity: 1; border-color: var(--forsec-green); background: #eaf3ec; color: var(--forsec-green-dark); font-weight: 600; }
+  .step.done { opacity: 1; color: var(--forsec-green-dark); }
+  .step .num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--border-strong); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
+  }
+  .step.active .num, .step.done .num { background: var(--forsec-green); }
+
   main {
-    max-width: 900px;
+    max-width: 920px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1.25rem 1.5rem 2rem 1.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -69,9 +128,9 @@
     border-radius: 10px;
     padding: 1.25rem;
   }
-  .card h2 { margin-top: 0; font-size: 1rem; }
+  .card h2 { margin-top: 0; font-size: 1rem; color: var(--forsec-green-dark); }
   #dropzone {
-    border: 2px dashed var(--border);
+    border: 2px dashed var(--border-strong);
     border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
@@ -79,74 +138,115 @@
     cursor: pointer;
     transition: border-color 0.15s, background 0.15s;
   }
-  #dropzone.dragover { border-color: var(--accent); background: rgba(0, 115, 234, 0.06); }
+  #dropzone.dragover { border-color: var(--forsec-green); background: #f0f5f1; }
+  #dropzone .browse-link { color: var(--forsec-green); font-weight: 600; text-decoration: underline; cursor: pointer; }
   textarea {
     width: 100%;
     min-height: 140px;
     margin-top: 0.75rem;
     padding: 0.6rem;
     border-radius: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     background: var(--bg);
     color: var(--text);
     font-family: inherit;
     font-size: 0.9rem;
     resize: vertical;
   }
-  input[type=text], input[type=file] { font-family: inherit; }
   .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
   button {
     font: inherit;
     padding: 0.55rem 1rem;
     border-radius: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-strong);
     background: var(--card);
     color: var(--text);
     cursor: pointer;
   }
-  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+  button.primary { background: var(--forsec-green); border-color: var(--forsec-green); color: var(--accent-text); font-weight: 600; }
+  button.primary:hover { background: var(--forsec-green-dark); border-color: var(--forsec-green-dark); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   button.small { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
   .sources-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.75rem; }
   .source-chip {
     display: flex; justify-content: space-between; align-items: center;
     padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: 6px;
-    font-size: 0.85rem;
+    font-size: 0.85rem; background: #f9fbf9;
   }
+  .source-chip .name { cursor: text; }
+  .source-chip .name:hover { text-decoration: underline dotted; }
+  .source-chip .actions { display: flex; gap: 0.4rem; }
   .summary-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
   .summary-card:last-child { margin-bottom: 0; }
   .meta { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
   .warn { color: var(--warn); font-weight: 600; }
   .route-group { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-top: 0.6rem; }
   .route-group h4 { margin: 0 0 0.5rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
-  .route-group.unrouted { border-color: var(--warn); background: var(--warn-bg); }
+  .route-group.unrouted { border-color: var(--warn-border); background: var(--warn-bg); }
   .item-row { padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
   .item-row:first-child { border-top: none; }
   .item-row .task { font-weight: 600; }
   .item-row .details { color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem; }
   .resolve-row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.4rem; flex-wrap: wrap; }
-  select { font: inherit; padding: 0.3rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text); }
+  select {
+    font: inherit; padding: 0.3rem 0.5rem; border-radius: 6px;
+    border: 1px solid var(--border-strong); background: var(--card); color: var(--text);
+  }
   label.remember { font-size: 0.82rem; color: var(--muted); display: flex; gap: 0.3rem; align-items: center; }
-  #log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; white-space: pre-wrap; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; max-height: 300px; overflow-y: auto; }
+  #log {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; white-space: pre-wrap;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem;
+    max-height: 300px; overflow-y: auto;
+  }
   .hint { font-size: 0.8rem; color: var(--muted); }
-  .field-label { font-weight: 600; }
+  footer {
+    max-width: 920px; margin: 0 auto; padding: 0 1.5rem 2rem 1.5rem;
+    font-size: 0.75rem; color: var(--muted); text-align: center;
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Plaud &rarr; monday.com Action Item Sync</h1>
-  <span id="tokenBadge" class="badge-bad">Checking token&hellip;</span>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">FORSEC</div>
+      <div class="brand-text">
+        <h1>Meeting Action Sync</h1>
+        <p>Turns meeting summaries into monday.com action items</p>
+      </div>
+    </div>
+    <div>
+      <div class="integrations">
+        <span>Connects:</span>
+        <span class="wordmark">Plaud</span>
+        <span class="wordmark">monday.com</span>
+      </div>
+      <div style="margin-top:0.4rem; text-align:right;">
+        <span id="tokenBadge" class="badge-bad">Checking token&hellip;</span>
+      </div>
+    </div>
+  </div>
 </header>
+
+<div class="stepper">
+  <div class="step active" id="step1"><span class="num">1</span> Add summaries</div>
+  <div class="step" id="step2"><span class="num">2</span> Review draft</div>
+  <div class="step" id="step3"><span class="num">3</span> Push to monday.com</div>
+</div>
 
 <main>
   <section class="card">
-    <h2>1. Add meeting summaries</h2>
-    <div id="dropzone">Drop one or more Plaud summary files here (.md / .txt), or paste text below</div>
-    <textarea id="pasteBox" placeholder="Or paste a Plaud summary here&hellip;"></textarea>
+    <h2>Add meeting summaries</h2>
+    <div id="dropzone">
+      Drop one or more summary files here (.md / .txt)<br>
+      <span class="hint">or</span> <span class="browse-link" id="browseLink">choose files</span>
+      <input type="file" id="fileInput" accept=".md,.txt" multiple style="display:none;">
+    </div>
+    <textarea id="pasteBox" placeholder="Or paste a meeting summary here&hellip;"></textarea>
     <div class="row" style="margin-top:0.5rem;">
-      <input type="text" id="pasteName" placeholder="Name for pasted text (e.g. meeting.md)" value="pasted.md" style="flex:1; padding:0.5rem; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
-      <button id="addPasteBtn">Add as source</button>
+      <button id="addPasteBtn" class="primary">Add This Summary</button>
+      <span class="hint">Dragging text off a webpage doesn't work as a file drop &mdash; copy the text and paste it here instead.</span>
     </div>
     <div id="sourcesList" class="sources-list"></div>
     <div class="row" style="margin-top:1rem;">
@@ -157,7 +257,7 @@
   </section>
 
   <section class="card" id="draftSection" style="display:none;">
-    <h2>2. Draft &mdash; review before pushing</h2>
+    <h2>Draft &mdash; review before pushing</h2>
     <div id="draftOutput"></div>
     <div class="row" style="margin-top:1rem;">
       <button id="pushBtn" class="primary">Push to monday.com</button>
@@ -166,21 +266,25 @@
   </section>
 
   <section class="card" id="resultsSection" style="display:none;">
-    <h2>3. Result</h2>
+    <h2>Result</h2>
     <div id="log"></div>
   </section>
 </main>
+
+<footer>FORSEC internal tool &middot; runs locally, nothing leaves this machine except calls to monday.com</footer>
 
 <script>
 const state = {
   sources: [],       // [{name, text}]
   lastDraft: null,    // last /api/draft response
   routeChoices: [],
+  pastedCount: 0,
 };
 
 const dropzone = document.getElementById('dropzone');
+const browseLink = document.getElementById('browseLink');
+const fileInput = document.getElementById('fileInput');
 const pasteBox = document.getElementById('pasteBox');
-const pasteName = document.getElementById('pasteName');
 const sourcesList = document.getElementById('sourcesList');
 const draftBtn = document.getElementById('draftBtn');
 const clearBtn = document.getElementById('clearBtn');
@@ -192,19 +296,14 @@ const pushStatus = document.getElementById('pushStatus');
 const resultsSection = document.getElementById('resultsSection');
 const logEl = document.getElementById('log');
 const tokenBadge = document.getElementById('tokenBadge');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+const step3 = document.getElementById('step3');
 
-function renderSources() {
-  sourcesList.innerHTML = '';
-  state.sources.forEach((src, i) => {
-    const div = document.createElement('div');
-    div.className = 'source-chip';
-    div.innerHTML = `<span>${escapeHtml(src.name)} (${src.text.length} chars)</span>`;
-    const btn = document.createElement('button');
-    btn.className = 'small';
-    btn.textContent = 'Remove';
-    btn.onclick = () => { state.sources.splice(i, 1); renderSources(); };
-    div.appendChild(btn);
-    sourcesList.appendChild(div);
+function setStep(n) {
+  [step1, step2, step3].forEach((el, i) => {
+    el.classList.toggle('active', i === n - 1);
+    el.classList.toggle('done', i < n - 1);
   });
 }
 
@@ -212,29 +311,83 @@ function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+function addFileSource(name, text) {
+  state.sources.push({ name, text });
+  renderSources();
+}
+
+function addPastedSource(text) {
+  state.pastedCount += 1;
+  // Auto-name from the first non-empty line of the pasted text, so there's
+  // no separate naming field to figure out - click the name to rename it.
+  const firstLine = text.split('\n').map(l => l.trim()).find(l => l.length > 0) || '';
+  const guess = firstLine.replace(/^#+\s*/, '').slice(0, 40).trim();
+  const name = guess ? guess : `Pasted summary ${state.pastedCount}`;
+  state.sources.push({ name, text });
+  renderSources();
+}
+
+function renderSources() {
+  sourcesList.innerHTML = '';
+  state.sources.forEach((src, i) => {
+    const div = document.createElement('div');
+    div.className = 'source-chip';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name';
+    nameSpan.textContent = `${src.name} (${src.text.length} chars)`;
+    nameSpan.title = 'Click to rename';
+    nameSpan.onclick = () => {
+      const next = prompt('Rename this summary:', src.name);
+      if (next && next.trim()) {
+        state.sources[i].name = next.trim();
+        renderSources();
+      }
+    };
+    div.appendChild(nameSpan);
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const btn = document.createElement('button');
+    btn.className = 'small';
+    btn.textContent = 'Remove';
+    btn.onclick = () => { state.sources.splice(i, 1); renderSources(); };
+    actions.appendChild(btn);
+    div.appendChild(actions);
+
+    sourcesList.appendChild(div);
+  });
+}
+
+function readFilesAsSources(files) {
+  [...files].forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => addFileSource(file.name, reader.result);
+    reader.readAsText(file);
+  });
+}
+
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
 dropzone.addEventListener('drop', e => {
   e.preventDefault();
   dropzone.classList.remove('dragover');
-  const files = [...e.dataTransfer.files];
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      state.sources.push({ name: file.name, text: reader.result });
-      renderSources();
-    };
-    reader.readAsText(file);
-  });
+  if (e.dataTransfer.files.length) {
+    readFilesAsSources(e.dataTransfer.files);
+  }
 });
+
+browseLink.onclick = () => fileInput.click();
+fileInput.onchange = () => {
+  if (fileInput.files.length) readFilesAsSources(fileInput.files);
+  fileInput.value = '';
+};
 
 document.getElementById('addPasteBtn').onclick = () => {
   const text = pasteBox.value;
   if (!text.trim()) return;
-  const name = pasteName.value.trim() || 'pasted.md';
-  state.sources.push({ name, text });
+  addPastedSource(text);
   pasteBox.value = '';
-  renderSources();
 };
 
 clearBtn.onclick = () => {
@@ -243,6 +396,7 @@ clearBtn.onclick = () => {
   renderSources();
   draftSection.style.display = 'none';
   resultsSection.style.display = 'none';
+  setStep(1);
 };
 
 async function checkToken() {
@@ -283,6 +437,7 @@ draftBtn.onclick = async () => {
     renderDraft(data);
     draftSection.style.display = 'block';
     draftStatus.textContent = '';
+    setStep(2);
   } catch (e) {
     draftStatus.textContent = 'Error: ' + e.message;
   } finally {
@@ -412,6 +567,7 @@ pushBtn.onclick = async () => {
     });
     const data = await res.json();
     resultsSection.style.display = 'block';
+    setStep(3);
     if (!data.ok) {
       logEl.textContent = 'Error: ' + data.error;
     } else {
