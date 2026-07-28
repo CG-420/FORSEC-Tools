@@ -290,7 +290,18 @@ HEADING_RE = re.compile(r"^(#{1,6})\s*(.+?)\s*$", re.MULTILINE)
 # [*_]* right after the anchor tolerates a fully-bolded/underlined heading or
 # label line (e.g. "## **Action Items**", "**Date:** ..."), since the label
 # text otherwise has to be the very first thing on the line to match.
-ACTION_ITEMS_HEADING_RE = re.compile(r"^(#{1,6})\s*[*_]*\s*action\s*items?\b.*$", re.IGNORECASE | re.MULTILINE)
+# Two forms: a markdown heading ("## Action Items", trailing text tolerated -
+# e.g. an old template's "Action Items - format each one as: ..." heading),
+# or a bare line that's *only* "Action Items" (optionally bold, optional
+# colon) with nothing else - this is what survives copy-pasting rendered
+# text off a webpage, where the "#" and other markdown never existed as
+# literal characters to begin with. The bare form is deliberately strict
+# (whole line, nothing else) so it doesn't false-match ordinary prose that
+# happens to mention "action items" mid-sentence.
+ACTION_ITEMS_HEADING_RE = re.compile(
+    r"^(?:(#{1,6})\s*[*_]*\s*action\s*items?\b.*|[*_]*\s*action\s*items?\s*[*_]*\s*:?\s*)$",
+    re.IGNORECASE | re.MULTILINE,
+)
 META_DATE_RE = re.compile(r"^[*_]*\s*(?:meeting\s*date|date)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 RECORDED_BY_RE = re.compile(r"^[*_]*\s*(?:recorded\s*by|logged\s*by)\s*:\s*(.+)$", re.IGNORECASE | re.MULTILINE)
 FIELD_RE = re.compile(
@@ -321,8 +332,15 @@ def extract_action_items_section(text: str) -> str:
     m = ACTION_ITEMS_HEADING_RE.search(text)
     if not m:
         return ""
-    heading_level = len(m.group(1))
     rest = text[m.end():]
+    if not m.group(1):
+        # Bare "Action Items" line, no markdown heading level to bound a
+        # "next heading" search against (this is what copy-pasting rendered
+        # text off a webpage looks like). Take the rest of the document -
+        # stray trailing content won't match the Task/Owner/Due row pattern
+        # anyway, so including a bit extra is harmless.
+        return rest
+    heading_level = len(m.group(1))
     next_heading = re.search(rf"^#{{1,{heading_level}}}\s+\S", rest, re.MULTILINE)
     return rest[: next_heading.start()] if next_heading else rest
 
