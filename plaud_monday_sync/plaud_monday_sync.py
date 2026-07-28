@@ -663,6 +663,25 @@ class MondayClient:
         data = self._request(query, variables)
         return data["create_subitem"]["id"]
 
+    def update_item_columns(self, board_id: int, item_id: str, column_values: dict) -> None:
+        """Sets column values on an already-existing item, as a genuine
+        change rather than baked into creation. monday.com's "when column
+        changes to X" automations (confirmed live 2026-07-28) do not fire
+        when a value is set as part of item creation - only on a real
+        subsequent change to an existing item - so this is required for
+        anything that needs to trigger one of those automations."""
+        query = """
+        mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
+          change_multiple_column_values(board_id: $boardId, item_id: $itemId, column_values: $columnValues) { id }
+        }
+        """
+        variables = {
+            "boardId": board_id,
+            "itemId": item_id,
+            "columnValues": json.dumps(column_values),
+        }
+        self._request(query, variables)
+
 
 # --------------------------------------------------------------------------
 # column_values builders
@@ -953,8 +972,19 @@ def push(client: MondayClient, summaries: list, logged_by_user_id: str, report=p
 
 def _push_ci_activity_log(client: MondayClient, summary: MeetingSummary, logged_by_user_id: str, report=print) -> None:
     cols = build_ci_activity_log_parent_columns(summary, logged_by_user_id)
+    # Adoption Signal is set as a separate follow-up change, not baked into
+    # creation, so it fires as a genuine change - required for monday's
+    # "Adoption Signal -> Interest" automation (auto-creates a linked
+    # Contractor Participation item) to actually trigger.
+    adoption_signal_col = cols.pop(CI_ACTIVITY_LOG_COLUMNS["adoption_signal"], None)
+
     parent_id = client.create_item(CI_ACTIVITY_LOG_BOARD_ID, CI_ACTIVITY_LOG_GROUPS["to_log"], summary.title, cols)
     report(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS['ci_activity_log']}")
+
+    if adoption_signal_col:
+        client.update_item_columns(CI_ACTIVITY_LOG_BOARD_ID, parent_id, {CI_ACTIVITY_LOG_COLUMNS["adoption_signal"]: adoption_signal_col})
+        report(f"  Set Adoption Signal on {parent_id} ({summary.adoption_signal}) - triggers monday's Contractor Participation automation when 'Interest'")
+
     for item in summary.action_items:
         sub_id = client.create_subitem(parent_id, item.task, build_subitem_columns(item))
         report(f"  Created subitem {sub_id}: {item.task}")

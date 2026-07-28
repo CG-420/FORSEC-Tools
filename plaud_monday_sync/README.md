@@ -110,6 +110,22 @@ Tracking's subitems: Name / Owner / Status / Date).
 Parent items land in the **To Log** group (pending your review), not
 "In Progress" — they're freshly parsed, not yet triaged.
 
+**Existing monday.com automations on this board** (confirmed live
+2026-07-28 — see `list_automations` on board `18403818341`): two AI
+auto-categorization recipes on Activity Type (harmless — one only fires
+when Activity Type is empty, the other fires on name changes but didn't
+alter an explicitly-set value in testing), status-change automations that
+move items between groups based on Implementation Stage, and — the
+important one — **when Adoption Signal changes to "Interest", monday
+auto-creates a linked item on Contractor Participation**. Live-tested and
+confirmed: none of these fire on values baked into item creation via the
+API, only on a genuine subsequent change to an existing item. Since
+"Interest" is one of the values our own keyword inference can produce, the
+script sets Adoption Signal as a separate follow-up `change_multiple_column_values`
+call after creating the item (see `_push_ci_activity_log`), specifically
+so this automation actually fires for real pushes instead of silently not
+triggering.
+
 The four inferred status fields use simple keyword heuristics (see
 `ACTIVITY_TYPE_KEYWORDS` etc. in the script) and are always marked
 `(inferred)` in the draft. If no keyword matches, the field is left blank
