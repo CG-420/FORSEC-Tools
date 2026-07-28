@@ -927,36 +927,40 @@ PARENT_SUBITEM_BOARDS = {
 }
 
 
-def push(client: MondayClient, summaries: list, logged_by_user_id: str) -> None:
+def push(client: MondayClient, summaries: list, logged_by_user_id: str, report=print) -> None:
+    """Creates everything on monday.com. `report(message)` is called for
+    every progress/result line instead of printing directly, so callers
+    other than the CLI (e.g. the web UI) can collect results as data
+    instead of console output - same push logic either way."""
     for summary in summaries:
         try:
             if summary.target_board == "ci_activity_log":
-                _push_ci_activity_log(client, summary, logged_by_user_id)
+                _push_ci_activity_log(client, summary, logged_by_user_id, report)
                 continue
 
             for route, items in group_items_by_route(summary.action_items).items():
                 if route == "unrouted":
-                    _push_needs_routing(client, summary, items)
+                    _push_needs_routing(client, summary, items, report)
                 elif route in PARENT_SUBITEM_BOARDS:
-                    _push_parent_and_subitems(client, summary, route, items)
+                    _push_parent_and_subitems(client, summary, route, items, report)
                 elif route == "board_of_directors":
-                    _push_board_of_directors(client, items)
+                    _push_board_of_directors(client, items, report)
                 elif route == "safety":
-                    _push_safety_feedback(client, summary, items)
+                    _push_safety_feedback(client, summary, items, report)
         except RuntimeError as e:
-            print(f"FAILED to push {summary.title!r}: {e}", file=sys.stderr)
+            report(f"FAILED to push {summary.title!r}: {e}")
 
 
-def _push_ci_activity_log(client: MondayClient, summary: MeetingSummary, logged_by_user_id: str) -> None:
+def _push_ci_activity_log(client: MondayClient, summary: MeetingSummary, logged_by_user_id: str, report=print) -> None:
     cols = build_ci_activity_log_parent_columns(summary, logged_by_user_id)
     parent_id = client.create_item(CI_ACTIVITY_LOG_BOARD_ID, CI_ACTIVITY_LOG_GROUPS["to_log"], summary.title, cols)
-    print(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS['ci_activity_log']}")
+    report(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS['ci_activity_log']}")
     for item in summary.action_items:
         sub_id = client.create_subitem(parent_id, item.task, build_subitem_columns(item))
-        print(f"  Created subitem {sub_id}: {item.task}")
+        report(f"  Created subitem {sub_id}: {item.task}")
 
 
-def _push_parent_and_subitems(client: MondayClient, summary: MeetingSummary, route: str, items: list) -> None:
+def _push_parent_and_subitems(client: MondayClient, summary: MeetingSummary, route: str, items: list, report=print) -> None:
     board_id, group_id = PARENT_SUBITEM_BOARDS[route]
     if route == "task_tracking":
         cols = build_task_tracking_parent_columns(summary, items)
@@ -968,32 +972,32 @@ def _push_parent_and_subitems(client: MondayClient, summary: MeetingSummary, rou
         cols = build_office_admin_parent_columns(summary, items)
 
     parent_id = client.create_item(board_id, group_id, summary.title, cols)
-    print(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS[route]}")
+    report(f"Created parent item {parent_id} ({summary.title!r}) on {BOARD_LABELS[route]}")
     for item in items:
         sub_cols = build_training_subitem_columns(item) if route == "training" else build_subitem_columns(item)
         sub_id = client.create_subitem(parent_id, item.task, sub_cols)
-        print(f"  Created subitem {sub_id}: {item.task}")
+        report(f"  Created subitem {sub_id}: {item.task}")
 
 
-def _push_board_of_directors(client: MondayClient, items: list) -> None:
+def _push_board_of_directors(client: MondayClient, items: list, report=print) -> None:
     for item in items:
         cols = build_board_of_directors_item_columns(item)
         item_id = client.create_item(BOARD_OF_DIRECTORS_BOARD_ID, BOARD_OF_DIRECTORS_GROUPS["other_tasks"], item.task, cols)
-        print(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['board_of_directors']}")
+        report(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['board_of_directors']}")
 
 
-def _push_safety_feedback(client: MondayClient, summary: MeetingSummary, items: list) -> None:
+def _push_safety_feedback(client: MondayClient, summary: MeetingSummary, items: list, report=print) -> None:
     for item in items:
         cols = build_safety_feedback_item_columns(item, summary)
         item_id = client.create_item(SAFETY_FEEDBACK_BOARD_ID, SAFETY_FEEDBACK_GROUPS["new_submissions"], item.task, cols)
-        print(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['safety']}")
+        report(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['safety']}")
 
 
-def _push_needs_routing(client: MondayClient, summary: MeetingSummary, items: list) -> None:
+def _push_needs_routing(client: MondayClient, summary: MeetingSummary, items: list, report=print) -> None:
     for item in items:
         cols = build_needs_routing_item_columns(item, summary)
         item_id = client.create_item(NEEDS_ROUTING_BOARD_ID, NEEDS_ROUTING_GROUPS["needs_review"], item.task, cols)
-        print(f"Created item {item_id} ({item.task!r}) on Needs Routing")
+        report(f"Created item {item_id} ({item.task!r}) on Needs Routing")
 
 
 # --------------------------------------------------------------------------

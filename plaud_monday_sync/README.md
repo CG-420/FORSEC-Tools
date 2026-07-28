@@ -216,6 +216,30 @@ python3 plaud_monday_sync.py --file meeting.md --no-push
 python3 plaud_monday_sync.py --file meeting.md --no-interactive
 ```
 
+### Or: the browser-based version (no terminal needed after setup)
+
+```bash
+export MONDAY_API_TOKEN="your monday.com API v2 token"
+python3 plaud_monday_sync_web.py
+# opens http://127.0.0.1:8765 in your browser automatically
+```
+
+This runs a small local server and opens a page where you can drag/drop or
+paste in summaries, see the draft, resolve unrouted items with dropdowns
+instead of terminal prompts, and push — all in the browser from then on.
+It reuses the exact same parsing/routing/column-building code as the CLI
+(`plaud_monday_sync.py` is imported, not duplicated), so anything true of
+the CLI's behavior above is true here too.
+
+**Why a local server and not just a plain HTML file:** monday.com's API
+blocks direct browser-to-API calls (CORS) — there's no way around this on
+monday's end, so a pure static page can't call monday.com itself. This
+server sits in between: the browser talks to it (same machine, no CORS
+issue), and it talks to monday.com server-side. You still need to run one
+command to start it, but everything after that is point-and-click.
+
+Options: `--port 8765` (default) and `--no-browser` (don't auto-open a tab).
+
 Without `MONDAY_API_TOKEN` set, the script still parses and prints the draft
 (contractor/owner matching just gets skipped, and pushing is disabled) — handy
 for eyeballing the parser on a new template before wiring up credentials.

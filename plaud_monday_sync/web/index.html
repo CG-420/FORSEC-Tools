@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Plaud &rarr; monday.com</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --border: #dde1e6;
+    --text: #1c2126;
+    --muted: #5b6570;
+    --accent: #0073ea;
+    --accent-text: #ffffff;
+    --warn: #b9770e;
+    --warn-bg: #fff6e6;
+    --ok: #037f4c;
+    --danger: #d0392a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171a;
+      --card: #1d2226;
+      --border: #333a40;
+      --text: #e7ebee;
+      --muted: #9aa5ad;
+      --warn-bg: #332a12;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  header h1 { font-size: 1.15rem; margin: 0; }
+  #tokenBadge {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .badge-ok { background: #d3f2e3; color: var(--ok); }
+  .badge-bad { background: #fbe3e0; color: var(--danger); }
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .card h2 { margin-top: 0; font-size: 1rem; }
+  #dropzone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  #dropzone.dragover { border-color: var(--accent); background: rgba(0, 115, 234, 0.06); }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    margin-top: 0.75rem;
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: vertical;
+  }
+  input[type=text], input[type=file] { font-family: inherit; }
+  .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.small { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+  .sources-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.75rem; }
+  .source-chip {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.45rem 0.75rem; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 0.85rem;
+  }
+  .summary-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .summary-card:last-child { margin-bottom: 0; }
+  .meta { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
+  .warn { color: var(--warn); font-weight: 600; }
+  .route-group { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-top: 0.6rem; }
+  .route-group h4 { margin: 0 0 0.5rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+  .route-group.unrouted { border-color: var(--warn); background: var(--warn-bg); }
+  .item-row { padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
+  .item-row:first-child { border-top: none; }
+  .item-row .task { font-weight: 600; }
+  .item-row .details { color: var(--muted); font-size: 0.82rem; margin-top: 0.15rem; }
+  .resolve-row { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.4rem; flex-wrap: wrap; }
+  select { font: inherit; padding: 0.3rem 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text); }
+  label.remember { font-size: 0.82rem; color: var(--muted); display: flex; gap: 0.3rem; align-items: center; }
+  #log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; white-space: pre-wrap; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; max-height: 300px; overflow-y: auto; }
+  .hint { font-size: 0.8rem; color: var(--muted); }
+  .field-label { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Plaud &rarr; monday.com Action Item Sync</h1>
+  <span id="tokenBadge" class="badge-bad">Checking token&hellip;</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>1. Add meeting summaries</h2>
+    <div id="dropzone">Drop one or more Plaud summary files here (.md / .txt), or paste text below</div>
+    <textarea id="pasteBox" placeholder="Or paste a Plaud summary here&hellip;"></textarea>
+    <div class="row" style="margin-top:0.5rem;">
+      <input type="text" id="pasteName" placeholder="Name for pasted text (e.g. meeting.md)" value="pasted.md" style="flex:1; padding:0.5rem; border-radius:6px; border:1px solid var(--border); background:var(--bg); color:var(--text);">
+      <button id="addPasteBtn">Add as source</button>
+    </div>
+    <div id="sourcesList" class="sources-list"></div>
+    <div class="row" style="margin-top:1rem;">
+      <button id="draftBtn" class="primary">Show Draft</button>
+      <button id="clearBtn">Clear all</button>
+      <span id="draftStatus" class="hint"></span>
+    </div>
+  </section>
+
+  <section class="card" id="draftSection" style="display:none;">
+    <h2>2. Draft &mdash; review before pushing</h2>
+    <div id="draftOutput"></div>
+    <div class="row" style="margin-top:1rem;">
+      <button id="pushBtn" class="primary">Push to monday.com</button>
+      <span id="pushStatus" class="hint"></span>
+    </div>
+  </section>
+
+  <section class="card" id="resultsSection" style="display:none;">
+    <h2>3. Result</h2>
+    <div id="log"></div>
+  </section>
+</main>
+
+<script>
+const state = {
+  sources: [],       // [{name, text}]
+  lastDraft: null,    // last /api/draft response
+  routeChoices: [],
+};
+
+const dropzone = document.getElementById('dropzone');
+const pasteBox = document.getElementById('pasteBox');
+const pasteName = document.getElementById('pasteName');
+const sourcesList = document.getElementById('sourcesList');
+const draftBtn = document.getElementById('draftBtn');
+const clearBtn = document.getElementById('clearBtn');
+const draftStatus = document.getElementById('draftStatus');
+const draftSection = document.getElementById('draftSection');
+const draftOutput = document.getElementById('draftOutput');
+const pushBtn = document.getElementById('pushBtn');
+const pushStatus = document.getElementById('pushStatus');
+const resultsSection = document.getElementById('resultsSection');
+const logEl = document.getElementById('log');
+const tokenBadge = document.getElementById('tokenBadge');
+
+function renderSources() {
+  sourcesList.innerHTML = '';
+  state.sources.forEach((src, i) => {
+    const div = document.createElement('div');
+    div.className = 'source-chip';
+    div.innerHTML = `<span>${escapeHtml(src.name)} (${src.text.length} chars)</span>`;
+    const btn = document.createElement('button');
+    btn.className = 'small';
+    btn.textContent = 'Remove';
+    btn.onclick = () => { state.sources.splice(i, 1); renderSources(); };
+    div.appendChild(btn);
+    sourcesList.appendChild(div);
+  });
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const files = [...e.dataTransfer.files];
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.sources.push({ name: file.name, text: reader.result });
+      renderSources();
+    };
+    reader.readAsText(file);
+  });
+});
+
+document.getElementById('addPasteBtn').onclick = () => {
+  const text = pasteBox.value;
+  if (!text.trim()) return;
+  const name = pasteName.value.trim() || 'pasted.md';
+  state.sources.push({ name, text });
+  pasteBox.value = '';
+  renderSources();
+};
+
+clearBtn.onclick = () => {
+  state.sources = [];
+  state.lastDraft = null;
+  renderSources();
+  draftSection.style.display = 'none';
+  resultsSection.style.display = 'none';
+};
+
+async function checkToken() {
+  try {
+    const res = await fetch('/api/status');
+    const data = await res.json();
+    if (data.tokenConfigured) {
+      tokenBadge.textContent = 'monday.com token configured';
+      tokenBadge.className = 'badge-ok';
+    } else {
+      tokenBadge.textContent = 'MONDAY_API_TOKEN not set on server';
+      tokenBadge.className = 'badge-bad';
+    }
+  } catch (e) {
+    tokenBadge.textContent = 'Cannot reach local server';
+    tokenBadge.className = 'badge-bad';
+  }
+}
+checkToken();
+
+draftBtn.onclick = async () => {
+  if (state.sources.length === 0) {
+    draftStatus.textContent = 'Add at least one summary first.';
+    return;
+  }
+  draftStatus.textContent = 'Loading draft…';
+  draftBtn.disabled = true;
+  try {
+    const res = await fetch('/api/draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sources: state.sources }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'unknown error');
+    state.lastDraft = data;
+    state.routeChoices = data.routeChoices;
+    renderDraft(data);
+    draftSection.style.display = 'block';
+    draftStatus.textContent = '';
+  } catch (e) {
+    draftStatus.textContent = 'Error: ' + e.message;
+  } finally {
+    draftBtn.disabled = false;
+  }
+};
+
+function fmtInferred(value, inferred) {
+  if (!value) return '(not set)';
+  return inferred ? value + ' (inferred)' : value;
+}
+
+function renderDraft(data) {
+  draftOutput.innerHTML = '';
+  data.summaries.forEach(summary => {
+    const card = document.createElement('div');
+    card.className = 'summary-card';
+
+    let meta = `<strong>${escapeHtml(summary.title)}</strong> &mdash; ${escapeHtml(summary.source)}<br>`;
+    meta += `Meeting date: ${summary.meetingDateIso}`;
+    if (summary.meetingDateWarning) meta += ` <span class="warn">⚠ ${escapeHtml(summary.meetingDateWarning)}</span>`;
+    if (summary.recordedByRaw) {
+      meta += `<br>Recorded by: ${escapeHtml(summary.recordedByUserName || summary.recordedByRaw)}`;
+      if (summary.recordedByWarning) meta += ` <span class="warn">⚠ ${escapeHtml(summary.recordedByWarning)}</span>`;
+    }
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'meta';
+    metaDiv.innerHTML = meta;
+    card.appendChild(metaDiv);
+
+    if (!summary.actionItems.length) {
+      const p = document.createElement('div');
+      p.className = 'hint';
+      p.textContent = 'No action items parsed from this summary.';
+      card.appendChild(p);
+      draftOutput.appendChild(card);
+      return;
+    }
+
+    if (summary.targetBoard === 'ci_activity_log') {
+      const g = document.createElement('div');
+      g.className = 'route-group';
+      g.innerHTML = `<h4>${escapeHtml(summary.targetBoardLabel)}</h4>
+        Contractor: <strong>${escapeHtml(summary.contractorName || '')}</strong><br>
+        Activity Type: ${escapeHtml(fmtInferred(summary.activityType, summary.activityTypeInferred))}<br>
+        Outcome: ${escapeHtml(fmtInferred(summary.outcome, summary.outcomeInferred))}<br>
+        Adoption Signal: ${escapeHtml(fmtInferred(summary.adoptionSignal, summary.adoptionSignalInferred))}<br>
+        Implementation Stage: ${escapeHtml(fmtInferred(summary.implementationStage, summary.implementationStageInferred))}`;
+      summary.actionItems.forEach(item => g.appendChild(renderItemRow(item, false)));
+      card.appendChild(g);
+      draftOutput.appendChild(card);
+      return;
+    }
+
+    const groups = {};
+    summary.actionItems.forEach(item => {
+      (groups[item.route] = groups[item.route] || []).push(item);
+    });
+
+    Object.entries(groups).forEach(([route, items]) => {
+      const g = document.createElement('div');
+      g.className = 'route-group' + (route === 'unrouted' ? ' unrouted' : '');
+      const h4 = document.createElement('h4');
+      h4.textContent = (route === 'unrouted' ? '⚠ ' : '') + items[0].routeLabel;
+      g.appendChild(h4);
+      items.forEach(item => g.appendChild(renderItemRow(item, route === 'unrouted')));
+      card.appendChild(g);
+    });
+
+    draftOutput.appendChild(card);
+  });
+}
+
+function renderItemRow(item, resolvable) {
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  let details = `Owner: ${escapeHtml(item.ownerUserName || item.ownerRaw || '(none)')}`;
+  if (item.ownerWarning) details += ` <span class="warn">⚠ ${escapeHtml(item.ownerWarning)}</span>`;
+  details += ` &middot; Due: ${escapeHtml(item.dueIso || item.dueRaw || '(none)')}`;
+  if (item.dueWarning) details += ` <span class="warn">⚠ ${escapeHtml(item.dueWarning)}</span>`;
+  if (item.routeReason) details += ` &middot; <em>${escapeHtml(item.routeReason)}</em>`;
+  row.innerHTML = `<div class="task">${escapeHtml(item.task)}</div><div class="details">${details}</div>`;
+
+  if (resolvable) {
+    const resolveRow = document.createElement('div');
+    resolveRow.className = 'resolve-row';
+    const select = document.createElement('select');
+    select.dataset.ownerKey = item.ownerKey;
+    select.innerHTML = '<option value="">Leave for Needs Routing</option>' +
+      state.routeChoices.map(c => `<option value="${c.key}">${escapeHtml(c.label)}</option>`).join('');
+    resolveRow.appendChild(select);
+
+    if (item.ownerUserId) {
+      const label = document.createElement('label');
+      label.className = 'remember';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.dataset.ownerKey = item.ownerKey;
+      label.appendChild(cb);
+      label.append(`Remember for ${item.ownerUserName} next time`);
+      resolveRow.appendChild(label);
+    }
+    row.appendChild(resolveRow);
+  }
+  return row;
+}
+
+pushBtn.onclick = async () => {
+  if (!state.lastDraft) return;
+  pushStatus.textContent = 'Pushing…';
+  pushBtn.disabled = true;
+
+  const resolutions = {};
+  draftOutput.querySelectorAll('select[data-owner-key]').forEach(sel => {
+    if (sel.value) {
+      const key = sel.dataset.ownerKey;
+      const rememberCb = draftOutput.querySelector(`input[type=checkbox][data-owner-key="${CSS.escape(key)}"]`);
+      resolutions[key] = { route: sel.value, remember: !!(rememberCb && rememberCb.checked) };
+    }
+  });
+
+  try {
+    const res = await fetch('/api/push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sources: state.sources, resolutions }),
+    });
+    const data = await res.json();
+    resultsSection.style.display = 'block';
+    if (!data.ok) {
+      logEl.textContent = 'Error: ' + data.error;
+    } else {
+      let text = data.log.join('\n');
+      if (data.remembered && data.remembered.length) {
+        text += '\n\nRemembered:\n' + data.remembered.map(r => `  ${r.owner} -> ${r.route}`).join('\n');
+      }
+      logEl.textContent = text;
+    }
+    pushStatus.textContent = '';
+  } catch (e) {
+    resultsSection.style.display = 'block';
+    logEl.textContent = 'Error: ' + e.message;
+  } finally {
+    pushBtn.disabled = false;
+  }
+};
+</script>
+
+</body>
+</html>
