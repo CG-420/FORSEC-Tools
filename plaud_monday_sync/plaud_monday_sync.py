@@ -17,19 +17,26 @@ Routing:
       automatic trigger of its own right now - see PARENT_SUBITEM_ROUTES.)
     - Otherwise, each action item is routed individually: a safety
       concern or event/demo idea (by keyword) goes to Safety Feedback
-      & Ideas; else an item owned by Kyle/Ariel/Kerri/Samantha goes to
-      their board (Communications / Office & Program Administration /
-      Board of Directors / Training Projects & Programs); everything
-      else is left UNROUTED for manual placement rather than guessed
-      onto a board it may not belong on. Items sharing a destination
-      board are grouped under one parent item per meeting (or created
-      as flat items on boards with no subitem structure).
+      & Ideas; else an item owned by Kyle/Ariel/Kerri/Samantha (or
+      anyone previously taught via the interactive prompt - see
+      learned_routes.json) goes to their board (Communications /
+      Office & Program Administration / Board of Directors / Training
+      Projects & Programs); everything else is left UNROUTED. Items
+      sharing a destination board are grouped under one parent item
+      per meeting (or created as flat items on boards with no subitem
+      structure).
+    - Right before pushing, you're asked where each still-unrouted
+      item (grouped by owner) should go, with the option to teach the
+      script that owner's default going forward. Anything you skip -
+      or run with --no-interactive - lands on the Needs Routing board
+      instead of being dropped, for later manual triage.
 
 Usage:
     python3 plaud_monday_sync.py --file meeting.md
     python3 plaud_monday_sync.py --dir ./summaries
     python3 plaud_monday_sync.py                     # paste, then Ctrl-D
     python3 plaud_monday_sync.py --file meeting.md --no-push
+    python3 plaud_monday_sync.py --file meeting.md --no-interactive
 
 Environment:
     MONDAY_API_TOKEN   monday.com API v2 token. Required to fetch live
@@ -154,6 +161,22 @@ TRAINING_COLUMNS = {
     "comments": "text_mm2f14wz",
 }
 TRAINING_SUBITEM_DATE_COLUMN = "timerange_mm26mvs0"  # different id than the parent's Timeline column
+
+# Holding board for items with no matching department board (created
+# 2026-07-28). Anything still unrouted after the interactive prompt at push
+# time lands here instead of being dropped, for weekly manual triage.
+NEEDS_ROUTING_BOARD_ID = 18424076669
+NEEDS_ROUTING_GROUPS = {"needs_review": "topics"}
+NEEDS_ROUTING_COLUMNS = {
+    "owner": "multiple_person_mm5ph3ak",
+    "due": "date_mm5pv64e",
+    "status": "color_mm5pbgmw",  # Needs Review / Resolved
+    "notes": "long_text_mm5pbbhn",
+}
+
+# Additional owner -> board mappings taught interactively at push time,
+# layered on top of OWNER_DEFAULT_ROUTE below. See load_learned_routes().
+LEARNED_ROUTES_PATH = Path(__file__).resolve().parent / "learned_routes.json"
 
 # Action items owned by these people default to their department board
 # instead of falling through to "unrouted" (overridden by a safety/
@@ -448,14 +471,31 @@ def infer_field(text: str, keyword_map: dict):
     return best_label, True
 
 
-def route_action_item(item: ActionItem) -> None:
+def load_learned_routes() -> dict:
+    """Owner-taught routes from a past interactive session (user_id -> route)."""
+    if not LEARNED_ROUTES_PATH.exists():
+        return {}
+    try:
+        return json.loads(LEARNED_ROUTES_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"Warning: could not read {LEARNED_ROUTES_PATH.name} ({e}); ignoring learned routes.", file=sys.stderr)
+        return {}
+
+
+def save_learned_routes(learned_routes: dict) -> None:
+    LEARNED_ROUTES_PATH.write_text(json.dumps(learned_routes, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def route_action_item(item: ActionItem, learned_routes: dict) -> None:
     """Decides which board a non-contractor-meeting action item goes to.
 
     A safety/demo-idea keyword match wins regardless of owner, since a
     safety concern shouldn't get buried on someone's department board.
     Otherwise, items owned by Kyle/Ariel/Kerri/Samantha default to their
-    board; everything else is left "unrouted" for manual placement rather
-    than guessed onto a board it may not belong on.
+    board, then anyone else previously taught via the interactive prompt
+    (learned_routes). Everything else is left "unrouted" - at push time
+    you're asked where it should go, and anything left unresolved lands
+    on the Needs Routing board rather than guessed or dropped.
     """
     label, matched = infer_field(item.task, SAFETY_OR_DEMO_KEYWORDS)
     if matched:
@@ -467,8 +507,12 @@ def route_action_item(item: ActionItem) -> None:
         item.route = OWNER_DEFAULT_ROUTE[item.owner_user_id]
         item.route_reason = f"owner: {item.owner_user_name}"
         return
+    if item.owner_user_id and item.owner_user_id in learned_routes:
+        item.route = learned_routes[item.owner_user_id]
+        item.route_reason = f"learned: {item.owner_user_name}"
+        return
     item.route = "unrouted"
-    item.route_reason = "no matching department board - place manually"
+    item.route_reason = "no matching department board"
 
 
 def group_items_by_route(action_items: list) -> dict:
@@ -482,7 +526,7 @@ def group_items_by_route(action_items: list) -> dict:
 # Build a MeetingSummary from raw text
 # --------------------------------------------------------------------------
 
-def build_summary(source: str, text: str, contractors: list, users: list, today: date) -> MeetingSummary:
+def build_summary(source: str, text: str, contractors: list, users: list, today: date, learned_routes: dict) -> MeetingSummary:
     title = extract_title(text)
     meeting_date_iso, date_warning = extract_meeting_date(text, today)
     ref_date = datetime.strptime(meeting_date_iso, "%Y-%m-%d").date()
@@ -522,7 +566,7 @@ def build_summary(source: str, text: str, contractors: list, users: list, today:
     else:
         summary.target_board = "task_tracking"
         for item in action_items:
-            route_action_item(item)
+            route_action_item(item, learned_routes)
 
     return summary
 
@@ -718,6 +762,22 @@ def build_safety_feedback_item_columns(item: ActionItem, summary: MeetingSummary
     return cols
 
 
+def build_needs_routing_item_columns(item: ActionItem, summary: MeetingSummary) -> dict:
+    cols = {NEEDS_ROUTING_COLUMNS["status"]: status_value("Needs Review")}
+    if item.due_iso:
+        cols[NEEDS_ROUTING_COLUMNS["due"]] = date_value(item.due_iso)
+    if item.owner_user_id:
+        cols[NEEDS_ROUTING_COLUMNS["owner"]] = people_value(item.owner_user_id)
+    notes_lines = [
+        f"Reason: {item.route_reason or 'no matching department board'}",
+        f"Owner (as written): {item.owner_raw or '(none)'}",
+        f"Source: {summary.source}",
+        f"Meeting date: {summary.meeting_date_iso}",
+    ]
+    cols[NEEDS_ROUTING_COLUMNS["notes"]] = long_text_value("\n".join(notes_lines))
+    return cols
+
+
 def build_ci_activity_log_parent_columns(summary: MeetingSummary, default_logged_by_user_id: Optional[str]) -> dict:
     cols = {}
     logged_by_user_id = summary.recorded_by_user_id or default_logged_by_user_id
@@ -761,7 +821,7 @@ BOARD_LABELS = {
     "board_of_directors": "Board of Directors (ED)",
     "safety": "Safety Feedback & Ideas",
     "training": "Training Projects & Programs",
-    "unrouted": "UNROUTED - place manually",
+    "unrouted": "UNROUTED - you'll be asked, or it lands on Needs Routing",
 }
 
 
@@ -865,8 +925,7 @@ def push(client: MondayClient, summaries: list, logged_by_user_id: str) -> None:
 
             for route, items in group_items_by_route(summary.action_items).items():
                 if route == "unrouted":
-                    for item in items:
-                        print(f"Skipped (unrouted, place manually): {item.task}")
+                    _push_needs_routing(client, summary, items)
                 elif route in PARENT_SUBITEM_BOARDS:
                     _push_parent_and_subitems(client, summary, route, items)
                 elif route == "board_of_directors":
@@ -919,6 +978,85 @@ def _push_safety_feedback(client: MondayClient, summary: MeetingSummary, items: 
         print(f"Created item {item_id} ({item.task!r}) on {BOARD_LABELS['safety']}")
 
 
+def _push_needs_routing(client: MondayClient, summary: MeetingSummary, items: list) -> None:
+    for item in items:
+        cols = build_needs_routing_item_columns(item, summary)
+        item_id = client.create_item(NEEDS_ROUTING_BOARD_ID, NEEDS_ROUTING_GROUPS["needs_review"], item.task, cols)
+        print(f"Created item {item_id} ({item.task!r}) on Needs Routing")
+
+
+# --------------------------------------------------------------------------
+# Interactive resolution of unrouted items, right before push
+# --------------------------------------------------------------------------
+
+# (route_key, display_label) choices offered when resolving an unrouted item.
+# Task Tracking deliberately excluded - it's CI-only, not a general catch-all.
+INTERACTIVE_ROUTE_CHOICES = [
+    ("communications", "Communications"),
+    ("office_admin", "Office & Program Administration"),
+    ("board_of_directors", "Board of Directors (ED)"),
+    ("training", "Training Projects & Programs"),
+    ("safety", "Safety Feedback & Ideas"),
+]
+
+
+def collect_unrouted_groups(summaries: list) -> dict:
+    """Groups still-unrouted items by owner identity, across all summaries.
+
+    Items sharing an owner are resolved together with one prompt. Owners
+    that didn't match a monday.com user are grouped by their raw typed
+    name instead, since there's no stable id to group (or later learn) by.
+    """
+    groups: dict = {}
+    for summary in summaries:
+        if summary.target_board == "ci_activity_log":
+            continue
+        for item in summary.action_items:
+            if item.route != "unrouted":
+                continue
+            key = item.owner_user_id or f"raw:{(item.owner_raw or '').strip().lower()}"
+            groups.setdefault(key, []).append((summary, item))
+    return groups
+
+
+def resolve_unrouted_interactively(summaries: list, learned_routes: dict) -> None:
+    groups = collect_unrouted_groups(summaries)
+    if not groups:
+        return
+
+    print("\nSome action items have no matching department board.")
+    for pairs in groups.values():
+        first_item = pairs[0][1]
+        owner_label = first_item.owner_user_name or first_item.owner_raw or "(no owner)"
+        print(f"\n{owner_label} - {len(pairs)} unrouted item(s):")
+        for _, item in pairs:
+            print(f"  - {item.task}")
+        print("  Where should these go?")
+        for i, (_, label) in enumerate(INTERACTIVE_ROUTE_CHOICES, start=1):
+            print(f"    {i}) {label}")
+        print("    0) Leave for the Needs Routing board (decide later)")
+        answer = input("  > ").strip()
+
+        valid_choices = {str(i): route for i, (route, _) in enumerate(INTERACTIVE_ROUTE_CHOICES, start=1)}
+        if answer not in valid_choices:
+            print("  Leaving these for Needs Routing.")
+            continue
+
+        chosen_route = valid_choices[answer]
+        for _, item in pairs:
+            item.route = chosen_route
+            item.route_reason = f"placed interactively ({owner_label})"
+
+        if first_item.owner_user_id:
+            remember = input(
+                f"  Remember that {owner_label}'s items go to {BOARD_LABELS[chosen_route]} from now on? [y/N] "
+            ).strip().lower()
+            if remember == "y":
+                learned_routes[first_item.owner_user_id] = chosen_route
+                save_learned_routes(learned_routes)
+                print(f"  Remembered: {owner_label} -> {BOARD_LABELS[chosen_route]}")
+
+
 # --------------------------------------------------------------------------
 # Input loading / CLI
 # --------------------------------------------------------------------------
@@ -951,6 +1089,8 @@ def parse_args():
                          help="monday.com user id for 'Logged By' on CI Activity Log entries when a summary has "
                               f"no 'Recorded by:' line of its own (default: {DEFAULT_LOGGED_BY_USER_ID})")
     parser.add_argument("--today", help="Override 'today' as YYYY-MM-DD (mainly for testing relative due dates)")
+    parser.add_argument("--no-interactive", action="store_true",
+                         help="Don't prompt about unrouted items before pushing; send them straight to Needs Routing")
     return parser.parse_args()
 
 
@@ -980,7 +1120,8 @@ def main() -> None:
             file=sys.stderr,
         )
 
-    summaries = [build_summary(name, text, contractors, users, today) for name, text in sources]
+    learned_routes = load_learned_routes()
+    summaries = [build_summary(name, text, contractors, users, today, learned_routes) for name, text in sources]
 
     print_draft(summaries)
 
@@ -996,7 +1137,10 @@ def main() -> None:
         print("\nMONDAY_API_TOKEN not set - cannot push. Set it and re-run to push these items.")
         return
 
-    print(f"\n{len(summaries)} summary(ies), {total_items} action item(s) parsed above.")
+    if not args.no_interactive:
+        resolve_unrouted_interactively(summaries, learned_routes)
+
+    print(f"\n{len(summaries)} summary(ies), {total_items} action item(s) - final routing above.")
     answer = input("Type CONFIRM to create these on monday.com, or anything else to cancel: ").strip()
     if answer != "CONFIRM":
         print("Cancelled - nothing was created.")

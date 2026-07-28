@@ -50,20 +50,20 @@ Routing happens in two stages:
    2. An item owned by Kyle MacKay → **Communications**; Ariel Durning →
       **Office & Program Administration**; Kerri Marshall → **Board of
       Directors (ED)**; Samantha Chu → **Training Projects & Programs** (see
-      `OWNER_DEFAULT_ROUTE`).
+      `OWNER_DEFAULT_ROUTE`) — or anyone else previously taught via the
+      interactive prompt (see `learned_routes.json` below).
    3. Everything else → **UNROUTED**. It is *not* defaulted to Task Tracking
       — Task Tracking lives in the CI Folder and Chris wants it CI-only, so
-      an item with no matching department board is left for manual
-      placement rather than guessed onto a board it may not belong on. The
-      draft flags these clearly with a `⚠`, and the push step skips them
-      entirely (prints what was skipped, creates nothing for them).
+      an item with no matching department board isn't guessed onto a board
+      it may not belong on. The draft flags these with a `⚠`. Unlike the
+      other routes, unrouted items aren't dropped — see "Unrouted items and
+      Needs Routing" below for what actually happens to them at push time.
 
    Items that land on a board with a subitems column (Communications,
    Office & Program Administration, Training Projects & Programs) are
    grouped under one parent item per meeting. Boards without a subitems
    column (Board of Directors, Safety Feedback & Ideas) get flat items
-   instead — one item per action item, no parent. Unrouted items are never
-   pushed anywhere.
+   instead — one item per action item, no parent.
 
 ### Task Tracking (board `18403136567`) — CI-only, no active trigger
 
@@ -152,6 +152,32 @@ whichever keyword matched), Submitted By (the item's owner, or the
 recording person if the item has no owner), Status → `New`. Lands in the
 **New Submissions** group.
 
+### Unrouted items and Needs Routing (board `18424076669`)
+
+An action item lands here when it isn't a contractor meeting, doesn't match
+a safety/demo-idea keyword, and its owner isn't Kyle/Ariel/Kerri/Samantha or
+anyone taught via the process below.
+
+**At push time**, before anything is created, you're asked about each
+unrouted item (grouped by owner, so one prompt covers everyone's items for
+that person in this run): pick one of the department boards to place them
+on right now, or leave them for later. If you place them and the owner
+matched a monday.com user, you're also asked whether to remember that
+owner's default board — say yes and it's written to `learned_routes.json`
+(a simple `{"monday_user_id": "route_key"}` file next to the script,
+committed to the repo) and checked automatically on every future run,
+layered on top of (but never overriding) the hardcoded
+`OWNER_DEFAULT_ROUTE` mapping. Owners that didn't resolve to a monday.com
+user can still be placed for this run, just not remembered — there's no
+stable id to key the learned route on.
+
+Anything you skip — or the whole batch, if you run with `--no-interactive`
+— gets created on the **Needs Routing** board instead of dropped: a small
+holding board (Owner / Due / Status `Needs Review`/`Resolved` / Notes with
+the reason and source meeting) in the **Needs Review** group, meant to be
+reviewed and manually placed on a regular cadence rather than left to pile
+up in terminal scrollback.
+
 ### Owner matching
 
 Owner names in Plaud text are free-form ("Chris", "Kerri"). The script fetches
@@ -185,6 +211,9 @@ python3 plaud_monday_sync.py
 
 # Draft only, never prompt to push
 python3 plaud_monday_sync.py --file meeting.md --no-push
+
+# Push without being asked about unrouted items (send them all to Needs Routing)
+python3 plaud_monday_sync.py --file meeting.md --no-interactive
 ```
 
 Without `MONDAY_API_TOKEN` set, the script still parses and prints the draft
@@ -192,8 +221,10 @@ Without `MONDAY_API_TOKEN` set, the script still parses and prints the draft
 for eyeballing the parser on a new template before wiring up credentials.
 
 The script always prints the full draft first. If there's anything to push,
-it then asks you to type `CONFIRM` before creating anything — nothing is
-created on a stray Enter keypress or a typo.
+and there are unrouted items, it asks where each one (grouped by owner)
+should go — see "Unrouted items and Needs Routing" above. After that, it
+asks you to type `CONFIRM` before creating anything — nothing is created on
+a stray Enter keypress or a typo.
 
 ## Try it
 
@@ -222,11 +253,13 @@ doesn't depend on owner matching).
 Board and column IDs are hardcoded as constants at the top of
 `plaud_monday_sync.py` (`TASK_TRACKING_*`, `CI_ACTIVITY_LOG_*`,
 `COMMUNICATIONS_*`, `OFFICE_ADMIN_*`, `BOARD_OF_DIRECTORS_*`,
-`SAFETY_FEEDBACK_*`, `TRAINING_*`, `CONTRACTOR_DIRECTORY_BOARD_ID`,
-`OWNER_DEFAULT_ROUTE`). If you rename/add columns in monday.com, update the
-relevant column ID there — get the current IDs from monday's board settings
-or the API's `boards { columns { id title } }` query. If department leads
-change, update `OWNER_DEFAULT_ROUTE` (monday user id → route key).
+`SAFETY_FEEDBACK_*`, `TRAINING_*`, `NEEDS_ROUTING_*`,
+`CONTRACTOR_DIRECTORY_BOARD_ID`, `OWNER_DEFAULT_ROUTE`). If you rename/add
+columns in monday.com, update the relevant column ID there — get the
+current IDs from monday's board settings or the API's
+`boards { columns { id title } }` query. If department leads change, update
+`OWNER_DEFAULT_ROUTE` (monday user id → route key); if someone's learned
+route needs correcting or removing, edit `learned_routes.json` directly.
 
 **Chris expects most of these boards to get a proper cleanup/revision in
 the next few weeks**, now that the note-taker devices make it realistic to
