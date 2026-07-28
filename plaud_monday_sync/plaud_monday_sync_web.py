@@ -38,6 +38,12 @@ import plaud_monday_sync as pms
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
 INDEX_HTML_PATH = WEB_DIR / "index.html"
+ASSETS_DIR = WEB_DIR / "assets"
+
+# Static artwork (logos, topographic background, treeline). These live as
+# separate files rather than inline data URIs because the contour map is
+# ~160KB of real path data - far too much to bury in the HTML.
+ASSET_CONTENT_TYPES = {".svg": "image/svg+xml", ".png": "image/png"}
 
 # Cached monday.com context (contractors/users), fetched once per server
 # process rather than on every request - refreshed via /api/refresh-context.
@@ -196,6 +202,27 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(payload)
 
+    def _send_asset(self, name: str) -> None:
+        # Resolve inside ASSETS_DIR and verify containment, so a crafted
+        # path like /assets/../../secrets can't escape the artwork folder.
+        candidate = (ASSETS_DIR / name).resolve()
+        try:
+            candidate.relative_to(ASSETS_DIR.resolve())
+        except ValueError:
+            self.send_error(404)
+            return
+        content_type = ASSET_CONTENT_TYPES.get(candidate.suffix.lower())
+        if content_type is None or not candidate.is_file():
+            self.send_error(404)
+            return
+        body = candidate.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "max-age=3600")
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
@@ -205,6 +232,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif path.startswith("/assets/"):
+            self._send_asset(path[len("/assets/"):])
         elif path == "/api/status":
             client = _get_client()
             self._send_json({"tokenConfigured": client.available})

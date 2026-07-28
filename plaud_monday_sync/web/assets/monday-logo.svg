@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 470 100" role="img" aria-label="monday.com">
+  <!-- Hand-traced approximation of the monday.com mark: two rounded diagonal
+       bars plus a dot, with the wordmark alongside. -->
+  <g stroke-linecap="round" stroke-width="20" fill="none">
+    <line x1="16" y1="76" x2="38" y2="26" stroke="#F62B54"/>
+    <line x1="56" y1="76" x2="78" y2="26" stroke="#FFCB00"/>
+  </g>
+  <circle cx="104" cy="66" r="11" fill="#00CA72"/>
+  <text x="132" y="72" font-family="Trebuchet MS, Verdana, Arial, sans-serif"
+        font-size="52" font-weight="bold" fill="#111111">monday.com</text>
+</svg>
