@@ -175,6 +175,12 @@
   .route-group { border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-top: 0.6rem; }
   .route-group h4 { margin: 0 0 0.5rem 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
   .route-group.unrouted { border-color: var(--warn-border); background: var(--warn-bg); }
+  .board-problems {
+    border: 1px solid var(--danger); background: var(--danger-bg); color: var(--danger);
+    border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem;
+  }
+  .board-problems strong { display: block; margin-bottom: 0.3rem; }
+  .board-problems ul { margin: 0.2rem 0 0.4rem 1.1rem; padding: 0; }
   .item-row { padding: 0.5rem 0; border-top: 1px solid var(--border); font-size: 0.9rem; }
   .item-row:first-child { border-top: none; }
   .item-row .task { font-weight: 600; }
@@ -525,6 +531,15 @@ function fmtInferred(value, inferred) {
 
 function renderDraft(data) {
   draftOutput.innerHTML = '';
+
+  if (data.boardProblems && data.boardProblems.length) {
+    const box = document.createElement('div');
+    box.className = 'board-problems';
+    box.innerHTML = '<strong>&#9888; Some target boards are no longer usable</strong>' +
+      '<ul>' + data.boardProblems.map(p => `<li>${escapeHtml(p)}</li>`).join('') + '</ul>' +
+      'Items routed to these will fail. Everything else still pushes normally.';
+    draftOutput.appendChild(box);
+  }
   data.summaries.forEach(summary => {
     const card = document.createElement('div');
     card.className = 'summary-card';

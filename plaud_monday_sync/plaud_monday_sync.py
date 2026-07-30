@@ -660,6 +660,16 @@ class MondayClient:
         items = data["boards"][0]["items_page"]["items"]
         return [(i["id"], i["name"]) for i in items]
 
+    def fetch_board_states(self, board_ids: list) -> dict:
+        """id -> {name, state} for the given boards, including archived and
+        deleted ones (state: all), so a vanished board can be reported
+        rather than blowing up mid-push."""
+        query = """
+        query ($ids: [ID!]) { boards(ids: $ids, state: all) { id name state } }
+        """
+        data = self._request(query, {"ids": [str(b) for b in board_ids]})
+        return {b["id"]: {"name": b["name"], "state": b["state"]} for b in data["boards"]}
+
     def fetch_users(self) -> list:
         data = self._request("query { users { id name } }", {})
         return [(u["id"], u["name"]) for u in data["users"]]
@@ -1005,21 +1015,59 @@ FLAT_ITEM_BOARDS = {
 }
 
 
+def check_configured_boards(client: MondayClient) -> list:
+    """Flags configured boards that are no longer usable.
+
+    FORSEC reorganised its workspaces on 2026-07-29/30 - boards were moved
+    into per-department workspaces, and at least two were archived or
+    deleted. Board ids survive a move between workspaces, so a move alone
+    is harmless, but an archived or deleted board would otherwise only
+    surface as a confusing API error partway through a push.
+    """
+    targets = {route: board_id for route, (board_id, _group, _builder) in FLAT_ITEM_BOARDS.items()}
+    targets["ci_activity_log"] = CI_ACTIVITY_LOG_BOARD_ID
+    targets["contractor_directory"] = CONTRACTOR_DIRECTORY_BOARD_ID
+
+    try:
+        states = client.fetch_board_states(list(targets.values()))
+    except RuntimeError as e:
+        return [f"Could not verify board configuration: {e}"]
+
+    problems = []
+    for route, board_id in targets.items():
+        # BOARD_LABELS["unrouted"] is phrased for the draft ("you'll be
+        # asked..."), which reads oddly in a config warning.
+        label = "Needs Routing" if route == "unrouted" else BOARD_LABELS.get(
+            route, route.replace("_", " ").title())
+        info = states.get(str(board_id))
+        if info is None:
+            problems.append(f"{label}: board {board_id} not found - deleted, or no access with this token.")
+        elif info["state"] != "active":
+            problems.append(f"{label}: board '{info['name']}' is {info['state']}.")
+    return problems
+
+
 def push(client: MondayClient, summaries: list, logged_by_user_id: str, report=print) -> None:
     """Creates everything on monday.com. `report(message)` is called for
     every progress/result line instead of printing directly, so callers
     other than the CLI (e.g. the web UI) can collect results as data
     instead of console output - same push logic either way."""
     for summary in summaries:
-        try:
-            if summary.target_board == "ci_activity_log":
+        if summary.target_board == "ci_activity_log":
+            try:
                 _push_ci_activity_log(client, summary, logged_by_user_id, report)
-                continue
+            except RuntimeError as e:
+                report(f"FAILED to push {summary.title!r} to CI Activity Log: {e}")
+            continue
 
-            for route, items in group_items_by_route(summary.action_items).items():
+        # Per-route try/except: a board that has been archived or deleted
+        # out from under the config must not stop the other boards' items
+        # from being created.
+        for route, items in group_items_by_route(summary.action_items).items():
+            try:
                 _push_flat_items(client, summary, route, items, report)
-        except RuntimeError as e:
-            report(f"FAILED to push {summary.title!r}: {e}")
+            except RuntimeError as e:
+                report(f"FAILED to push {len(items)} item(s) to {BOARD_LABELS.get(route, route)}: {e}")
 
 
 def _push_flat_items(client: MondayClient, summary: MeetingSummary, route: str, items: list, report=print) -> None:
@@ -1200,6 +1248,15 @@ def main() -> None:
     if not client.available:
         print("\nMONDAY_API_TOKEN not set - cannot push. Set it and re-run to push these items.")
         return
+
+    board_problems = check_configured_boards(client)
+    if board_problems:
+        print("\n" + "=" * 78)
+        print("BOARD CONFIGURATION PROBLEMS - items routed to these will fail:")
+        for problem in board_problems:
+            print(f"  ⚠ {problem}")
+        print("Other boards will still be pushed to normally.")
+        print("=" * 78)
 
     if not args.no_interactive:
         resolve_unrouted_interactively(summaries, learned_routes)
