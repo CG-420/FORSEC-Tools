@@ -132,9 +132,13 @@ def _build_summaries(body: dict):
 
 def handle_draft(body: dict) -> dict:
     summaries, client, _ = _build_summaries(body)
+    # Surface archived/deleted target boards in the draft, so they're seen
+    # before pushing rather than as a mid-push API error.
+    board_problems = pms.check_configured_boards(client) if client.available else []
     return {
         "ok": True,
         "tokenConfigured": client.available,
+        "boardProblems": board_problems,
         "routeChoices": [{"key": k, "label": v} for k, v in pms.INTERACTIVE_ROUTE_CHOICES],
         "summaries": [serialize_summary(s) for s in summaries],
     }
