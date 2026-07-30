@@ -131,14 +131,9 @@ OFFICE_ADMIN_COLUMNS = {
     "notes": "text_mkxsfve0",
 }
 
-# No subitems column - action items land as flat items directly.
-BOARD_OF_DIRECTORS_BOARD_ID = 18386660346
-BOARD_OF_DIRECTORS_GROUPS = {"other_tasks": "group_mm067c1p"}
-BOARD_OF_DIRECTORS_COLUMNS = {
-    "person": "person",
-    "status": "status",  # Working on it / Done / Stuck
-    "date": "date4",
-}
+# Board of Directors (ED) was deleted in the 2026-07-29/30 reorg. Its
+# config, column builder and routing entries were removed rather than
+# left pointing at a dead board id; a replacement would get new ids.
 
 # A submission-form board, not a task list - flat items, different shape.
 SAFETY_FEEDBACK_BOARD_ID = 18418568346
@@ -167,16 +162,18 @@ TRAINING_COLUMNS = {
 }
 TRAINING_DEFAULT_LEAD_USER_ID = "97947987"  # Samantha Chu, when an item has no matched owner
 
-# Holding board for items with no matching department board (created
-# 2026-07-28). Anything still unrouted after the interactive prompt at push
-# time lands here instead of being dropped, for weekly manual triage.
-NEEDS_ROUTING_BOARD_ID = 18424076669
+# Holding board for items with no matching department board. The original
+# sat in the Main workspace and was archived during the 2026-07-29/30
+# reorg; monday's API has no unarchive mutation and the board was empty,
+# so it was recreated here in Continuous Improvement (2026-07-30) - the
+# Strategic Work Plan workspace is reserved for the strategic plan.
+NEEDS_ROUTING_BOARD_ID = 18424493577
 NEEDS_ROUTING_GROUPS = {"needs_review": "topics"}
 NEEDS_ROUTING_COLUMNS = {
-    "owner": "multiple_person_mm5ph3ak",
-    "due": "date_mm5pv64e",
-    "status": "color_mm5pbgmw",  # Needs Review / Resolved
-    "notes": "long_text_mm5pbbhn",
+    "owner": "multiple_person_mm5rdfk7",
+    "due": "date_mm5rv36k",
+    "status": "color_mm5r3nq1",  # Needs Review / Resolved
+    "notes": "long_text_mm5rwdr6",
 }
 
 # Additional owner -> board mappings taught interactively at push time,
@@ -186,10 +183,13 @@ LEARNED_ROUTES_PATH = Path(__file__).resolve().parent / "learned_routes.json"
 # Action items owned by these people default to their department board
 # instead of falling through to "unrouted" (overridden by a safety/
 # demo-idea keyword match, which always wins regardless of owner).
+#
+# Kerri Marshall (80632035) deliberately has no entry: Board of Directors
+# (ED) was deleted in the reorg, so her items fall through to Needs
+# Routing for manual placement until she has a board again.
 OWNER_DEFAULT_ROUTE = {
     "81506714": "communications",      # Kyle MacKay
     "82580584": "office_admin",        # Ariel Durning
-    "80632035": "board_of_directors",  # Kerri Marshall
     "97947987": "training",            # Samantha Chu
 }
 
@@ -544,12 +544,17 @@ def route_action_item(item: ActionItem, learned_routes: dict) -> None:
         item.safety_submission_type = label
         item.route_reason = f"keyword match ({label.lower()})"
         return
-    if item.owner_user_id and item.owner_user_id in OWNER_DEFAULT_ROUTE:
-        item.route = OWNER_DEFAULT_ROUTE[item.owner_user_id]
+    # Only honour a mapping whose board is still configured. Boards do get
+    # deleted (Board of Directors was), and a stale learned_routes.json
+    # entry must not aim items at one.
+    mapped = OWNER_DEFAULT_ROUTE.get(item.owner_user_id or "")
+    if mapped in FLAT_ITEM_BOARDS:
+        item.route = mapped
         item.route_reason = f"owner: {item.owner_user_name}"
         return
-    if item.owner_user_id and item.owner_user_id in learned_routes:
-        item.route = learned_routes[item.owner_user_id]
+    learned = learned_routes.get(item.owner_user_id or "")
+    if learned in FLAT_ITEM_BOARDS:
+        item.route = learned
         item.route_reason = f"learned: {item.owner_user_name}"
         return
     item.route = "unrouted"
@@ -815,28 +820,6 @@ def build_training_item_columns(item: ActionItem, summary: MeetingSummary) -> di
     return cols
 
 
-def build_board_of_directors_item_columns(item: ActionItem) -> dict:
-    cols = {BOARD_OF_DIRECTORS_COLUMNS["status"]: status_value("Working on it")}
-    if item.due_iso:
-        cols[BOARD_OF_DIRECTORS_COLUMNS["date"]] = date_value(item.due_iso)
-    if item.owner_user_id:
-        cols[BOARD_OF_DIRECTORS_COLUMNS["person"]] = people_value(item.owner_user_id)
-    return cols
-
-
-def build_training_parent_columns(summary: MeetingSummary, items: list) -> dict:
-    cols = {
-        TRAINING_COLUMNS["status"]: status_value("Working on it"),
-        TRAINING_COLUMNS["lead"]: people_value("97947987"),  # Samantha Chu
-    }
-    due_dates = [i.due_iso for i in items if i.due_iso]
-    if due_dates:
-        cols[TRAINING_COLUMNS["timeline"]] = timeline_value(min(due_dates))
-    comments_lines = [f"Source: {summary.source}", f"Meeting date: {summary.meeting_date_iso}"]
-    cols[TRAINING_COLUMNS["comments"]] = "\n".join(comments_lines)
-    return cols
-
-
 def build_safety_feedback_item_columns(item: ActionItem, summary: MeetingSummary) -> dict:
     cols = {
         SAFETY_FEEDBACK_COLUMNS["status"]: status_value("New"),
@@ -907,7 +890,6 @@ BOARD_LABELS = {
     "ci_activity_log": "CI Activity Log",
     "communications": "Communications",
     "office_admin": "Office & Program Administration",
-    "board_of_directors": "Board of Directors (ED)",
     "safety": "Safety Feedback & Ideas",
     "training": "Training Projects & Programs",
     "unrouted": "UNROUTED - you'll be asked, or it lands on Needs Routing",
@@ -1006,8 +988,6 @@ FLAT_ITEM_BOARDS = {
                      lambda i, s: build_office_admin_item_columns(i, s)),
     "training": (TRAINING_BOARD_ID, TRAINING_GROUPS["incoming"],
                  lambda i, s: build_training_item_columns(i, s)),
-    "board_of_directors": (BOARD_OF_DIRECTORS_BOARD_ID, BOARD_OF_DIRECTORS_GROUPS["other_tasks"],
-                           lambda i, s: build_board_of_directors_item_columns(i)),
     "safety": (SAFETY_FEEDBACK_BOARD_ID, SAFETY_FEEDBACK_GROUPS["new_submissions"],
                lambda i, s: build_safety_feedback_item_columns(i, s)),
     "unrouted": (NEEDS_ROUTING_BOARD_ID, NEEDS_ROUTING_GROUPS["needs_review"],
@@ -1106,7 +1086,6 @@ def _push_ci_activity_log(client: MondayClient, summary: MeetingSummary, logged_
 INTERACTIVE_ROUTE_CHOICES = [
     ("communications", "Communications"),
     ("office_admin", "Office & Program Administration"),
-    ("board_of_directors", "Board of Directors (ED)"),
     ("training", "Training Projects & Programs"),
     ("safety", "Safety Feedback & Ideas"),
 ]
