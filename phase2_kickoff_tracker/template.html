@@ -1,0 +1,1222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phase 2 Kickoff Tracker | FORSEC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    /* FORSEC palette. Green is the primary brand colour, Dark Green the
+       secondary depth tone, Amber a sparing accent only. */
+    --green:        #338A57;
+    --green-dark:   #3B6E4D;
+    --green-deep:   #24603A;
+    --green-light:  #EAF4EE;
+    --amber:        #FFB001;
+    --amber-dark:   #8A6000;
+    --amber-light:  #FFF6E3;
+    --bg:           #F4F6F4;
+    --card:         #FFFFFF;
+    --border:       #DCE6DE;
+    --border-strong:#C3D6C7;
+    --text:         #1A1F1B;
+    --muted:        #5F6B62;
+    --muted-2:      #83907F;
+    /* Status colours follow the monday.com board convention:
+       not started grey, in progress amber, completed green, blocked red. */
+    --grey:         #9AA39C;
+    --grey-bg:      #F0F2F0;
+    --red:          #A8322A;
+    --red-bg:       #FBE9E7;
+    --red-border:   #E9B7B1;
+    --blue:         #2A5B7A;
+    --blue-bg:      #E8F0F5;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    line-height: 1.5;
+    font-size: 15px;
+    background-color: var(--bg);
+    background-image: url("__TOPO_URI__");
+    background-size: 680px 680px;
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ---------------------------------------------------------------- header */
+
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border-strong);
+    padding: 1.5rem 0 3.25rem 0;
+    background-image: url("__TREES_URI__");
+    background-repeat: repeat-x;
+    background-position: bottom left;
+    background-size: 560px 75px;
+  }
+  .head-row {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 1.5rem; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 1.15rem; }
+  .brand img { height: 58px; width: auto; display: block; flex-shrink: 0; }
+  .brand-rule { width: 1px; align-self: stretch; background: var(--border-strong); }
+  .brand h1 { margin: 0; font-size: 1.4rem; color: var(--green); }
+  .brand .sub { margin: 3px 0 0 0; font-size: 0.85rem; color: var(--muted); }
+  .head-meta { text-align: right; font-size: 0.8rem; color: var(--muted); }
+  .head-meta .line { margin-bottom: 2px; }
+  .head-meta strong { color: var(--text); font-weight: bold; }
+  .head-actions { margin-top: 0.6rem; display: flex; gap: 0.4rem; justify-content: flex-end; }
+
+  button {
+    font: inherit; font-size: 0.82rem;
+    padding: 0.38rem 0.8rem; border-radius: 6px;
+    border: 1px solid var(--border-strong); background: var(--card);
+    color: var(--text); cursor: pointer;
+  }
+  button:hover { background: var(--green-light); border-color: var(--green); }
+  button.primary { background: var(--green); border-color: var(--green); color: #fff; font-weight: bold; }
+  button.primary:hover { background: var(--green-deep); border-color: var(--green-deep); }
+  button.tiny { font-size: 0.75rem; padding: 0.22rem 0.5rem; }
+
+  /* ----------------------------------------------------------- countdown */
+
+  .countdown { background: var(--green); color: #fff; padding: 0.85rem 0; font-size: 0.9rem; }
+  .countdown .wrap { display: flex; gap: 2rem; flex-wrap: wrap; align-items: baseline; }
+  .countdown .cd-item { display: flex; gap: 0.5rem; align-items: baseline; }
+  .countdown .cd-num { font-size: 1.5rem; font-weight: bold; color: var(--amber); line-height: 1; }
+  .countdown .cd-lab { font-size: 0.78rem; opacity: 0.92; }
+
+  /* --------------------------------------------------------------- layout */
+
+  main { padding: 1.75rem 0 3rem 0; }
+  section { margin-bottom: 2rem; }
+
+  .sec-head {
+    display: flex; align-items: baseline; gap: 0.75rem;
+    flex-wrap: wrap; margin-bottom: 0.85rem;
+    border-bottom: 2px solid var(--green); padding-bottom: 0.45rem;
+  }
+  .sec-head h2 { margin: 0; font-size: 1.05rem; color: var(--green); text-transform: uppercase; letter-spacing: 0.04em; }
+  .sec-head .sec-note { font-size: 0.82rem; color: var(--muted); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.25rem; }
+
+  /* ----------------------------------------------------------- stat tiles */
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 0.75rem; }
+  .tile {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.85rem 1rem; border-top: 3px solid var(--green);
+  }
+  .tile .val { font-size: 1.75rem; font-weight: bold; color: var(--green); line-height: 1.1; }
+  .tile .lab { font-size: 0.76rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 0.2rem; }
+  .tile .fine { font-size: 0.76rem; color: var(--muted-2); margin-top: 0.3rem; }
+  .tile.alert { border-top-color: var(--red); }
+  .tile.alert .val { color: var(--red); }
+  .tile.amber { border-top-color: var(--amber); }
+  .tile.amber .val { color: var(--amber-dark); }
+
+  /* -------------------------------------------------------------- sessions */
+
+  .sessions { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.85rem; }
+  .session {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 4px solid var(--amber); border-radius: 8px; padding: 0.9rem 1rem;
+  }
+  .session h3 { margin: 0 0 0.15rem 0; font-size: 1rem; color: var(--green); }
+  .session .date { font-size: 0.88rem; font-weight: bold; color: var(--text); }
+  .session .det { font-size: 0.8rem; color: var(--muted); margin-top: 0.35rem; }
+  .session .det div { margin-bottom: 1px; }
+
+  /* ------------------------------------------------------------ milestones */
+
+  .timeline { position: relative; padding-left: 1.4rem; }
+  .timeline::before {
+    content: ""; position: absolute; left: 5px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--border-strong);
+  }
+  .ms { position: relative; padding: 0 0 0.85rem 0; font-size: 0.9rem; }
+  .ms::before {
+    content: ""; position: absolute; left: -1.4rem; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--card); border: 2px solid var(--border-strong);
+  }
+  .ms.done::before { background: var(--green); border-color: var(--green); }
+  .ms.now::before  { background: var(--amber); border-color: var(--amber-dark); }
+  .ms.late::before { background: var(--red); border-color: var(--red); }
+  .ms .ms-date { font-weight: bold; color: var(--green); }
+  .ms .ms-note { font-size: 0.8rem; color: var(--muted); }
+  .ms.late .ms-date { color: var(--red); }
+
+  /* ----------------------------------------------------------- workstreams */
+
+  .ws { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 0.75rem; overflow: hidden; }
+  .ws-head {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1rem; cursor: pointer; user-select: none;
+    background: linear-gradient(to right, var(--green-light), var(--card) 70%);
+    border-bottom: 1px solid transparent;
+  }
+  .ws.open .ws-head { border-bottom-color: var(--border); }
+  .ws-head:hover { background: var(--green-light); }
+  .ws-key {
+    width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
+    background: var(--green); color: #fff; font-weight: bold; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ws-title { font-weight: bold; font-size: 0.98rem; color: var(--green); flex: 1; }
+  .ws-title .ws-owner { font-weight: normal; font-size: 0.8rem; color: var(--muted); display: block; }
+  .ws-prog { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--muted); flex-shrink: 0; }
+  .bar { width: 84px; height: 7px; border-radius: 4px; background: var(--border); overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--green); }
+  .ws-caret { color: var(--muted); font-size: 0.8rem; transition: transform 0.15s; flex-shrink: 0; }
+  .ws.open .ws-caret { transform: rotate(90deg); }
+  .ws-body { display: none; padding: 0.35rem 0; }
+  .ws.open .ws-body { display: block; }
+  .ws-intro { font-size: 0.85rem; color: var(--muted); padding: 0.6rem 1rem 0.3rem 1rem; }
+
+  .task {
+    display: grid; grid-template-columns: 22px 1fr 122px 96px;
+    gap: 0.6rem; align-items: start;
+    padding: 0.55rem 1rem; border-top: 1px solid var(--border); font-size: 0.89rem;
+  }
+  .task .tick {
+    width: 18px; height: 18px; margin-top: 2px; cursor: pointer;
+    border: 2px solid var(--grey); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: #fff; background: var(--card); flex-shrink: 0;
+  }
+  .task[data-status="doing"]   .tick { background: var(--amber); border-color: var(--amber); }
+  .task[data-status="done"]    .tick { background: var(--green); border-color: var(--green); }
+  .task[data-status="blocked"] .tick { background: var(--red);   border-color: var(--red); }
+  .task[data-status="done"] .t-name { text-decoration: line-through; color: var(--muted-2); }
+  .t-name { font-weight: bold; }
+  .t-sub { font-size: 0.8rem; color: var(--muted); margin-top: 1px; font-weight: normal; }
+  .t-note {
+    font-size: 0.8rem; color: var(--blue); background: var(--blue-bg);
+    border-left: 2px solid var(--blue); padding: 0.25rem 0.5rem;
+    margin-top: 0.35rem; border-radius: 0 4px 4px 0;
+  }
+  /* An empty note collapses to a faint prompt so 60 tasks do not carry 60
+     empty boxes. It takes on the full callout styling once it has content
+     or the cursor is in it. */
+  .t-note:empty {
+    background: none; border-left-color: transparent;
+    padding: 0 0 0 0.15rem; margin-top: 0.1rem; font-size: 0.75rem;
+  }
+  .t-note:empty::before { content: "Add a note"; color: var(--muted-2); }
+  .t-note:empty:hover::before { color: var(--blue); text-decoration: underline; }
+  .t-note:focus {
+    background: var(--blue-bg); border-left-color: var(--blue);
+    padding: 0.25rem 0.5rem; margin-top: 0.35rem; outline: none;
+  }
+  .t-note:focus::before { content: none; }
+  .t-due { font-size: 0.82rem; color: var(--muted); white-space: nowrap; padding-top: 1px; }
+  .t-due.overdue { color: var(--red); font-weight: bold; }
+  .t-due.soon { color: var(--amber-dark); font-weight: bold; }
+  .t-owner { font-size: 0.78rem; color: var(--muted); text-align: right; padding-top: 2px; }
+
+  .pill {
+    display: inline-block; font-size: 0.68rem; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 0.08rem 0.4rem; border-radius: 3px; vertical-align: 1px; margin-left: 0.35rem;
+  }
+  .pill.crit  { background: var(--red-bg); color: var(--red); }
+  .pill.q     { background: var(--amber-light); color: var(--amber-dark); }
+  .pill.block { background: var(--red-bg); color: var(--red); }
+
+  /* --------------------------------------------------------------- tables */
+
+  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+  th, td { padding: 0.45rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th {
+    background: var(--green); color: #fff;
+    font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em;
+    white-space: nowrap; position: sticky; top: 0; z-index: 2;
+  }
+  tbody tr:nth-child(even) { background: #F2F2F2; }
+  tbody tr:hover { background: var(--green-light); }
+  tfoot td { font-weight: bold; background: var(--green-light); border-top: 2px solid var(--green); }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+
+  .tag { display: inline-block; font-size: 0.72rem; font-weight: bold; padding: 0.1rem 0.42rem; border-radius: 3px; white-space: nowrap; }
+  .tag.int   { background: #DCEFE1; color: var(--green-deep); }
+  .tag.visit { background: var(--blue-bg); color: var(--blue); }
+  .tag.no    { background: var(--grey-bg); color: var(--muted); }
+  .tag.pend  { background: var(--amber-light); color: var(--amber-dark); }
+  .tag.june  { background: var(--red-bg); color: var(--red); }
+
+  .filters { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem; }
+  .filters .lab { font-size: 0.78rem; color: var(--muted); margin-right: 0.15rem; }
+  .chip {
+    font: inherit; font-size: 0.78rem; padding: 0.25rem 0.65rem;
+    border: 1px solid var(--border-strong); background: var(--card);
+    border-radius: 999px; cursor: pointer; color: var(--muted);
+  }
+  .chip.on { background: var(--green); border-color: var(--green); color: #fff; font-weight: bold; }
+
+  input[type="text"], input[type="number"], select {
+    font: inherit; font-size: 0.82rem; padding: 0.2rem 0.4rem;
+    border: 1px solid var(--border-strong); border-radius: 4px;
+    background: var(--card); color: var(--text); max-width: 100%;
+  }
+  input.cell { width: 100%; border-color: transparent; background: transparent; }
+  input.cell:hover { border-color: var(--border-strong); }
+  input.cell:focus { border-color: var(--green); background: var(--card); outline: none; }
+  input.money { width: 92px; text-align: right; }
+  .ck { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+
+  /* -------------------------------------------------------------- callouts */
+
+  .callout {
+    border-radius: 8px; padding: 0.85rem 1.05rem; font-size: 0.88rem;
+    border: 1px solid var(--amber); border-left-width: 4px; background: var(--amber-light);
+  }
+  .callout.red { border-color: var(--red-border); border-left-color: var(--red); background: var(--red-bg); }
+  .callout h4 { margin: 0 0 0.4rem 0; font-size: 0.9rem; color: var(--green); }
+  .callout.red h4 { color: var(--red); }
+  .callout ul { margin: 0.35rem 0 0 0; padding-left: 1.15rem; }
+  .callout li { margin-bottom: 0.3rem; }
+
+  .risk { display: grid; grid-template-columns: 74px 1fr; gap: 0.75rem; padding: 0.6rem 0; border-top: 1px solid var(--border); }
+  .risk:first-child { border-top: none; }
+  .sev { font-size: 0.68rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.12rem 0; text-align: center; border-radius: 3px; height: fit-content; }
+  .sev.high { background: var(--red-bg); color: var(--red); }
+  .sev.med  { background: var(--amber-light); color: var(--amber-dark); }
+  .sev.low  { background: var(--grey-bg); color: var(--muted); }
+  .risk .r-what { font-weight: bold; }
+  .risk .r-mit { font-size: 0.83rem; color: var(--muted); margin-top: 2px; }
+
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+
+  ul.plain { margin: 0; padding-left: 1.15rem; font-size: 0.88rem; }
+  ul.plain li { margin-bottom: 0.35rem; }
+  ul.plain .why { color: var(--muted); font-size: 0.83rem; }
+
+  footer { border-top: 1px solid var(--border-strong); background: var(--card); padding: 1.1rem 0; font-size: 0.78rem; color: var(--muted); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+  .assump {
+    font-size: 0.8rem; color: var(--muted); background: var(--card);
+    border: 1px dashed var(--border-strong); border-radius: 6px;
+    padding: 0.5rem 0.75rem; margin-top: 0.6rem;
+  }
+  .assump strong { color: var(--amber-dark); }
+
+  /* ---------------------------------------------------------------- print */
+
+  @media print {
+    @page { margin: 12mm; size: portrait; }
+    body { background: #fff; font-size: 10.5pt; background-image: none; }
+    header { background: #fff; padding-bottom: 1rem; background-image: none; }
+    .countdown { background: #fff; color: var(--text); border-bottom: 1px solid var(--border-strong); }
+    .countdown .cd-num { color: var(--green); }
+    .no-print, .head-actions, .filters, .ws-caret { display: none !important; }
+    .ws-body { display: block !important; }
+    .ws, .card, .tile, .session { break-inside: avoid; page-break-inside: avoid; }
+    section { break-inside: avoid-page; }
+    .sec-head { break-after: avoid; }
+    thead th { position: static; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .wrap { max-width: none; padding: 0; }
+  }
+
+  @media (max-width: 620px) {
+    .task { grid-template-columns: 22px 1fr; }
+    .t-due, .t-owner { grid-column: 2; text-align: left; padding-top: 0; }
+    .head-meta { text-align: left; }
+    .head-actions { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head-row">
+    <div class="brand">
+      <img src="__LOGO_URI__" alt="Forestry Sector Council">
+      <div class="brand-rule"></div>
+      <div>
+        <h1>Phase 2 Kickoff Tracker</h1>
+        <p class="sub">Continuous Improvement Project, three regional sessions, September 2026</p>
+      </div>
+    </div>
+    <div class="head-meta">
+      <div class="line"><strong>Chris Garcelon</strong>, Continuous Improvement Specialist</div>
+      <div class="line">For Kerri Marshall, Executive Director</div>
+      <div class="line">Brock McEwen and Tim McEwen, Wavez Consulting</div>
+      <div class="line" style="margin-top:4px;">Baselined <strong>28 July 2026</strong>, viewed <strong id="today"></strong></div>
+      <div class="head-actions no-print">
+        <button onclick="expandAll(true)">Expand all</button>
+        <button onclick="expandAll(false)">Collapse</button>
+        <button class="primary" onclick="window.print()">Print or save as PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="countdown">
+  <div class="wrap" id="countdownBar"></div>
+</div>
+
+<main class="wrap">
+
+  <section>
+    <div class="sec-head">
+      <h2>Status at a glance</h2>
+      <span class="sec-note">Counts update as I tick things off below</span>
+    </div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>The three sessions</h2>
+      <span class="sec-note">11:00 AM to 3:00 PM, simple lunch, open format with sign-up on the spot</span>
+    </div>
+    <div class="sessions" id="sessions"></div>
+    <div class="assump">
+      <strong>Assumption to confirm:</strong> these are the dates from the July 17 meeting, which I was to lock by
+      Friday July 24, so I am showing them as target dates. If they are confirmed, ticking task A1 firms up the whole
+      plan behind it. If they have moved, every date in this tracker shifts with them.
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Critical path</h2>
+      <span class="sec-note">The dates everything else hangs off</span>
+    </div>
+    <div class="card"><div class="timeline" id="timeline"></div></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Needs a decision</h2>
+      <span class="sec-note">Open items blocking work below</span>
+    </div>
+    <div class="callout">
+      <h4>Waiting on Kerri, Brock, or a conversation with Angela</h4>
+      <ul id="questions"></ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Workstreams</h2>
+      <span class="sec-note no-print">Click a heading to open it, click a box to cycle not started, in progress, complete, blocked</span>
+    </div>
+    <div class="filters no-print">
+      <span class="lab">Show:</span>
+      <button class="chip on" data-filter="all"     onclick="setFilter('all', this)">All tasks</button>
+      <button class="chip"    data-filter="open"    onclick="setFilter('open', this)">Open only</button>
+      <button class="chip"    data-filter="overdue" onclick="setFilter('overdue', this)">Overdue</button>
+      <button class="chip"    data-filter="two"     onclick="setFilter('two', this)">Next 14 days</button>
+      <button class="chip"    data-filter="mine"    onclick="setFilter('mine', this)">Mine</button>
+      <button class="chip"    data-filter="others"  onclick="setFilter('others', this)">Kerri, Brock, Angela, Kyle</button>
+    </div>
+    <div id="workstreams"></div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Contractor re-contact and registration</h2>
+      <span class="sec-note">The 33 contractors from the April and May outreach, all approached on a June timeline</span>
+    </div>
+    <div class="filters no-print">
+      <span class="lab">Session:</span>
+      <button class="chip on" data-cf="all" onclick="setContractorFilter('all', this)">All 33</button>
+      <button class="chip" data-cf="PH"   onclick="setContractorFilter('PH', this)">Port Hawkesbury</button>
+      <button class="chip" data-cf="BW"   onclick="setContractorFilter('BW', this)">Bridgewater</button>
+      <button class="chip" data-cf="TR"   onclick="setContractorFilter('TR', this)">Truro</button>
+      <button class="chip" data-cf="june" onclick="setContractorFilter('june', this)">Owed a June call</button>
+      <button class="chip" data-cf="todo" onclick="setContractorFilter('todo', this)">Not yet re-contacted</button>
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Contractor or company</th>
+              <th>Location</th>
+              <th>Session</th>
+              <th>Interest in May</th>
+              <th>NSFCA</th>
+              <th style="text-align:center;">Told<br>June</th>
+              <th style="text-align:center;">Re-<br>contacted</th>
+              <th>Attending</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="contractorBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="assump">
+      <strong>Session assignment</strong> is by region: Eastern Nova Scotia and Cape Breton to Port Hawkesbury,
+      Western Nova Scotia to Bridgewater, Central Nova Scotia to Truro. The invitation announces all three dates with a
+      first and second choice question, so these are the expected fit rather than a restriction.
+      <strong>Interest in May</strong> is preserved for context, but I recorded it against the old delivery model.
+      Under the pull model, a "call to arrange visit" contractor is simply a session invite.
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Session budget</h2>
+      <span class="sec-note">Three sessions, figures are placeholders to overwrite</span>
+    </div>
+    <div class="callout red" style="margin-bottom:0.85rem;">
+      <h4>Every dollar figure below is an estimate, not a quote</h4>
+      They are here so the shape of the budget and the arithmetic are ready to go. Replace them with real numbers
+      before this goes to Kerri or into a funding conversation. Editable cells save in this browser.
+    </div>
+    <div class="card" style="padding:0;">
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Line item</th><th>Basis</th>
+              <th class="num">Unit</th><th class="num">Qty</th>
+              <th class="num">Estimate</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="budgetBody"></tbody>
+          <tfoot id="budgetFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="assump">
+      Built for 35 attendees per session across three sessions, an 11:00 AM to 3:00 PM format with a simple lunch, and
+      me plus one other FORSEC attendee travelling to each. The July 17 meeting set the expectation of short proposals
+      with intended outcome and estimated cost before travel-heavy or spend-heavy activities. This table is the cost
+      half of that proposal.
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Risks</h2>
+      <span class="sec-note">What could put the September dates or the turnout at risk</span>
+    </div>
+    <div class="card" id="risks"></div>
+  </section>
+
+  <section>
+    <div class="two-col">
+      <div>
+        <div class="sec-head"><h2>Decisions carried forward</h2></div>
+        <div class="card"><ul class="plain" id="decisions"></ul></div>
+      </div>
+      <div>
+        <div class="sec-head"><h2>Deliberately out of scope</h2></div>
+        <div class="card">
+          <p style="margin:0 0 0.5rem 0; font-size:0.85rem; color:var(--muted);">
+            Live CI work that is not Phase 2 kickoff planning or setup, so it is tracked elsewhere.
+            If any of it should be pulled in, say so and I will add it.
+          </p>
+          <ul class="plain" id="outOfScope"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <strong>FORSEC, Nova Scotia Forestry Sector Council</strong>, Continuous Improvement Project, internal use<br>
+      Prepared by Chris Garcelon, Continuous Improvement Specialist
+    </div>
+    <div style="text-align:right;">
+      <span class="no-print">Ticks, notes, and budget edits save to this browser only.
+      <button class="tiny" onclick="resetState()" style="margin-left:0.4rem;">Reset all</button></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+/* ===========================================================================
+   PROJECT DATA
+   Everything the page renders lives here, so updating the plan means editing
+   this block rather than hunting through markup. Sourced from the July 17
+   strategic planning meeting summary, the Phase 2 kickoff plan, and the
+   April and May contractor outreach report.
+   ======================================================================== */
+
+const SESSIONS = [
+  { key: "PH", city: "Port Hawkesbury", date: "2026-09-10",
+    region: "Eastern Nova Scotia and Cape Breton", venue: "",
+    note: "Feeds mentorship cohort 1, which starts September 22 in this region" },
+  { key: "BW", city: "Bridgewater", date: "2026-09-16",
+    region: "Western Nova Scotia", venue: "",
+    note: "Back to back with Truro, no recovery day between them" },
+  { key: "TR", city: "Truro", date: "2026-09-17",
+    region: "Central Nova Scotia", venue: "Inn on Prince and Best Western were the May shortlist", note: "" }
+];
+
+const MILESTONES = [
+  { date: "2026-07-17", label: "Strategic planning meeting", note: "Phase 1 closed, kickoff reframed to three open advertising sessions", state: "done" },
+  { date: "2026-07-24", label: "Session dates to be locked", note: "Deadline set in the July 17 meeting, status to confirm", state: "auto" },
+  { date: "2026-08-06", label: "Budget proposal approved by Kerri", note: "Intended outcome plus estimated cost, per the new budget discipline", state: "auto" },
+  { date: "2026-08-07", label: "Angela aligned and venues booked", note: "NSFCA promotion is the main channel for filling the rooms", state: "auto" },
+  { date: "2026-08-14", label: "Invitation goes out", note: "All three dates announced together with a first and second choice question", state: "auto" },
+  { date: "2026-09-03", label: "Registration cut-off", note: "Final headcounts drive catering and print runs", state: "auto" },
+  { date: "2026-09-10", label: "Session 1, Port Hawkesbury", note: "", state: "auto" },
+  { date: "2026-09-15", label: "Mentorship sign-ups to Genevieve", note: "She needs a week of pre-calls before the September 22 cohort starts", state: "auto" },
+  { date: "2026-09-16", label: "Session 2, Bridgewater", note: "", state: "auto" },
+  { date: "2026-09-17", label: "Session 3, Truro", note: "", state: "auto" },
+  { date: "2026-09-22", label: "Mentorship cohort 1 begins", note: "Port Hawkesbury region, downstream of session 1", state: "auto" }
+];
+
+const QUESTIONS = [
+  "<strong>Are the three session dates locked?</strong> They were due Friday July 24, and everything in this tracker is dated off them.",
+  "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17. Confirmation unlocks the co-promotion plan and the invitation timing.",
+  "<strong>Which funding stream carries the session costs?</strong> I need this before the budget proposal can be finalised.",
+  "<strong>Does Wavez facilitation at the sessions draw on existing contract capacity</strong>, or is it a new line in the budget?",
+  "<strong>Do we invite the 11 Phase 1 contractors?</strong> The new offerings, mentorship, GIS, belt training, and Enhanced Direct Entry, all apply to them too, and they would fill seats.",
+  "<strong>Are contractor staff welcome, or owners only?</strong> This affects catering numbers and how I word the invitation.",
+  "<strong>Enhanced Direct Entry dates are still unconfirmed.</strong> A sign-up sheet for a program with no dates is a weak ask. Is there a date to publish by late August?",
+  "<strong>Is Emmitt Peniston eligible under the FITT grant definition as an arborist?</strong> Outstanding decision for Kerri from the April outreach, and it determines whether I invite him at all."
+];
+
+const WORKSTREAMS = [
+  {
+    key: "A", title: "Sessions, dates, and venues", owner: "Chris Garcelon",
+    intro: "Locking the three dates and getting rooms, food, and AV booked. I cannot announce anything until A1 is closed.",
+    tasks: [
+      { id: "A1", name: "Lock and publish the three session dates", sub: "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, Truro Thursday September 17", due: "2026-07-24", owner: "Chris", flag: "crit" },
+      { id: "A2", name: "Confirm Kerri, Brock, and Tim are available on all three dates", due: "2026-07-31", owner: "Chris" },
+      { id: "A3", name: "Book the Port Hawkesbury venue", sub: "Room for 40, 11:00 AM to 3:00 PM, projector and screen, parking for trucks", due: "2026-08-07", owner: "Chris" },
+      { id: "A4", name: "Book the Bridgewater venue", sub: "Room for 40, same format", due: "2026-08-07", owner: "Chris" },
+      { id: "A5", name: "Book the Truro venue", sub: "Inn on Prince and Best Western were both shortlisted in May", due: "2026-08-07", owner: "Chris" },
+      { id: "A6", name: "Build the run of show for the 11:00 AM to 3:00 PM format", sub: "Shorter and looser than the old four hour agenda, since people arrive and leave around work", due: "2026-08-14", owner: "Chris" },
+      { id: "A7", name: "Confirm facilitation roles and speaking slots", sub: "I lead, Kerri opens, Angela opens for NSFCA, Tim and Brock support", due: "2026-08-14", owner: "Chris" },
+      { id: "A8", name: "Confirm catering at each venue", sub: "Simple lunch, dietary options, service window inside 11:00 AM to 3:00 PM", due: "2026-08-21", owner: "Chris" },
+      { id: "A9", name: "Confirm AV and connectivity at each venue", sub: "Projector, screen, power, and enough signal for digital sign-up in the room", due: "2026-08-28", owner: "Chris" },
+      { id: "A10", name: "Agree the contingency if a session under-registers", sub: "The July 17 decision was to collapse or shift sessions rather than run an empty room", due: "2026-09-03", owner: "Chris and Kerri" }
+    ]
+  },
+  {
+    key: "B", title: "Re-contacting the contractors I have already spoken to", owner: "Chris Garcelon",
+    intro: "I approached all 33 contractors in April and May on a June timeline, and I promised several of them a call once the June date was confirmed. Those calls are now four months late and the answer has changed. This is the reputational piece of the project.",
+    tasks: [
+      { id: "B1", name: "Personal call to Paul Delaney", sub: "He specifically said early June worked for him, so the move to September deserves a direct call rather than an email", due: "2026-07-31", owner: "Chris", flag: "crit" },
+      { id: "B2", name: "Call the five others I promised a call once the June date was confirmed", sub: "Tim Amero, Dana Rafuse, Leo Hankinson, Landon Reginato, and John and Jesse Gatza at Ryan River Lumber", due: "2026-08-04", owner: "Chris", flag: "crit" },
+      { id: "B3", name: "Agree the line on why the date moved", sub: "One consistent explanation of June to September, and what changed about the format, before the calls start", due: "2026-07-30", owner: "Chris" },
+      { id: "B4", name: "Contact the remaining contractors I flagged as interested in May", sub: "Zach Bates, John Goodwin, Chris Greene, Ronnie Langille, Ralph Stewart, Mathew Bezanson, and Titus Campbell", due: "2026-08-08", owner: "Chris" },
+      { id: "B5", name: "Contact the 17 call to arrange visit contractors", sub: "Under the pull model these become session invitations rather than site visit bookings", due: "2026-08-12", owner: "Chris" },
+      { id: "B6", name: "Re-approach the four not interested right now contractors", sub: "Kyle Ogilvie, Jeremy Simpson, Marshall Bateman, and Emmitt Peniston. An open session is a much lower ask than a site visit", due: "2026-08-15", owner: "Chris" },
+      { id: "B7", name: "Final attempt on Jeff Tanner", sub: "Never reached across three attempts in May", due: "2026-08-15", owner: "Chris" },
+      { id: "B8", name: "Source a working number for James Tanner", sub: "His line was out of service in May, so try NSFCA or John Tanner", due: "2026-08-15", owner: "Chris" },
+      { id: "B9", name: "Send the written invitation with all three dates", sub: "Announce all three locations up front with a first and second choice question, per the July 17 decision", due: "2026-08-14", owner: "Chris" },
+      { id: "B10", name: "Log every re-contact and stated preference in the table below", sub: "Ongoing through August", due: "2026-09-03", owner: "Chris" }
+    ]
+  },
+  {
+    key: "C", title: "Expanding the invite list", owner: "Chris Garcelon",
+    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100, and the existing 33 contractors fill barely a third of them.",
+    tasks: [
+      { id: "C1", name: "Set the per-session attendance target and overall registration goal", sub: "The number the whole outreach effort is measured against", due: "2026-08-04", owner: "Chris and Kerri" },
+      { id: "C2", name: "NSFCA member distribution via Angela", sub: "The single highest leverage channel for filling the rooms, and it depends on workstream D", due: "2026-08-14", owner: "Chris and Angela", flag: "crit" },
+      { id: "C3", name: "Decide on and invite the 11 Phase 1 contractors", sub: "Mentorship, GIS, belt training, and Enhanced Direct Entry are all new to them", due: "2026-08-12", owner: "Chris", flag: "q" },
+      { id: "C4", name: "Referral ask on every call", sub: "Two names from each contractor, which is how most of the current list was built", due: "2026-08-22", owner: "Chris" },
+      { id: "C5", name: "Re-open the hard to reach and lapsed contacts", sub: "Brent MacInnis, Mitch Jamieson, Wayne Chisholm, and Glenmore Forestry. Repeated attempts in May, never a real conversation", due: "2026-08-15", owner: "Chris" },
+      { id: "C6", name: "Deliberately recruit trucking contractors", sub: "The current 33 skew heavily to harvesting, but Phase 2 covers both", due: "2026-08-18", owner: "Chris" },
+      { id: "C7", name: "Work the mill and supply chain connectors for names", sub: "Darryl Byers at Greenwood Meadows produced the Doug Denny lead, and mills know who cuts for them", due: "2026-08-18", owner: "Chris" },
+      { id: "C8", name: "FORSEC communications push", sub: "Social, newsletter, and job board channels, timed with the invitation", due: "2026-08-14", owner: "Kyle MacKay" },
+      { id: "C9", name: "Decide whether contractor staff are invited alongside owners", sub: "Belt training and Enhanced Direct Entry are staff facing offers, so this could double the room", due: "2026-08-07", owner: "Chris and Kerri", flag: "q" }
+    ]
+  },
+  {
+    key: "D", title: "NSFCA partnership, Angela MacGillivray", owner: "Chris Garcelon and Kerri Marshall",
+    intro: "Kerri sent the re-engagement proposal to Angela on July 17 and the indications are that NSFCA will accept. The pause was operational only, tied to the financial review. Angela is both a speaker at the sessions and the fastest route to a full room.",
+    tasks: [
+      { id: "D1", name: "Confirm with Kerri that the MOU has been formally accepted", sub: "Everything else in this workstream sits behind a yes", due: "2026-07-30", owner: "Chris", flag: "crit" },
+      { id: "D2", name: "Book the meeting with Angela", sub: "Agenda: partnership restart, session co-promotion, her speaking slot, and the member list", due: "2026-08-01", owner: "Chris" },
+      { id: "D3", name: "Meet Angela", sub: "Kerri and I together, restarting the partnership and asking for promotion in the same conversation", due: "2026-08-07", owner: "Chris and Kerri" },
+      { id: "D4", name: "Agree the co-promotion plan and the date NSFCA sends the invitation", sub: "Named channels and a date, not a general offer of support", due: "2026-08-07", owner: "Chris and Angela" },
+      { id: "D5", name: "Get NSFCA membership status for the 14 contractors listed TBD", sub: "It changes how I approach each one. Members are an existing relationship, non-members are a door in", due: "2026-08-12", owner: "Angela" },
+      { id: "D6", name: "Confirm Angela or a delegate for opening remarks at all three sessions", sub: "Three dates in three regions is a real ask, so confirm it early", due: "2026-08-14", owner: "Chris" },
+      { id: "D7", name: "Agree what NSFCA gets on the agenda in return", sub: "A partnership restart works better if their ask is on the table too", due: "2026-08-14", owner: "Chris and Angela" }
+    ]
+  },
+  {
+    key: "E", title: "Session content and materials", owner: "Chris Garcelon",
+    intro: "The sessions sell five things and take sign-ups on the spot: Phase 1 tools, GIS and telematics, mentorship training, Lean Six Sigma belt training, and Enhanced Direct Entry. Every one of them needs something a contractor can read and something they can sign.",
+    tasks: [
+      { id: "E1", name: "Get a working annual production value for one harvester", sub: "The anchor number for every ROI conversation in the room, flagged as an action item on July 17", due: "2026-08-14", owner: "Chris", flag: "crit" },
+      { id: "E2", name: "Build the Phase 1 results deck", sub: "One or two slides per improvement with real numbers: ConnecTeam, Block Reconciliation, Team Fuel Incentive, FDAP, Sales Brochure, and the Job Board", due: "2026-08-21", owner: "Chris" },
+      { id: "E3", name: "Build sign-up sheets for all five offerings", sub: "They have to work on paper and on a phone, because venue signal is not guaranteed", due: "2026-08-21", owner: "Chris" },
+      { id: "E4", name: "Write a one-pager per offering", sub: "What it is, who it suits, what it costs, and when it runs. Nobody signs up for a title on a list", due: "2026-08-21", owner: "Chris" },
+      { id: "E5", name: "Adapt Brock's belt training pricing blurbs for a contractor audience", sub: "From the write-up Brock delivered to Kerri on July 21", due: "2026-08-21", owner: "Chris and Brock" },
+      { id: "E6", name: "Publish Enhanced Direct Entry dates on the sign-up sheet", sub: "Fall delivery is confirmed but the dates are not, which blocks E3 and E4 from being final", due: "2026-08-18", owner: "Chris", flag: "block" },
+      { id: "E7", name: "Pull the Phase 1 kickoff improvement list for the group discussion", sub: "Including the items that were never acted on, since surfacing that honestly was the plan", due: "2026-08-21", owner: "Chris" },
+      { id: "E8", name: "Language check every piece of material", sub: "Lead with a platform I designed for you, not AI, per the July 17 delivery note", due: "2026-08-25", owner: "Chris" },
+      { id: "E9", name: "Print run for all three sessions", sub: "Agendas, one-pagers, sign-up sheets, and Phase 1 handouts, times three", due: "2026-09-03", owner: "Chris" },
+      { id: "E10", name: "Pack the FORSEC swag", sub: "Stickers and hats have opened more doors than anything else in this project so far", due: "2026-09-03", owner: "Chris" }
+    ]
+  },
+  {
+    key: "F", title: "Budget and approval", owner: "Chris Garcelon",
+    intro: "July 17 introduced a new rule: a short proposal with intended outcome and estimated cost before anything travel-heavy or spend-heavy. Three catered sessions in three regions is exactly that.",
+    tasks: [
+      { id: "F1", name: "Build the session budget", sub: "Venue, catering, materials, travel, accommodation, swag, and contingency, which is the table below", due: "2026-08-05", owner: "Chris" },
+      { id: "F2", name: "Write the short proposal with intended outcome and estimated cost", sub: "Framed so a funder question can be answered from it directly", due: "2026-08-05", owner: "Chris" },
+      { id: "F3", name: "Submit to Kerri for approval", due: "2026-08-06", owner: "Chris" },
+      { id: "F4", name: "Confirm which funding stream carries the session costs", due: "2026-08-06", owner: "Kerri", flag: "q" },
+      { id: "F5", name: "Confirm whether Wavez facilitation sits inside existing contract capacity", sub: "Tim and Brock across three sessions is a material cost if it does not", due: "2026-08-06", owner: "Chris and Kerri", flag: "q" },
+      { id: "F6", name: "Record actuals against estimate after each session", sub: "It makes the Phase 3 budget an evidence-based number rather than another estimate", due: "2026-09-18", owner: "Chris" }
+    ]
+  },
+  {
+    key: "G", title: "Registration, tracking, and handoff", owner: "Chris Garcelon",
+    intro: "The sessions only pay off if the sign-ups they generate land somewhere. Sign-up volume is also the documented justification for an additional hire if Phase 2 demand exceeds one person's capacity.",
+    tasks: [
+      { id: "G1", name: "Decide the registration mechanism", sub: "Form, email reply, or NSFCA collected. I need this settled before I write the invitation", due: "2026-08-04", owner: "Chris" },
+      { id: "G2", name: "Set and communicate the registration cut-off", sub: "Proposed Thursday September 3, one week before the first session", due: "2026-08-12", owner: "Chris" },
+      { id: "G3", name: "Update the monday.com CI Contractor Directory with Phase 2 entries", sub: "Status for every one of the 33 plus everyone added through expansion", due: "2026-08-22", owner: "Chris" },
+      { id: "G4", name: "Confirmation and reminder emails", sub: "On registration, then at two weeks and three days out", due: "2026-09-03", owner: "Chris" },
+      { id: "G5", name: "Final headcounts to each caterer", sub: "Port Hawkesbury by September 4, Bridgewater and Truro by September 11", due: "2026-09-04", owner: "Chris" },
+      { id: "G6", name: "Capture sign-ups into monday.com within 48 hours of each session", sub: "A signed sheet left in a folder is a lost sign-up", due: "2026-09-18", owner: "Chris" },
+      { id: "G7", name: "Hand Port Hawkesbury mentorship sign-ups to Genevieve", sub: "Cohort 1 starts September 22 and she needs at least a week of pre-calls, which is five working days after session 1", due: "2026-09-15", owner: "Chris", flag: "crit" },
+      { id: "G8", name: "Report total sign-up numbers by offering and region", sub: "The evidence base for an additional hire, and for the Phase 3 plan", due: "2026-09-18", owner: "Chris" }
+    ]
+  }
+];
+
+const CONTRACTORS = [
+  { n: "Paul Delaney, Delaney and Son Pulpwood", loc: "Cheticamp", s: "PH", i: "int", m: "Yes", june: true, note: "Said early June worked for him. Needs a personal call about the move." },
+  { n: "Landon Reginato, Mira Forestry", loc: "Albert Bridge", s: "PH", i: "int", m: "Yes", june: true, note: "Strong candidate. Confirm he received both Block Reconciliation versions." },
+  { n: "John and Jesse Gatza, Ryan River Lumber", loc: "River Ryan", s: "PH", i: "int", m: "TBD", june: true, note: "Operator shortage and automation interest, so a good fit for Enhanced Direct Entry and mentorship." },
+  { n: "Ralph Stewart, RES Forestry", loc: "Antigonish", s: "PH", i: "int", m: "No", june: false, note: "Phase 1 contractor, very well connected. His endorsement carries weight in the room." },
+  { n: "Titus Campbell, Titus Campbell Logging", loc: "Inverness", s: "PH", i: "int", m: "No", june: false, note: "" },
+  { n: "Kody Fraser, BP Fraser Forestry", loc: "Mabou", s: "PH", i: "visit", m: "Yes", june: false, note: "Caught at the airport in May, asked to be called back in early May." },
+  { n: "Wayne Chisholm, Wayne Chisholm Forestry", loc: "Antigonish", s: "PH", i: "visit", m: "Yes", june: false, note: "Multiple attempts, never a real conversation. Try in person." },
+  { n: "Ryan MacIsaac", loc: "Antigonish", s: "PH", i: "visit", m: "TBD", june: false, note: "Interest depends on Lloyd putting in a word." },
+  { n: "Russell Huntington, MB Pulp", loc: "Marion Bridge", s: "PH", i: "visit", m: "TBD", june: false, note: "" },
+  { n: "Charles Garland, Roy Garland Logging", loc: "Baddeck", s: "PH", i: "visit", m: "No", june: false, note: "" },
+  { n: "Doug and Darrell Denny", loc: "Eskasoni", s: "PH", i: "visit", m: "TBD", june: false, note: "Firewood and road construction now. Darrell drives truck, so there is a possible second seat." },
+
+  { n: "Tim Amero, Cut Rite", loc: "Digby area", s: "BW", i: "int", m: "TBD", june: true, note: "Very engaged. Interested in telematics, Enhanced Direct Entry, and train the trainer." },
+  { n: "Dana Rafuse, Dana Rafuse Forestry", loc: "Chester", s: "BW", i: "int", m: "No", june: true, note: "Excellent fit, family operation. Social media feature opportunity flagged for Sam and Kyle." },
+  { n: "Leo Hankinson, Hankinson's Logging", loc: "Weymouth", s: "BW", i: "visit", m: "TBD", june: true, note: "Never actually met in person, so his interest is not fully established." },
+  { n: "Josh and Kyle Millett", loc: "Chester Basin", s: "BW", i: "visit", m: "TBD", june: false, note: "Josh sounded interested on a poor reception call in April." },
+  { n: "Colin Hughes, G and C Hughes Enterprises", loc: "New Ross", s: "BW", i: "visit", m: "TBD", june: false, note: "Card and voicemail left at his shop." },
+  { n: "Vince Croft, Lone Wolf Logging", loc: "Western NS", s: "BW", i: "visit", m: "TBD", june: false, note: "Believed to be trucking, to confirm." },
+  { n: "Ken Gray", loc: "Yarmouth", s: "BW", i: "visit", m: "No", june: false, note: "" },
+  { n: "Luke Smith, Fine Cuts", loc: "Hebbville", s: "BW", i: "visit", m: "TBD", june: false, note: "Email sent in April, no reply yet." },
+  { n: "John and Jamie Fehr, TJ Fehr", loc: "Shelburne", s: "BW", i: "visit", m: "TBD", june: false, note: "Father and son, recently added a truck and a forwarder operator." },
+  { n: "Josh Morris, Ecological Forestry", loc: "Western NS", s: "BW", i: "visit", m: "TBD", june: false, note: "Works for Westfour. Asked to be called next time I am in the area." },
+  { n: "Kyle Ogilvie, Skyline Forestry", loc: "Western NS", s: "BW", i: "no", m: "TBD", june: false, note: "Declined in April with little context. An open session is a lower ask." },
+  { n: "Jeremy Simpson, Back Country Logging", loc: "New Germany", s: "BW", i: "no", m: "Yes", june: false, note: "Short staffed and running a machine himself. Suggested Phase 3." },
+
+  { n: "Zach Bates, Zach Bates Logging", loc: "Bass River", s: "TR", i: "int", m: "No", june: false, note: "Site visit was scheduled in May." },
+  { n: "John Goodwin, AK Goodwin", loc: "Cumberland County", s: "TR", i: "int", m: "Yes", june: false, note: "Seven or eight crews. Two sons taking over the business." },
+  { n: "Chris Greene, T and C Wood Fiber", loc: "Thorburn", s: "TR", i: "int", m: "Yes", june: false, note: "" },
+  { n: "Ronnie Langille, E and R Langille", loc: "New Glasgow", s: "TR", i: "int", m: "No", june: false, note: "Interested but hard to catch. Not an association member." },
+  { n: "Mathew Bezanson, Glenmore Forestry", loc: "Musquodoboit Valley", s: "TR", i: "int", m: "TBD", june: false, note: "Several unanswered calls in May despite interest." },
+  { n: "John Tanner, JET Logging", loc: "Nine Mile River", s: "TR", i: "visit", m: "Yes", june: false, note: "Built his own proformas since the 90s. Cannot use a spreadsheet, so Performa is a direct fit." },
+  { n: "Mitch Jamieson, Atlantic Tree Solutions", loc: "Toney River", s: "TR", i: "visit", m: "TBD", june: false, note: "Interested but the location pin never arrived." },
+  { n: "Jeff Tanner", loc: "Economy", s: "TR", i: "pend", m: "TBD", june: false, note: "Never reached across three attempts. Possibly related to John Tanner." },
+  { n: "Marshall Bateman, ABL Timber", loc: "New Glasgow", s: "TR", i: "no", m: "Yes", june: false, note: "NSFCA member, so Angela may be the better route in." },
+  { n: "Emmitt Peniston, Emmitt's Tree Service", loc: "Sheet Harbour", s: "TR", i: "no", m: "No", june: false, note: "Mostly arboriculture now. FITT eligibility decision still open with Kerri." }
+];
+
+const BUDGET = [
+  { id: "b1", item: "Venue rental", basis: "Meeting room, half day, capacity 40", unit: 350, qty: 3, status: "Estimate, no quotes yet" },
+  { id: "b2", item: "Lunch catering", basis: "Simple lunch, headcount times three sessions", unit: 28, qty: 105, status: "Estimate, per person" },
+  { id: "b3", item: "Arrival coffee and refreshments", basis: "Per person, three sessions", unit: 6, qty: 105, status: "Estimate, per person" },
+  { id: "b4", item: "AV rental", basis: "Projector and screen where the venue has none", unit: 150, qty: 3, status: "May be included in venue" },
+  { id: "b5", item: "Printed materials", basis: "Agendas, one-pagers, sign-up sheets, handouts", unit: 250, qty: 3, status: "Estimate" },
+  { id: "b6", item: "FORSEC swag", basis: "Stickers, hats, branded items per session", unit: 400, qty: 3, status: "Check existing stock first" },
+  { id: "b7", item: "Travel and mileage", basis: "Roughly 1,400 km across three regions", unit: 0.72, qty: 1400, status: "Confirm current rate" },
+  { id: "b8", item: "Accommodation", basis: "Port Hawkesbury and Bridgewater, two rooms, one night each", unit: 180, qty: 4, status: "Estimate" },
+  { id: "b9", item: "Wavez facilitation", basis: "Tim and Brock across three sessions", unit: 0, qty: 1, status: "Confirm against existing contract capacity" },
+  { id: "b10", item: "Contingency", basis: "10 percent of the lines above", unit: 0, qty: 1, status: "Calculated", auto: true }
+];
+
+const RISKS = [
+  { sev: "high", what: "The session dates were due to be locked on July 24 and this tracker cannot confirm they were.",
+    mit: "Every downstream date depends on them: venue bookings, the invitation, the registration cut-off, and catering numbers. Closing A1 is the single highest value thing on this page." },
+  { sev: "high", what: "Port Hawkesbury on September 10 feeds a mentorship cohort starting September 22 in the same region.",
+    mit: "Genevieve needs at least a week of pre-calls, so sign-ups have to reach her by roughly September 15, which is five working days after the session. Build the handoff into the session day routine rather than treating it as follow-up." },
+  { sev: "high", what: "Filling three rooms of 30 to 40 depends on NSFCA promotion, which depends on the MOU being accepted.",
+    mit: "The existing 33 contractors fill about a third of the seats. If NSFCA promotion does not land by mid August, either scale the target down or find a second channel quickly." },
+  { sev: "med", what: "Contractors were told June and have not heard since, so the move to September is a four month slip.",
+    mit: "Six were explicitly promised a call once the June date was confirmed. Get ahead of it with a consistent explanation and personal calls to those six before any mass invitation goes out." },
+  { sev: "med", what: "Enhanced Direct Entry has no confirmed dates but is one of five things being sold in the room.",
+    mit: "Either secure dates by late August or present it as an expression of interest list rather than a sign-up, so nobody feels they signed up for something that never appeared." },
+  { sev: "med", what: "Three sessions of 30 to 40 could produce well over 100 sign-ups against one person's delivery capacity.",
+    mit: "July 17 anticipated this as the justification for an additional hire. It only works as an argument if the sign-up numbers are captured cleanly, which is G6 and G8." },
+  { sev: "low", what: "Bridgewater on September 16 and Truro on September 17 are back to back with travel in between.",
+    mit: "There is no recovery day if the Bridgewater venue, AV, or catering goes wrong. Pre-stage the Truro materials before leaving for Bridgewater." }
+];
+
+const DECISIONS = [
+  ["Phase 1 is complete as of July 17, 2026", "Declared with full agreement, and no project defense is required."],
+  ["Kickoff reframed to advertising sessions", "No longer two sessions of 10 committed contractors, but three regional sessions open to 30 to 40 or more attendees."],
+  ["Three regions, three dates, announced together", "Port Hawkesbury, Truro, and Bridgewater, published up front with a first and second choice question."],
+  ["Sessions run 11:00 AM to 3:00 PM with a simple lunch", "Shorter than the four hour agenda drafted in May."],
+  ["Sign-up happens on the spot", "Phase 1 tools, telematics, mentorship training, belt training, and new skills training, all signable in the room."],
+  ["Phase 2 delivery shifts to a pull model", "Contractors sign up for what they want, and more than half of delivery is expected to be online."],
+  ["NSFCA re-engagement confirmed", "The pause was operational only, tied to the financial review. Re-engagement was always the intention."],
+  ["Budget discipline applies from now on", "A short proposal with intended outcome and estimated cost before travel-heavy or spend-heavy activity."],
+  ["Avoid leading with AI in contractor conversations", "Frame tools as a platform I designed for you. Exceptions are S and S Forestry, Mark Bannerman, and Alex Phillips."]
+];
+
+const OUT_OF_SCOPE = [
+  ["Phase 2 delivery after the sessions", "Site visits, online group sessions, and one on one calls all start once the kickoff is done."],
+  ["Unified Block Tools App", "Block Reconciliation, Block Assessment, and Performa merging into one app, which is a Phase 1 closeout and build item."],
+  ["Team Fuel Incentive handoff", "Meeting Gerald's new hire and rebuilding the workflow ahead of the January 2027 handoff."],
+  ["Alex and Mark Ross site visit", "Block Reconciliation V3 demo and ConnecTeam piloting."],
+  ["Gerald's Google Business landing page fix", "Unrelated to the kickoff."],
+  ["My black belt path", "Endorsed and funded in principle, timed for after the Phase 2 rollout settles."],
+  ["Kerri's tariff funding proposal", "Including the industry wide belt training program design and the Wavez sole source mentorship proposal."],
+  ["The AI opportunities appendix", "Reviewed separately with Kerri on July 20."],
+  ["Northern Pulp manual conversion", "Pending the apprenticeship agency standardization check."],
+  ["S and S nursery improvement project", "A candidate for green belt certification work, not kickoff planning."]
+];
+
+/* ===========================================================================
+   STATE
+   ======================================================================== */
+
+const STORE_KEY = "forsec-p2-kickoff-v1";
+const TODAY = startOfDay(new Date());
+let filter = "all";
+let contractorFilter = "all";
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return Object.assign({ tasks: {}, contractors: {}, budget: {}, open: {} }, JSON.parse(raw));
+  } catch (e) { /* storage blocked or corrupt, fall through to defaults */ }
+  return { tasks: {}, contractors: {}, budget: {}, open: {} };
+}
+
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch (e) { /* private browsing: the page still works, it just will not persist */ }
+}
+
+function resetState() {
+  if (!confirm("Clear every tick, note, and budget edit on this page?")) return;
+  state = { tasks: {}, contractors: {}, budget: {}, open: {} };
+  saveState();
+  location.reload();
+}
+
+/* ===========================================================================
+   HELPERS
+   ======================================================================== */
+
+function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+
+function parseDate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+
+function fmtDate(iso, withYear) {
+  const opts = { month: "short", day: "numeric" };
+  if (withYear) opts.year = "numeric";
+  return parseDate(iso).toLocaleDateString("en-CA", opts);
+}
+
+function fmtLongDate(iso) {
+  return parseDate(iso).toLocaleDateString("en-CA",
+    { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+}
+
+function money(n) {
+  return "$" + n.toLocaleString("en-CA", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function taskStatus(id) { return (state.tasks[id] && state.tasks[id].status) || "todo"; }
+function taskNote(id)   { return (state.tasks[id] && state.tasks[id].note)   || ""; }
+function allTasks()     { return WORKSTREAMS.flatMap(w => w.tasks); }
+
+function isOverdue(t) {
+  return taskStatus(t.id) !== "done" && daysBetween(TODAY, parseDate(t.due)) < 0;
+}
+
+function isoOffset(days) {
+  const d = new Date(TODAY.getTime() + days * 86400000);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") +
+         "-" + String(d.getDate()).padStart(2, "0");
+}
+
+/* ===========================================================================
+   RENDER
+   ======================================================================== */
+
+function renderCountdown() {
+  document.getElementById("countdownBar").innerHTML = SESSIONS.map(s => {
+    const d = daysBetween(TODAY, parseDate(s.date));
+    const label = d < 0 ? "days ago" : d === 0 ? "today" : "days away";
+    return `<div class="cd-item">
+      <span class="cd-num">${Math.abs(d)}</span>
+      <span class="cd-lab">${label}<br>${esc(s.city)}, ${fmtDate(s.date)}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderTiles() {
+  const tasks = allTasks();
+  const done = tasks.filter(t => taskStatus(t.id) === "done").length;
+  const overdue = tasks.filter(isOverdue).length;
+  const next14 = tasks.filter(t => {
+    const d = daysBetween(TODAY, parseDate(t.due));
+    return taskStatus(t.id) !== "done" && d >= 0 && d <= 14;
+  }).length;
+
+  const contacted = CONTRACTORS.filter(c => (state.contractors[c.n] || {}).contacted).length;
+  const attending = CONTRACTORS.filter(c => (state.contractors[c.n] || {}).attending === "Yes").length;
+  const juneOwed = CONTRACTORS.filter(c => c.june && !(state.contractors[c.n] || {}).contacted).length;
+  const blocked = tasks.filter(t => taskStatus(t.id) === "blocked").length;
+
+  // Days to session 1 is deliberately not a tile here: the green countdown
+  // band at the top of the page already carries it for all three sessions.
+  const tiles = [
+    { v: Math.round(done / tasks.length * 100) + "%", l: "Tasks complete", f: done + " of " + tasks.length + " across 7 workstreams" },
+    { v: overdue, l: "Overdue", f: overdue ? "Past due and still open" : "Nothing past due", cls: overdue ? "alert" : "" },
+    { v: next14, l: "Due in 14 days", f: "Open tasks landing before " + fmtDate(isoOffset(14)), cls: next14 ? "amber" : "" },
+    { v: blocked, l: "Blocked", f: blocked ? "Waiting on someone else" : "Nothing blocked", cls: blocked ? "alert" : "" },
+    { v: juneOwed, l: "June calls owed", f: "Promised a call once the June date was set", cls: juneOwed ? "alert" : "" },
+    { v: contacted + " of 33", l: "Re-contacted", f: "Told about the move to September" },
+    { v: attending, l: "Confirmed attending", f: "Target is 30 to 40 per session" }
+  ];
+
+  document.getElementById("tiles").innerHTML = tiles.map(t =>
+    `<div class="tile ${t.cls || ""}">
+       <div class="val">${esc(t.v)}</div>
+       <div class="lab">${esc(t.l)}</div>
+       <div class="fine">${esc(t.f)}</div>
+     </div>`).join("");
+}
+
+function renderSessions() {
+  document.getElementById("sessions").innerHTML = SESSIONS.map(s => {
+    const assigned = CONTRACTORS.filter(c => c.s === s.key).length;
+    const yes = CONTRACTORS.filter(c => c.s === s.key && (state.contractors[c.n] || {}).attending === "Yes").length;
+    return `<div class="session">
+      <h3>${esc(s.city)}</h3>
+      <div class="date">${fmtLongDate(s.date)}</div>
+      <div class="det">
+        <div>11:00 AM to 3:00 PM, lunch provided</div>
+        <div>Draws from ${esc(s.region)}</div>
+        <div>${assigned} known contractors in region, ${yes} confirmed</div>
+        <div>Venue: ${s.venue ? esc(s.venue) : "<strong>not yet booked</strong>"}</div>
+        ${s.note ? `<div style="margin-top:4px; color:var(--amber-dark);">${esc(s.note)}</div>` : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderTimeline() {
+  document.getElementById("timeline").innerHTML = MILESTONES
+    .slice().sort((a, b) => a.date.localeCompare(b.date)).map(m => {
+      const d = daysBetween(TODAY, parseDate(m.date));
+      let cls = m.state;
+      if (cls === "auto") cls = d < 0 ? "late" : d <= 14 ? "now" : "";
+      const rel = d === 0 ? "today" : d > 0 ? "in " + d + " days" : Math.abs(d) + " days ago";
+      return `<div class="ms ${cls}">
+        <span class="ms-date">${fmtDate(m.date, true)}</span>
+        <span>, ${esc(m.label)}</span>
+        <span class="ms-note">(${rel})</span>
+        ${m.note ? `<div class="ms-note">${esc(m.note)}</div>` : ""}
+      </div>`;
+    }).join("");
+}
+
+function renderQuestions() {
+  document.getElementById("questions").innerHTML = QUESTIONS.map(q => `<li>${q}</li>`).join("");
+}
+
+function taskVisible(t) {
+  const status = taskStatus(t.id);
+  const d = daysBetween(TODAY, parseDate(t.due));
+  switch (filter) {
+    case "open":    return status !== "done";
+    case "overdue": return isOverdue(t);
+    case "two":     return status !== "done" && d >= 0 && d <= 14;
+    case "mine":    return /Chris/.test(t.owner);
+    case "others":  return t.owner !== "Chris";
+    default:        return true;
+  }
+}
+
+function renderWorkstreams() {
+  document.getElementById("workstreams").innerHTML = WORKSTREAMS.map(w => {
+    const visible = w.tasks.filter(taskVisible);
+    const done = w.tasks.filter(t => taskStatus(t.id) === "done").length;
+    const pct = Math.round(done / w.tasks.length * 100);
+    const late = w.tasks.filter(isOverdue).length;
+    const isOpen = state.open[w.key] !== false;
+
+    const rows = visible.map(t => {
+      const status = taskStatus(t.id);
+      const d = daysBetween(TODAY, parseDate(t.due));
+      let dueCls = "";
+      if (status !== "done" && d < 0) dueCls = "overdue";
+      else if (status !== "done" && d <= 7) dueCls = "soon";
+      const dueTxt = status !== "done" && d < 0
+        ? fmtDate(t.due) + ", " + Math.abs(d) + "d late"
+        : fmtDate(t.due);
+      const mark = status === "done" ? "&#10003;"
+        : status === "doing" ? "&#9679;"
+        : status === "blocked" ? "&#33;" : "";
+      const flag = t.flag === "crit" ? '<span class="pill crit">critical</span>'
+        : t.flag === "q" ? '<span class="pill q">decision needed</span>'
+        : t.flag === "block" ? '<span class="pill block">blocked</span>' : "";
+      return `<div class="task" data-status="${status}">
+        <div class="tick" onclick="cycle('${t.id}')" title="Click to change status">${mark}</div>
+        <div>
+          <div class="t-name">${esc(t.id)}. ${esc(t.name)}${flag}</div>
+          ${t.sub ? `<div class="t-sub">${esc(t.sub)}</div>` : ""}
+          <div class="t-note" contenteditable="true" oninput="noteEdit('${t.id}', this)">${esc(taskNote(t.id))}</div>
+        </div>
+        <div class="t-due ${dueCls}">${dueTxt}</div>
+        <div class="t-owner">${esc(t.owner)}</div>
+      </div>`;
+    }).join("");
+
+    return `<div class="ws ${isOpen ? "open" : ""}" data-ws="${w.key}">
+      <div class="ws-head" onclick="toggleWs('${w.key}')">
+        <div class="ws-key">${w.key}</div>
+        <div class="ws-title">${esc(w.title)}<span class="ws-owner">${esc(w.owner)}</span></div>
+        <div class="ws-prog">
+          ${late ? `<span style="color:var(--red); font-weight:bold;">${late} late</span>` : ""}
+          <span>${done} of ${w.tasks.length}</span>
+          <span class="bar"><span style="width:${pct}%"></span></span>
+        </div>
+        <div class="ws-caret">&#9654;</div>
+      </div>
+      <div class="ws-body">
+        <div class="ws-intro">${esc(w.intro)}</div>
+        ${rows || '<div class="ws-intro" style="font-style:italic;">No tasks match the current filter.</div>'}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+const INTEREST = {
+  int:   ["int",   "Interested"],
+  visit: ["visit", "Call to arrange visit"],
+  no:    ["no",    "Not right now"],
+  pend:  ["pend",  "Never reached"]
+};
+
+function contractorVisible(c) {
+  const st = state.contractors[c.n] || {};
+  switch (contractorFilter) {
+    case "PH": case "BW": case "TR": return c.s === contractorFilter;
+    case "june": return !!c.june;
+    case "todo": return !st.contacted;
+    default: return true;
+  }
+}
+
+function renderContractors() {
+  const body = document.getElementById("contractorBody");
+  const rows = CONTRACTORS.filter(contractorVisible);
+  const sessionName = { PH: "Port Hawkesbury", BW: "Bridgewater", TR: "Truro" };
+
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--muted); padding:1rem;">No contractors match this filter.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map((c, idx) => {
+    const st = state.contractors[c.n] || {};
+    const [cls, label] = INTEREST[c.i];
+    const note = st.note != null ? st.note : c.note;
+    const i = CONTRACTORS.indexOf(c);
+    return `<tr>
+      <td><strong>${esc(c.n)}</strong></td>
+      <td>${esc(c.loc)}</td>
+      <td>${esc(sessionName[c.s])}<br><span style="color:var(--muted); font-size:0.78rem;">${fmtDate(SESSIONS.find(s => s.key === c.s).date)}</span></td>
+      <td><span class="tag ${cls}">${esc(label)}</span></td>
+      <td>${esc(c.m)}</td>
+      <td style="text-align:center;">${c.june ? '<span class="tag june">yes</span>' : ""}</td>
+      <td style="text-align:center;">
+        <input type="checkbox" class="ck" ${st.contacted ? "checked" : ""}
+               onchange="setContractor(${i}, 'contacted', this.checked)"></td>
+      <td>
+        <select onchange="setContractor(${i}, 'attending', this.value)">
+          <option value="">not set</option>
+          <option value="Yes"   ${st.attending === "Yes" ? "selected" : ""}>Yes</option>
+          <option value="Maybe" ${st.attending === "Maybe" ? "selected" : ""}>Maybe</option>
+          <option value="No"    ${st.attending === "No" ? "selected" : ""}>No</option>
+        </select></td>
+      <td style="min-width:230px;">
+        <input type="text" class="cell" value="${esc(note)}"
+               onchange="setContractor(${i}, 'note', this.value)"></td>
+    </tr>`;
+  }).join("");
+}
+
+function budgetUnit(b) { return state.budget[b.id] != null ? state.budget[b.id] : b.unit; }
+
+function renderBudget() {
+  let subtotal = 0;
+  const lines = BUDGET.filter(b => !b.auto).map(b => {
+    const unit = budgetUnit(b);
+    const total = unit * b.qty;
+    subtotal += total;
+    return { b, unit, total };
+  });
+
+  const contingencyDef = BUDGET.find(b => b.auto);
+  const contingency = Math.round(subtotal * 0.10);
+
+  document.getElementById("budgetBody").innerHTML =
+    lines.map(({ b, unit, total }) =>
+      `<tr>
+        <td><strong>${esc(b.item)}</strong></td>
+        <td style="color:var(--muted);">${esc(b.basis)}</td>
+        <td class="num"><input type="number" class="money" step="0.01" value="${unit}"
+              onchange="setBudget('${b.id}', this.value)"></td>
+        <td class="num">${b.qty.toLocaleString("en-CA")}</td>
+        <td class="num"><strong>${money(total)}</strong></td>
+        <td style="color:var(--muted); font-size:0.8rem;">${esc(b.status)}</td>
+      </tr>`).join("") +
+    `<tr>
+      <td><strong>${esc(contingencyDef.item)}</strong></td>
+      <td style="color:var(--muted);">${esc(contingencyDef.basis)}</td>
+      <td class="num" style="color:var(--muted);">10%</td>
+      <td class="num">n/a</td>
+      <td class="num"><strong>${money(contingency)}</strong></td>
+      <td style="color:var(--muted); font-size:0.8rem;">${esc(contingencyDef.status)}</td>
+    </tr>`;
+
+  const grand = subtotal + contingency;
+  document.getElementById("budgetFoot").innerHTML =
+    `<tr>
+      <td colspan="4">Estimated total, three sessions</td>
+      <td class="num">${money(grand)}</td>
+      <td style="font-weight:normal; font-size:0.8rem;">${money(Math.round(grand / 3))} per session</td>
+    </tr>`;
+}
+
+function renderRisks() {
+  document.getElementById("risks").innerHTML = RISKS.map(r =>
+    `<div class="risk">
+      <div class="sev ${r.sev}">${r.sev === "med" ? "medium" : r.sev}</div>
+      <div>
+        <div class="r-what">${esc(r.what)}</div>
+        <div class="r-mit">${esc(r.mit)}</div>
+      </div>
+    </div>`).join("");
+}
+
+function renderLists() {
+  document.getElementById("decisions").innerHTML = DECISIONS.map(([t, w]) =>
+    `<li><strong>${esc(t)}</strong><br><span class="why">${esc(w)}</span></li>`).join("");
+  document.getElementById("outOfScope").innerHTML = OUT_OF_SCOPE.map(([t, w]) =>
+    `<li><strong>${esc(t)}</strong><br><span class="why">${esc(w)}</span></li>`).join("");
+}
+
+/* ===========================================================================
+   INTERACTION
+   ======================================================================== */
+
+const CYCLE = ["todo", "doing", "done", "blocked"];
+
+function cycle(id) {
+  const next = CYCLE[(CYCLE.indexOf(taskStatus(id)) + 1) % CYCLE.length];
+  state.tasks[id] = Object.assign({}, state.tasks[id], { status: next });
+  saveState();
+  renderWorkstreams();
+  renderTiles();
+}
+
+function noteEdit(id, el) {
+  state.tasks[id] = Object.assign({}, state.tasks[id], { note: el.textContent });
+  saveState();
+}
+
+function toggleWs(key) {
+  const el = document.querySelector(`.ws[data-ws="${key}"]`);
+  const nowOpen = !el.classList.contains("open");
+  el.classList.toggle("open", nowOpen);
+  state.open[key] = nowOpen;
+  saveState();
+}
+
+function expandAll(open) {
+  WORKSTREAMS.forEach(w => { state.open[w.key] = open; });
+  saveState();
+  renderWorkstreams();
+}
+
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll(".chip[data-filter]").forEach(c => c.classList.remove("on"));
+  btn.classList.add("on");
+  renderWorkstreams();
+}
+
+function setContractorFilter(f, btn) {
+  contractorFilter = f;
+  document.querySelectorAll(".chip[data-cf]").forEach(c => c.classList.remove("on"));
+  btn.classList.add("on");
+  renderContractors();
+}
+
+function setContractor(index, field, value) {
+  const name = CONTRACTORS[index].n;
+  state.contractors[name] = Object.assign({}, state.contractors[name], { [field]: value });
+  saveState();
+  renderTiles();
+  renderSessions();
+}
+
+function setBudget(id, value) {
+  const n = parseFloat(value);
+  state.budget[id] = isNaN(n) ? 0 : n;
+  saveState();
+  renderBudget();
+}
+
+/* ===========================================================================
+   BOOT
+   ======================================================================== */
+
+document.getElementById("today").textContent =
+  TODAY.toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
+
+renderCountdown();
+renderTiles();
+renderSessions();
+renderTimeline();
+renderQuestions();
+renderWorkstreams();
+renderContractors();
+renderBudget();
+renderRisks();
+renderLists();
+</script>
+
+</body>
+</html>
