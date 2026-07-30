@@ -33,6 +33,34 @@ This is deliberately template-agnostic — it doesn't care about the other 11
 headings/sections in your 12 templates, only that this one heading and
 row format are consistent.
 
+## Where these boards live
+
+FORSEC reorganised monday.com on 2026-07-29/30: the Main workspace was
+renamed **Strategic Work Plan** and reserved for the strategic plan itself,
+and each department got its own workspace. Board ids survive a move between
+workspaces, so the mapping below is keyed on ids and was unaffected — but
+for orientation:
+
+| Board | Workspace |
+|---|---|
+| Task Tracking, CI Activity Log, Contractor Directory, Needs Routing | Continuous Improvement |
+| Communications | Communications |
+| Office & Program Administration | Administration |
+| Training Projects & Programs | Training - Skills Development & Training |
+| Safety Feedback & Ideas | Safety Committee |
+| Strategic Work Plan | Strategic Work Plan |
+
+Two other workspaces exist with no task board this tool targets yet:
+**Outreach - Attraction & Retention** and **Labour - Human Resources &
+Planning**. They're likely future routing destinations as those areas grow.
+
+Before any push, `check_configured_boards()` verifies every configured
+board in a single query and reports anything archived, deleted or
+inaccessible — in the CLI before the confirm prompt, and as a banner on the
+web draft. This exists because the reorg silently archived one target board
+and deleted another; without it, that surfaces only as a confusing API
+error partway through a push.
+
 ## Board / column mapping
 
 Routing happens in two stages:
@@ -48,10 +76,13 @@ Routing happens in two stages:
       `SAFETY_OR_DEMO_KEYWORDS`) → **Safety Feedback & Ideas**, regardless of
       owner.
    2. An item owned by Kyle MacKay → **Communications**; Ariel Durning →
-      **Office & Program Administration**; Kerri Marshall → **Board of
-      Directors (ED)**; Samantha Chu → **Training Projects & Programs** (see
-      `OWNER_DEFAULT_ROUTE`) — or anyone else previously taught via the
-      interactive prompt (see `learned_routes.json` below).
+      **Office & Program Administration**; Samantha Chu → **Training
+      Projects & Programs** (see `OWNER_DEFAULT_ROUTE`) — or anyone else
+      previously taught via the interactive prompt (see
+      `learned_routes.json` below). A mapping is only honoured if its board
+      is still configured, so a deleted board or a stale learned entry can
+      never aim items at something that no longer exists. Kerri Marshall
+      has no mapping — see "Board of Directors" below.
    3. Everything else → **UNROUTED**. It is *not* defaulted to Task Tracking
       — Task Tracking lives in the CI Folder and Chris wants it CI-only, so
       an item with no matching department board isn't guessed onto a board
@@ -59,34 +90,31 @@ Routing happens in two stages:
       other routes, unrouted items aren't dropped — see "Unrouted items and
       Needs Routing" below for what actually happens to them at push time.
 
-   Items that land on a board with a subitems column (Communications,
-   Office & Program Administration, Training Projects & Programs) are
-   grouped under one parent item per meeting. Boards without a subitems
-   column (Board of Directors, Safety Feedback & Ideas) get flat items
-   instead — one item per action item, no parent.
+   **Every department board gets one flat item per action item.** An
+   earlier version grouped a meeting's items as subitems under a parent
+   item named after the meeting, but that buried them behind a collapsed
+   dropdown — a busy meeting's tasks effectively vanished from the board.
+   CI Activity Log is the one exception and still uses parent + subitems,
+   because there an item genuinely *is* the interaction rather than a task.
+
+   Because there is no parent item naming the meeting any more, flat items
+   carry a one-line provenance note ("From: *meeting* (*date*), recorded by
+   *who*") in whichever text column the board has — Office Admin Notes,
+   Training Comments, Task Tracking Notes. Communications has no such
+   column, so its items rely on the owner and date alone.
 
 ### Task Tracking (board `18403136567`) — CI-only, no active trigger
 
 Task Tracking sits in the CI Folder alongside CI Activity Log, and per Chris
 it should only ever contain CI-related content. Since contractor meetings
 already route entirely to CI Activity Log, there's currently no rule that
-sends anything to Task Tracking automatically — it's wired up in the script
-(`build_task_tracking_parent_columns`, `PARENT_SUBITEM_BOARDS`) for whenever
-a "CI work, but no named contractor" signal gets defined, but the router
-doesn't reach it today. If/when that signal exists:
-
-| Plaud field | monday.com target |
-|---|---|
-| Meeting title | Parent item name |
-| — | Parent Status → `Not Started` |
-| earliest action item Due date | Parent Deadline |
-| source filename + meeting date | Parent Notes |
-| Task | Subitem name |
-| Owner | Subitem Owner (People column, matched to a monday user) |
-| Due | Subitem Date |
-| — | Subitem Status → `Working on it` |
-
-Parent items would land in the **This Week** group.
+sends anything here automatically — it stays wired up
+(`build_task_tracking_item_columns`, `FLAT_ITEM_BOARDS`) for whenever a
+"CI work, but no named contractor" signal gets defined, but the router
+doesn't reach it today. If/when that signal exists, items would land in the
+**This Week** group as flat items: Task → item name, Status → `Not Started`,
+Due → Deadline. This board has no people column at all, so the owner is
+written into its Notes text alongside the provenance note.
 
 ### CI Activity Log (board `18403818341`)
 
@@ -133,12 +161,16 @@ rather than guessed, and the draft says so explicitly.
 
 ### Communications (board `18336748732`) and Office & Program Administration (board `18381184971`)
 
-Same parent-item-per-meeting + subitems-per-action-item pattern described
-for Task Tracking above. Communications only has a Status/Date on the
-parent (no notes column); Office & Program Administration also gets a
-Notes column with the source/meeting date, and its parent Date Due is set
-to the earliest action item due date. Parent items land in Communications'
-**Tasks** group and Office Admin's **Team Requests** group.
+One flat item per action item. Both boards carry the owner on their own
+**Person** column, Status → `Working on it`, and the due date (Communications
+`Date`, Office Admin `Date Due`). Office & Program Administration also gets
+the provenance note in its **Notes** column; Communications has no notes
+column, so its items rely on owner and date alone. Items land in
+Communications' **Tasks** group and Office Admin's **Team Requests** group.
+
+Communications' **Spend** and **Link to Draft** columns are deliberately
+left blank for manual entry — a meeting summary rarely states a budget, and
+the draft an action item asks for doesn't exist yet when the item is created.
 
 ### Training Projects & Programs (board `18407621067`)
 
@@ -153,11 +185,13 @@ column instead of a single date — the parser sets `{"from": due, "to":
 due}` since it only has one date to work with, on both the parent (earliest
 due date) and each subitem. The parent's Lead column defaults to Samantha.
 
-### Board of Directors (ED) (board `18386660346`)
+### Board of Directors (ED) — deleted
 
-No subitems column, so each routed action item becomes its own flat item
-(Person / Status / Date) directly in the **Other Tasks** group — no parent
-meeting item.
+This board was deleted during FORSEC's 2026-07-29/30 monday.com reorg.
+Kerri Marshall therefore has no entry in `OWNER_DEFAULT_ROUTE`, and her
+action items fall through to Needs Routing for manual placement until she
+has a board again. Its config and column builder were removed rather than
+left pointing at a dead board id — a replacement would get new ids anyway.
 
 ### Safety Feedback & Ideas (board `18418568346`)
 
@@ -168,7 +202,7 @@ whichever keyword matched), Submitted By (the item's owner, or the
 recording person if the item has no owner), Status → `New`. Lands in the
 **New Submissions** group.
 
-### Unrouted items and Needs Routing (board `18424076669`)
+### Unrouted items and Needs Routing (board `18424493577`)
 
 An action item lands here when it isn't a contractor meeting, doesn't match
 a safety/demo-idea keyword, and its owner isn't Kyle/Ariel/Kerri/Samantha or
@@ -193,6 +227,13 @@ holding board (Owner / Due / Status `Needs Review`/`Resolved` / Notes with
 the reason and source meeting) in the **Needs Review** group, meant to be
 reviewed and manually placed on a regular cadence rather than left to pile
 up in terminal scrollback.
+
+The original Needs Routing board sat in the Main workspace and was
+archived during the reorg. monday's API has no unarchive mutation and the
+board was empty, so it was recreated in the **Continuous Improvement**
+workspace, where Chris's own boards live — the Strategic Work Plan
+workspace is reserved for the strategic plan itself. The old archived
+shell can be deleted from monday.com whenever convenient.
 
 ### Owner matching
 
