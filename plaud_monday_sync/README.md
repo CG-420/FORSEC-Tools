@@ -329,6 +329,52 @@ through to UNROUTED since there's no live user data to match against
 (safety/demo-idea keyword routing still works without a token, since it
 doesn't depend on owner matching).
 
+## Getting summaries out of Plaud
+
+Today you export or copy a summary and hand it to the tool (drag/drop a
+`.md`/`.txt`/`.docx`, or paste the text). Two newer Plaud features could
+replace that step; neither is wired up yet.
+
+**Plaud MCP** — a connector that gives an AI assistant direct access to
+your recordings. Install for local AI clients with
+`npx -y @plaud-ai/mcp@latest install`, or add it from the connector
+directory in claude.ai for web-based sessions. Tools: `list_files`,
+`get_file`, `get_note`, `get_transcript`, `get_current_user`. Requires an
+active Plaud account with Cloud Sync enabled. Note that Claude Code needs
+a **fresh session** after install - an already-running session won't pick
+the connector up.
+
+This helps inside Claude sessions only. MCP connectors authenticate to a
+Claude account, so `plaud_monday_sync_web.py` cannot use one.
+
+**Plaud CLI** — this *is* usable from the local web app, because it's an
+ordinary command-line program the server could shell out to. Confirmed
+commands (from docs.plaud.ai/plaud-mcp-cli/cli, 2026-07-30):
+
+```bash
+npm install -g @plaud-ai/cli    # requires Node.js >= 20
+
+plaud login                     # browser sign-in; tokens saved automatically
+plaud logout                    # sign out and revoke authorization
+plaud me                        # current account details
+
+plaud files                     # latest page of recordings
+plaud files --page 2 --page-size 50
+plaud recent                    # recordings from the last 7 days
+plaud recent --days 30
+plaud today                     # today's recordings only
+plaud search "Q2"               # find a recording by keyword
+
+plaud summary <id>              # the AI summary (Markdown) - what this tool parses
+plaud transcript <id>           # the full transcript
+```
+
+`plaud summary <id>` is the interesting one: it returns exactly the
+templated summary the parser expects. Wiring `plaud recent` + `plaud
+summary` into the web UI would turn the "choose files / paste" step into a
+dropdown of actual recordings, and would work for anyone on the team
+without needing a Claude session.
+
 ## If your boards change
 
 Board and column IDs are hardcoded as constants at the top of
