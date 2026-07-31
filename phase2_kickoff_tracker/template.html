@@ -429,11 +429,11 @@
   <section>
     <div class="sec-head">
       <h2>Contractor re-contact and registration</h2>
-      <span class="sec-note">The 33 contractors from the April and May outreach, all approached on a June timeline</span>
+      <span class="sec-note">32 contractors invited, from the April and May outreach, all approached on a June timeline</span>
     </div>
     <div class="filters no-print">
       <span class="lab">Session:</span>
-      <button class="chip on" data-cf="all" onclick="setContractorFilter('all', this)">All 33</button>
+      <button class="chip on" data-cf="all" onclick="setContractorFilter('all', this)">All</button>
       <button class="chip" data-cf="PH"   onclick="setContractorFilter('PH', this)">Port Hawkesbury</button>
       <button class="chip" data-cf="BW"   onclick="setContractorFilter('BW', this)">Bridgewater</button>
       <button class="chip" data-cf="TR"   onclick="setContractorFilter('TR', this)">Truro</button>
@@ -583,10 +583,8 @@ const MILESTONES = [
 const QUESTIONS = [
   "<strong>I need the names of the 11 Phase 1 contractors.</strong> The decision to invite them all is made, but I cannot add them to the table below until I pull the list from the monday.com directory. Ralph Stewart is already in the table.",
   "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17 and acceptance is expected, but nothing is formal yet. Confirmation unlocks the co-promotion plan and the invitation timing.",
-  "<strong>Which funding stream carries the session costs?</strong> I need this before the budget proposal can be finalised.",
-  "<strong>Does Wavez facilitation at the sessions draw on existing contract capacity</strong>, or is it a new line in the budget? Tim and Brock across three sessions is material if it is new.",
-  "<strong>Enhanced Direct Entry dates are still unconfirmed.</strong> A sign-up sheet for a program with no dates is a weak ask. Is there a date to publish by late August, or do I run it as an expression of interest?",
-  "<strong>Is Emmitt Peniston eligible under the FITT grant definition as an arborist?</strong> Outstanding decision for Kerri from the April outreach, and it determines whether I invite him at all."
+  "<strong>Which funding stream carries the session costs?</strong> Kerri's call. I need it before the budget proposal can be finalised, so it goes in the same conversation as the approval.",
+  "<strong>How does Enhanced Direct Entry appear on the sign-up sheet?</strong> Fall delivery is confirmed but the dates are not. If they land before the print run it is a normal sign-up, otherwise it becomes an interest list. Deciding late August."
 ];
 
 const WORKSTREAMS = [
@@ -615,7 +613,7 @@ const WORKSTREAMS = [
       { id: "B3", name: "Agree the line on why the date moved", sub: "One consistent explanation of June to September, and what changed about the format, before the calls start", due: "2026-08-03", owner: "Chris" },
       { id: "B4", name: "Contact the remaining contractors I flagged as interested in May", sub: "Zach Bates, John Goodwin, Chris Greene, Ronnie Langille, Ralph Stewart, Mathew Bezanson, and Titus Campbell", due: "2026-08-08", owner: "Chris" },
       { id: "B5", name: "Contact the 17 call to arrange visit contractors", sub: "Under the pull model these become session invitations rather than site visit bookings", due: "2026-08-12", owner: "Chris" },
-      { id: "B6", name: "Re-approach the four not interested right now contractors", sub: "Kyle Ogilvie, Jeremy Simpson, Marshall Bateman, and Emmitt Peniston. An open session is a much lower ask than a site visit", due: "2026-08-15", owner: "Chris" },
+      { id: "B6", name: "Re-approach the three not interested right now contractors", sub: "Kyle Ogilvie, Jeremy Simpson, and Marshall Bateman. An open session is a much lower ask than a site visit. Emmitt Peniston is deferred to a future round", due: "2026-08-15", owner: "Chris" },
       { id: "B7", name: "Final attempt on Jeff Tanner", sub: "Never reached across three attempts in May", due: "2026-08-15", owner: "Chris" },
       { id: "B8", name: "Source a working number for James Tanner", sub: "His line was out of service in May, so try NSFCA or John Tanner", due: "2026-08-15", owner: "Chris" },
       { id: "B9", name: "Send the written invitation with all three dates", sub: "Announce all three locations up front with a first and second choice question, per the July 17 decision", due: "2026-08-14", owner: "Chris" },
@@ -659,7 +657,8 @@ const WORKSTREAMS = [
       { id: "E3", name: "Build sign-up sheets for all five offerings", sub: "They have to work on paper and on a phone, because venue signal is not guaranteed", due: "2026-08-21", owner: "Chris" },
       { id: "E4", name: "Write a one-pager per offering", sub: "What it is, who it suits, what it costs, and when it runs. Nobody signs up for a title on a list", due: "2026-08-21", owner: "Chris" },
       { id: "E5", name: "Adapt Brock's belt training pricing blurbs for a contractor audience", sub: "From the write-up Brock delivered to Kerri on July 21", due: "2026-08-21", owner: "Chris and Brock" },
-      { id: "E6", name: "Publish Enhanced Direct Entry dates on the sign-up sheet", sub: "Fall delivery is confirmed but the dates are not, which blocks E3 and E4 from being final", due: "2026-08-18", owner: "Chris", flag: "block" },
+      { id: "E6", name: "Chase Enhanced Direct Entry dates", sub: "Fall delivery is confirmed but the dates are not. July 17 expected more detail after July 23, so there may be news already", due: "2026-08-18", owner: "Chris", flag: "block" },
+      { id: "E6b", name: "Decide how Enhanced Direct Entry appears on the sheet", sub: "If dates have landed, it is a normal sign-up. If not, run it as an interest list so nobody signs up for something with no date attached. Decide by late August, ahead of the September 3 print run", due: "2026-08-25", owner: "Chris", flag: "q" },
       { id: "E7", name: "Pull the Phase 1 kickoff improvement list for the group discussion", sub: "Including the items that were never acted on, since surfacing that honestly was the plan", due: "2026-08-21", owner: "Chris" },
       { id: "E8", name: "Language check every piece of material", sub: "Lead with a platform I designed for you, not AI, per the July 17 delivery note", due: "2026-08-25", owner: "Chris" },
       { id: "E9", name: "Print run for all three sessions", sub: "Agendas, one-pagers, sign-up sheets, and Phase 1 handouts, times three", due: "2026-09-03", owner: "Chris" },
@@ -673,8 +672,8 @@ const WORKSTREAMS = [
       { id: "F1", name: "Build the session budget", sub: "Venue, catering, materials, travel, accommodation, swag, and contingency, which is the table below", due: "2026-08-05", owner: "Chris" },
       { id: "F2", name: "Write the short proposal with intended outcome and estimated cost", sub: "Framed so a funder question can be answered from it directly", due: "2026-08-05", owner: "Chris" },
       { id: "F3", name: "Submit to Kerri for approval", due: "2026-08-06", owner: "Chris" },
-      { id: "F4", name: "Confirm which funding stream carries the session costs", due: "2026-08-06", owner: "Kerri", flag: "q" },
-      { id: "F5", name: "Confirm whether Wavez facilitation sits inside existing contract capacity", sub: "Tim and Brock across three sessions is a material cost if it does not", due: "2026-08-06", owner: "Chris and Kerri", flag: "q" },
+      { id: "F4", name: "Ask Kerri which funding stream carries the session costs", sub: "Her call, not mine. The proposal cannot be finalised without it, so raise it in the same conversation as F3", due: "2026-08-06", owner: "Chris and Kerri", flag: "q" },
+      { id: "F5", name: "Confirm whether Wavez facilitation sits inside existing contract capacity", sub: "Confirmed: Tim and Brock facilitating all three sessions is covered by the existing contract, so it carries no new cost", due: "2026-08-06", owner: "Chris", baseline: "done" },
       { id: "F6", name: "Record actuals against estimate after each session", sub: "It makes the Phase 3 budget an evidence-based number rather than another estimate", due: "2026-09-18", owner: "Chris" }
     ]
   },
@@ -729,7 +728,8 @@ const CONTRACTORS = [
   { n: "Mitch Jamieson, Atlantic Tree Solutions", loc: "Toney River", s: "TR", i: "visit", m: "TBD", june: false, note: "Interested but the location pin never arrived." },
   { n: "Jeff Tanner", loc: "Economy", s: "TR", i: "pend", m: "TBD", june: false, note: "Never reached across three attempts. Possibly related to John Tanner." },
   { n: "Marshall Bateman, ABL Timber", loc: "New Glasgow", s: "TR", i: "no", m: "Yes", june: false, note: "NSFCA member, so Angela may be the better route in." },
-  { n: "Emmitt Peniston, Emmitt's Tree Service", loc: "Sheet Harbour", s: "TR", i: "no", m: "No", june: false, note: "Mostly arboriculture now. FITT eligibility decision still open with Kerri." }
+  { n: "Emmitt Peniston, Emmitt's Tree Service", loc: "Sheet Harbour", s: "TR", i: "no", m: "No", june: false, excluded: true,
+    note: "Not participating this round, but open to future rounds. Keep on the radar for Phase 3, especially if mechanized PCT rate-setting moves forward." }
 ];
 
 const BUDGET = [
@@ -741,7 +741,7 @@ const BUDGET = [
   { id: "b6", item: "FORSEC swag", basis: "Stickers, hats, branded items per session", unit: 400, qty: 3, status: "Check existing stock first" },
   { id: "b7", item: "Travel and mileage", basis: "Roughly 1,400 km across three regions", unit: 0.72, qty: 1400, status: "Confirm current rate" },
   { id: "b8", item: "Accommodation", basis: "Port Hawkesbury and Bridgewater, two rooms, one night each", unit: 180, qty: 4, status: "Estimate" },
-  { id: "b9", item: "Wavez facilitation", basis: "Tim and Brock across three sessions", unit: 0, qty: 1, status: "Confirm against existing contract capacity" },
+  { id: "b9", item: "Wavez facilitation", basis: "Tim and Brock across three sessions", unit: 0, qty: 1, status: "Confirmed inside existing contract, no new cost" },
   { id: "b10", item: "Contingency", basis: "10 percent of the lines above", unit: 0, qty: 1, status: "Calculated", auto: true }
 ];
 
@@ -764,6 +764,8 @@ const DECISIONS = [
   ["Session dates are locked", "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, and Truro Thursday September 17."],
   ["All 11 Phase 1 contractors are invited", "Mentorship, GIS, belt training, and Enhanced Direct Entry are all new to them, and they help fill the rooms."],
   ["Sessions are for contractors, not their staff", "Staff facing offers still get sold in the room, but the contractor signs their people up afterwards. This holds catering at 35 per session."],
+  ["Wavez facilitation carries no new cost", "Tim and Brock facilitating all three sessions is covered by the existing FORSEC and Wavez contract capacity."],
+  ["Emmitt Peniston is deferred to a future round", "Not participating in Phase 2, but open to future rounds. Worth revisiting if mechanized PCT rate-setting moves forward."],
   ["Phase 1 is complete as of July 17, 2026", "Declared with full agreement, and no project defense is required."],
   ["Kickoff reframed to advertising sessions", "No longer two sessions of 10 committed contractors, but three regional sessions open to 30 to 40 or more attendees."],
   ["Three regions, three dates, announced together", "Port Hawkesbury, Truro, and Bridgewater, published up front with a first and second choice question."],
@@ -853,6 +855,11 @@ function esc(s) {
 
 function allTasks() { return WORKSTREAMS.flatMap(w => w.tasks); }
 
+// Contractors deferred to a future round stay in the table for the record but
+// drop out of every count, so the outreach numbers reflect who is actually
+// being invited to these sessions.
+const ACTIVE = CONTRACTORS.filter(c => !c.excluded);
+
 // Tasks that were already settled when this tracker was baselined carry a
 // `baseline` status, so a fresh open shows them complete without anyone having
 // to tick them. A saved state always wins over the baseline.
@@ -901,9 +908,9 @@ function renderTiles() {
     return taskStatus(t.id) !== "done" && d >= 0 && d <= 14;
   }).length;
 
-  const contacted = CONTRACTORS.filter(c => (state.contractors[c.n] || {}).contacted).length;
-  const attending = CONTRACTORS.filter(c => (state.contractors[c.n] || {}).attending === "Yes").length;
-  const juneOwed = CONTRACTORS.filter(c => c.june && !(state.contractors[c.n] || {}).contacted).length;
+  const contacted = ACTIVE.filter(c => (state.contractors[c.n] || {}).contacted).length;
+  const attending = ACTIVE.filter(c => (state.contractors[c.n] || {}).attending === "Yes").length;
+  const juneOwed = ACTIVE.filter(c => c.june && !(state.contractors[c.n] || {}).contacted).length;
   const blocked = tasks.filter(t => taskStatus(t.id) === "blocked").length;
 
   // Days to session 1 is deliberately not a tile here: the green countdown
@@ -914,7 +921,7 @@ function renderTiles() {
     { v: next14, l: "Due in 14 days", f: "Open tasks landing before " + fmtDate(isoOffset(14)), cls: next14 ? "amber" : "" },
     { v: blocked, l: "Blocked", f: blocked ? "Waiting on someone else" : "Nothing blocked", cls: blocked ? "alert" : "" },
     { v: juneOwed, l: "June calls owed", f: "Promised a call once the June date was set", cls: juneOwed ? "alert" : "" },
-    { v: contacted + " of 33", l: "Re-contacted", f: "Told about the move to September" },
+    { v: contacted + " of " + ACTIVE.length, l: "Re-contacted", f: "Told about the move to September" },
     { v: attending, l: "Confirmed attending", f: "Target is 30 to 40 per session" }
   ];
 
@@ -928,8 +935,8 @@ function renderTiles() {
 
 function renderSessions() {
   document.getElementById("sessions").innerHTML = SESSIONS.map(s => {
-    const assigned = CONTRACTORS.filter(c => c.s === s.key).length;
-    const yes = CONTRACTORS.filter(c => c.s === s.key && (state.contractors[c.n] || {}).attending === "Yes").length;
+    const assigned = ACTIVE.filter(c => c.s === s.key).length;
+    const yes = ACTIVE.filter(c => c.s === s.key && (state.contractors[c.n] || {}).attending === "Yes").length;
     return `<div class="session">
       <h3>${esc(s.city)}</h3>
       <div class="date">${fmtLongDate(s.date)}</div>
@@ -1063,6 +1070,19 @@ function renderContractors() {
     const [cls, label] = INTEREST[c.i];
     const note = st.note != null ? st.note : c.note;
     const i = CONTRACTORS.indexOf(c);
+
+    // Deferred contractors stay visible for the record, but greyed back with
+    // their controls disabled so they cannot be counted or ticked by mistake.
+    if (c.excluded) {
+      return `<tr style="opacity:0.6;">
+        <td><strong>${esc(c.n)}</strong></td>
+        <td>${esc(c.loc)}</td>
+        <td colspan="4"><span class="tag no">Deferred to a future round</span></td>
+        <td colspan="2" style="color:var(--muted); font-size:0.8rem;">Not invited to these sessions</td>
+        <td style="min-width:230px; color:var(--muted); font-size:0.8rem;">${esc(note)}</td>
+      </tr>`;
+    }
+
     return `<tr>
       <td><strong>${esc(c.n)}</strong></td>
       <td>${esc(c.loc)}</td>
