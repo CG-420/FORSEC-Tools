@@ -178,7 +178,7 @@ def main():
     out = [
         f"<svg xmlns='http://www.w3.org/2000/svg' width='{TILE:.0f}' "
         f"height='{TILE:.0f}' viewBox='0 0 {TILE:.0f} {TILE:.0f}'>",
-        "<g fill='none' stroke='#3B6E4D' stroke-linecap='round' "
+        "<g fill='none' stroke='#338A57' stroke-linecap='round' "
         "stroke-linejoin='round'>",
         "<g stroke-width='1' opacity='0.16'>",
     ]
