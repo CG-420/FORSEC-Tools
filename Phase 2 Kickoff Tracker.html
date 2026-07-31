@@ -253,6 +253,7 @@
   .tag.no    { background: var(--grey-bg); color: var(--muted); }
   .tag.pend  { background: var(--amber-light); color: var(--amber-dark); }
   .tag.june  { background: var(--red-bg); color: var(--red); }
+  .tag.p1    { background: #E4EDF3; color: var(--blue); }
 
   .filters { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem; }
   .filters .lab { font-size: 0.78rem; color: var(--muted); margin-right: 0.15rem; }
@@ -429,7 +430,7 @@
   <section>
     <div class="sec-head">
       <h2>Contractor re-contact and registration</h2>
-      <span class="sec-note">32 contractors invited, from the April and May outreach, all approached on a June timeline</span>
+      <span class="sec-note">44 contractors invited: 32 Phase 2 prospects from the April and May outreach, plus all 12 Phase 1 contractors</span>
     </div>
     <div class="filters no-print">
       <span class="lab">Session:</span>
@@ -438,6 +439,8 @@
       <button class="chip" data-cf="BW"   onclick="setContractorFilter('BW', this)">Bridgewater</button>
       <button class="chip" data-cf="TR"   onclick="setContractorFilter('TR', this)">Truro</button>
       <button class="chip" data-cf="june" onclick="setContractorFilter('june', this)">Owed a June call</button>
+      <button class="chip" data-cf="p1" onclick="setContractorFilter('p1', this)">Phase 1</button>
+      <button class="chip" data-cf="noregion" onclick="setContractorFilter('noregion', this)">Region needed</button>
       <button class="chip" data-cf="todo" onclick="setContractorFilter('todo', this)">Not yet re-contacted</button>
     </div>
     <div class="card" style="padding:0;">
@@ -581,7 +584,10 @@ const MILESTONES = [
 ];
 
 const QUESTIONS = [
-  "<strong>I need the names of the 11 Phase 1 contractors.</strong> The decision to invite them all is made, but I cannot add them to the table below until I pull the list from the monday.com directory. Ralph Stewart is already in the table.",
+  "<strong>Ten of the 12 Phase 1 contractors have no region on record</strong>, so I cannot assign them to a session yet. Only Nick Carmichael and Luke McGrath do.",
+  "<strong>Is Ralph Stewart Phase 1 or Phase 2?</strong> The April outreach report logs him as a Phase 1 check-in, but he is not on the Phase 1 board. He is currently in the table as a Phase 2 prospect at Port Hawkesbury.",
+  "<strong>Is Brent MacInnis Phase 1 or a Phase 2 prospect?</strong> He is on the Phase 1 board, but I approached him as a new prospect in April. He is listed once, as Phase 1.",
+  "<strong>Who is Lloyd?</strong> The outreach report names Luke and Lloyd as Phase 1 contractors in the Antigonish area, and Lloyd referred Ryan MacIsaac. Luke McGrath is on the board but no Lloyd is, so he may be missing from it.",
   "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17 and acceptance is expected, but nothing is formal yet. Confirmation unlocks the co-promotion plan and the invitation timing.",
   "<strong>Which funding stream carries the session costs?</strong> Kerri's call. I need it before the budget proposal can be finalised, so it goes in the same conversation as the approval.",
   "<strong>How does Enhanced Direct Entry appear on the sign-up sheet?</strong> Fall delivery is confirmed but the dates are not. If they land before the print run it is a normal sign-up, otherwise it becomes an interest list. Deciding late August."
@@ -622,13 +628,13 @@ const WORKSTREAMS = [
   },
   {
     key: "C", title: "Expanding the invite list", owner: "Chris Garcelon",
-    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100. The 33 Phase 2 prospects plus the 11 Phase 1 contractors give me 44 known names, which still fills less than half the room.",
+    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100. The 32 Phase 2 prospects plus the 12 Phase 1 contractors give me 44 known names, which still fills less than half the room.",
     tasks: [
       { id: "C1", name: "Set the per-session attendance target and overall registration goal", sub: "The number the whole outreach effort is measured against", due: "2026-08-04", owner: "Chris and Kerri" },
       { id: "C2", name: "NSFCA member distribution via Angela", sub: "The single highest leverage channel for filling the rooms, and it depends on workstream D", due: "2026-08-14", owner: "Chris and Angela", flag: "crit" },
-      { id: "C3", name: "Add the 11 Phase 1 contractors to the invite list", sub: "Decided: all 11 are invited. I need to pull their names from the monday.com directory and add them to the table below, assigned to sessions by region", due: "2026-08-12", owner: "Chris", flag: "q" },
+      { id: "C3", name: "Assign the Phase 1 contractors to sessions", sub: "All 12 are in the table below. Ten still need a region before the invitation goes out, since only Nick Carmichael and Luke McGrath have one on record", due: "2026-08-12", owner: "Chris", flag: "q" },
       { id: "C4", name: "Referral ask on every call", sub: "Two names from each contractor, which is how most of the current list was built", due: "2026-08-22", owner: "Chris" },
-      { id: "C5", name: "Re-open the hard to reach and lapsed contacts", sub: "Brent MacInnis, Mitch Jamieson, Wayne Chisholm, and Glenmore Forestry. Repeated attempts in May, never a real conversation", due: "2026-08-15", owner: "Chris" },
+      { id: "C5", name: "Re-open the hard to reach and lapsed contacts", sub: "Mitch Jamieson, Wayne Chisholm, and Glenmore Forestry. Repeated attempts in May, never a real conversation", due: "2026-08-15", owner: "Chris" },
       { id: "C6", name: "Deliberately recruit trucking contractors", sub: "The current 33 skew heavily to harvesting, but Phase 2 covers both", due: "2026-08-18", owner: "Chris" },
       { id: "C7", name: "Work the mill and supply chain connectors for names", sub: "Darryl Byers at Greenwood Meadows produced the Doug Denny lead, and mills know who cuts for them", due: "2026-08-18", owner: "Chris" },
       { id: "C8", name: "FORSEC communications push", sub: "Social, newsletter, and job board channels, timed with the invitation", due: "2026-08-14", owner: "Kyle MacKay" },
@@ -697,7 +703,7 @@ const CONTRACTORS = [
   { n: "Paul Delaney, Delaney and Son Pulpwood", loc: "Cheticamp", s: "PH", i: "int", m: "Yes", june: true, note: "Said early June worked for him. Needs a personal call about the move." },
   { n: "Landon Reginato, Mira Forestry", loc: "Albert Bridge", s: "PH", i: "int", m: "Yes", june: true, note: "Strong candidate. Confirm he received both Block Reconciliation versions." },
   { n: "John and Jesse Gatza, Ryan River Lumber", loc: "River Ryan", s: "PH", i: "int", m: "TBD", june: true, note: "Operator shortage and automation interest, so a good fit for Enhanced Direct Entry and mentorship." },
-  { n: "Ralph Stewart, RES Forestry", loc: "Antigonish", s: "PH", i: "int", m: "No", june: false, note: "Phase 1 contractor, very well connected. His endorsement carries weight in the room." },
+  { n: "Ralph Stewart, RES Forestry", loc: "Antigonish", s: "PH", i: "int", m: "No", june: false, note: "Logged as a Phase 1 check-in in April but not on the Phase 1 board, so confirm which he is. Very well connected either way, and his endorsement carries weight." },
   { n: "Titus Campbell, Titus Campbell Logging", loc: "Inverness", s: "PH", i: "int", m: "No", june: false, note: "" },
   { n: "Kody Fraser, BP Fraser Forestry", loc: "Mabou", s: "PH", i: "visit", m: "Yes", june: false, note: "Caught at the airport in May, asked to be called back in early May." },
   { n: "Wayne Chisholm, Wayne Chisholm Forestry", loc: "Antigonish", s: "PH", i: "visit", m: "Yes", june: false, note: "Multiple attempts, never a real conversation. Try in person." },
@@ -729,7 +735,33 @@ const CONTRACTORS = [
   { n: "Jeff Tanner", loc: "Economy", s: "TR", i: "pend", m: "TBD", june: false, note: "Never reached across three attempts. Possibly related to John Tanner." },
   { n: "Marshall Bateman, ABL Timber", loc: "New Glasgow", s: "TR", i: "no", m: "Yes", june: false, note: "NSFCA member, so Angela may be the better route in." },
   { n: "Emmitt Peniston, Emmitt's Tree Service", loc: "Sheet Harbour", s: "TR", i: "no", m: "No", june: false, excluded: true,
-    note: "Not participating this round, but open to future rounds. Keep on the radar for Phase 3, especially if mechanized PCT rate-setting moves forward." }
+    note: "Not participating this round, but open to future rounds. Keep on the radar for Phase 3, especially if mechanized PCT rate-setting moves forward." },
+
+  // Phase 1 contractors, from the monday.com Contractor Information board.
+  // All 12 are invited to the September sessions. Region is only filled in
+  // where the outreach report actually states it, so the rest need assigning
+  // before the invitation goes out (task C3).
+  { n: "Nick Carmichael", loc: "Margaree area", s: "PH", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Too busy for a check-in in April. Left a FORSEC hat on his door. Worth a low pressure session invite." },
+  { n: "Luke McGrath", loc: "Antigonish area", s: "PH", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Lower engagement in Phase 1, scheduling was difficult. Connected to Ryan MacIsaac through Lloyd." },
+  { n: "Cody Carter", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true, note: "" },
+  { n: "Kevin Eisnor", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Referred Luke Smith at Fine Cuts, so he is willing to open doors." },
+  { n: "Gerald Battist", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Team Fuel Incentive contractor. Meeting his new hire, with handoff targeted January 2027." },
+  { n: "Brent MacDougall", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true, note: "" },
+  { n: "Brent MacInnis", loc: "Central NS", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Listed as Phase 1 here but approached as a Phase 2 prospect in April, and very hard to reach either way. Worth confirming which he is." },
+  { n: "Mark Ross", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Alex Phillips runs this operation." },
+  { n: "Alex Phillips", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Mark Ross's operation. Block Reconciliation V3 demo and ConnecTeam piloting pending. Direct AI conversation is fine here." },
+  { n: "Mark Bannerman", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "Direct AI conversation is fine here." },
+  { n: "Chris Weare", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true, note: "" },
+  { n: "Ryan Scott", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
+    note: "S and S Forestry. Interested in building an LSS culture, white belt as the entry point, so a strong belt training prospect." }
 ];
 
 const BUDGET = [
@@ -1042,7 +1074,8 @@ const INTEREST = {
   int:   ["int",   "Interested"],
   visit: ["visit", "Call to arrange visit"],
   no:    ["no",    "Not right now"],
-  pend:  ["pend",  "Never reached"]
+  pend:  ["pend",  "Never reached"],
+  p1:    ["p1",    "Phase 1 contractor"]
 };
 
 function contractorVisible(c) {
@@ -1050,7 +1083,9 @@ function contractorVisible(c) {
   switch (contractorFilter) {
     case "PH": case "BW": case "TR": return c.s === contractorFilter;
     case "june": return !!c.june;
-    case "todo": return !st.contacted;
+    case "todo": return !st.contacted && !c.excluded;
+    case "p1": return !!c.phase1;
+    case "noregion": return !c.s && !c.excluded;
     default: return true;
   }
 }
@@ -1086,7 +1121,10 @@ function renderContractors() {
     return `<tr>
       <td><strong>${esc(c.n)}</strong></td>
       <td>${esc(c.loc)}</td>
-      <td>${esc(sessionName[c.s])}<br><span style="color:var(--muted); font-size:0.78rem;">${fmtDate(SESSIONS.find(s => s.key === c.s).date)}</span></td>
+      <td>${c.s
+        ? esc(sessionName[c.s]) + '<br><span style="color:var(--muted); font-size:0.78rem;">' +
+          fmtDate(SESSIONS.find(s => s.key === c.s).date) + "</span>"
+        : '<span class="tag pend">region needed</span>'}</td>
       <td><span class="tag ${cls}">${esc(label)}</span></td>
       <td>${esc(c.m)}</td>
       <td style="text-align:center;">${c.june ? '<span class="tag june">yes</span>' : ""}</td>
