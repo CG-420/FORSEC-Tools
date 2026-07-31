@@ -384,9 +384,9 @@
     </div>
     <div class="sessions" id="sessions"></div>
     <div class="assump">
-      <strong>Assumption to confirm:</strong> these are the dates from the July 17 meeting, which I was to lock by
-      Friday July 24, so I am showing them as target dates. If they are confirmed, ticking task A1 firms up the whole
-      plan behind it. If they have moved, every date in this tracker shifts with them.
+      <strong>Dates are locked.</strong> Confirmed against the July 17 meeting, so venue booking, the invitation, and
+      the registration cut-off can all proceed against them. Sessions are for contractors rather than their staff,
+      which holds the catering estimate at 35 per session.
     </div>
   </section>
 
@@ -568,7 +568,7 @@ const SESSIONS = [
 
 const MILESTONES = [
   { date: "2026-07-17", label: "Strategic planning meeting", note: "Phase 1 closed, kickoff reframed to three open advertising sessions", state: "done" },
-  { date: "2026-07-24", label: "Session dates to be locked", note: "Deadline set in the July 17 meeting, status to confirm", state: "auto" },
+  { date: "2026-07-24", label: "Session dates locked", note: "Port Hawkesbury September 10, Bridgewater September 16, Truro September 17", state: "done" },
   { date: "2026-08-06", label: "Budget proposal approved by Kerri", note: "Intended outcome plus estimated cost, per the new budget discipline", state: "auto" },
   { date: "2026-08-07", label: "Angela aligned and venues booked", note: "NSFCA promotion is the main channel for filling the rooms", state: "auto" },
   { date: "2026-08-14", label: "Invitation goes out", note: "All three dates announced together with a first and second choice question", state: "auto" },
@@ -581,23 +581,21 @@ const MILESTONES = [
 ];
 
 const QUESTIONS = [
-  "<strong>Are the three session dates locked?</strong> They were due Friday July 24, and everything in this tracker is dated off them.",
-  "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17. Confirmation unlocks the co-promotion plan and the invitation timing.",
+  "<strong>I need the names of the 11 Phase 1 contractors.</strong> The decision to invite them all is made, but I cannot add them to the table below until I pull the list from the monday.com directory. Ralph Stewart is already in the table.",
+  "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17 and acceptance is expected, but nothing is formal yet. Confirmation unlocks the co-promotion plan and the invitation timing.",
   "<strong>Which funding stream carries the session costs?</strong> I need this before the budget proposal can be finalised.",
-  "<strong>Does Wavez facilitation at the sessions draw on existing contract capacity</strong>, or is it a new line in the budget?",
-  "<strong>Do we invite the 11 Phase 1 contractors?</strong> The new offerings, mentorship, GIS, belt training, and Enhanced Direct Entry, all apply to them too, and they would fill seats.",
-  "<strong>Are contractor staff welcome, or owners only?</strong> This affects catering numbers and how I word the invitation.",
-  "<strong>Enhanced Direct Entry dates are still unconfirmed.</strong> A sign-up sheet for a program with no dates is a weak ask. Is there a date to publish by late August?",
+  "<strong>Does Wavez facilitation at the sessions draw on existing contract capacity</strong>, or is it a new line in the budget? Tim and Brock across three sessions is material if it is new.",
+  "<strong>Enhanced Direct Entry dates are still unconfirmed.</strong> A sign-up sheet for a program with no dates is a weak ask. Is there a date to publish by late August, or do I run it as an expression of interest?",
   "<strong>Is Emmitt Peniston eligible under the FITT grant definition as an arborist?</strong> Outstanding decision for Kerri from the April outreach, and it determines whether I invite him at all."
 ];
 
 const WORKSTREAMS = [
   {
     key: "A", title: "Sessions, dates, and venues", owner: "Chris Garcelon",
-    intro: "Locking the three dates and getting rooms, food, and AV booked. I cannot announce anything until A1 is closed.",
+    intro: "The three dates are locked, so this is now about getting rooms, food, and AV booked against them.",
     tasks: [
-      { id: "A1", name: "Lock and publish the three session dates", sub: "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, Truro Thursday September 17", due: "2026-07-24", owner: "Chris", flag: "crit" },
-      { id: "A2", name: "Confirm Kerri, Brock, and Tim are available on all three dates", due: "2026-07-31", owner: "Chris" },
+      { id: "A1", name: "Lock and publish the three session dates", sub: "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, Truro Thursday September 17", due: "2026-07-24", owner: "Chris", baseline: "done" },
+      { id: "A2", name: "Confirm Kerri, Brock, and Tim are available on all three dates", due: "2026-08-04", owner: "Chris" },
       { id: "A3", name: "Book the Port Hawkesbury venue", sub: "Room for 40, 11:00 AM to 3:00 PM, projector and screen, parking for trucks", due: "2026-08-07", owner: "Chris" },
       { id: "A4", name: "Book the Bridgewater venue", sub: "Room for 40, same format", due: "2026-08-07", owner: "Chris" },
       { id: "A5", name: "Book the Truro venue", sub: "Inn on Prince and Best Western were both shortlisted in May", due: "2026-08-07", owner: "Chris" },
@@ -612,9 +610,9 @@ const WORKSTREAMS = [
     key: "B", title: "Re-contacting the contractors I have already spoken to", owner: "Chris Garcelon",
     intro: "I approached all 33 contractors in April and May on a June timeline, and I promised several of them a call once the June date was confirmed. Those calls are now four months late and the answer has changed. This is the reputational piece of the project.",
     tasks: [
-      { id: "B1", name: "Personal call to Paul Delaney", sub: "He specifically said early June worked for him, so the move to September deserves a direct call rather than an email", due: "2026-07-31", owner: "Chris", flag: "crit" },
-      { id: "B2", name: "Call the five others I promised a call once the June date was confirmed", sub: "Tim Amero, Dana Rafuse, Leo Hankinson, Landon Reginato, and John and Jesse Gatza at Ryan River Lumber", due: "2026-08-04", owner: "Chris", flag: "crit" },
-      { id: "B3", name: "Agree the line on why the date moved", sub: "One consistent explanation of June to September, and what changed about the format, before the calls start", due: "2026-07-30", owner: "Chris" },
+      { id: "B1", name: "Personal call to Paul Delaney", sub: "He specifically said early June worked for him, so the move to September deserves a direct call rather than an email", due: "2026-08-04", owner: "Chris", flag: "crit" },
+      { id: "B2", name: "Call the five others I promised a call once the June date was confirmed", sub: "Tim Amero, Dana Rafuse, Leo Hankinson, Landon Reginato, and John and Jesse Gatza at Ryan River Lumber", due: "2026-08-06", owner: "Chris", flag: "crit" },
+      { id: "B3", name: "Agree the line on why the date moved", sub: "One consistent explanation of June to September, and what changed about the format, before the calls start", due: "2026-08-03", owner: "Chris" },
       { id: "B4", name: "Contact the remaining contractors I flagged as interested in May", sub: "Zach Bates, John Goodwin, Chris Greene, Ronnie Langille, Ralph Stewart, Mathew Bezanson, and Titus Campbell", due: "2026-08-08", owner: "Chris" },
       { id: "B5", name: "Contact the 17 call to arrange visit contractors", sub: "Under the pull model these become session invitations rather than site visit bookings", due: "2026-08-12", owner: "Chris" },
       { id: "B6", name: "Re-approach the four not interested right now contractors", sub: "Kyle Ogilvie, Jeremy Simpson, Marshall Bateman, and Emmitt Peniston. An open session is a much lower ask than a site visit", due: "2026-08-15", owner: "Chris" },
@@ -626,25 +624,25 @@ const WORKSTREAMS = [
   },
   {
     key: "C", title: "Expanding the invite list", owner: "Chris Garcelon",
-    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100, and the existing 33 contractors fill barely a third of them.",
+    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100. The 33 Phase 2 prospects plus the 11 Phase 1 contractors give me 44 known names, which still fills less than half the room.",
     tasks: [
       { id: "C1", name: "Set the per-session attendance target and overall registration goal", sub: "The number the whole outreach effort is measured against", due: "2026-08-04", owner: "Chris and Kerri" },
       { id: "C2", name: "NSFCA member distribution via Angela", sub: "The single highest leverage channel for filling the rooms, and it depends on workstream D", due: "2026-08-14", owner: "Chris and Angela", flag: "crit" },
-      { id: "C3", name: "Decide on and invite the 11 Phase 1 contractors", sub: "Mentorship, GIS, belt training, and Enhanced Direct Entry are all new to them", due: "2026-08-12", owner: "Chris", flag: "q" },
+      { id: "C3", name: "Add the 11 Phase 1 contractors to the invite list", sub: "Decided: all 11 are invited. I need to pull their names from the monday.com directory and add them to the table below, assigned to sessions by region", due: "2026-08-12", owner: "Chris", flag: "q" },
       { id: "C4", name: "Referral ask on every call", sub: "Two names from each contractor, which is how most of the current list was built", due: "2026-08-22", owner: "Chris" },
       { id: "C5", name: "Re-open the hard to reach and lapsed contacts", sub: "Brent MacInnis, Mitch Jamieson, Wayne Chisholm, and Glenmore Forestry. Repeated attempts in May, never a real conversation", due: "2026-08-15", owner: "Chris" },
       { id: "C6", name: "Deliberately recruit trucking contractors", sub: "The current 33 skew heavily to harvesting, but Phase 2 covers both", due: "2026-08-18", owner: "Chris" },
       { id: "C7", name: "Work the mill and supply chain connectors for names", sub: "Darryl Byers at Greenwood Meadows produced the Doug Denny lead, and mills know who cuts for them", due: "2026-08-18", owner: "Chris" },
       { id: "C8", name: "FORSEC communications push", sub: "Social, newsletter, and job board channels, timed with the invitation", due: "2026-08-14", owner: "Kyle MacKay" },
-      { id: "C9", name: "Decide whether contractor staff are invited alongside owners", sub: "Belt training and Enhanced Direct Entry are staff facing offers, so this could double the room", due: "2026-08-07", owner: "Chris and Kerri", flag: "q" }
+      { id: "C9", name: "Word the invitation for contractors rather than their staff", sub: "Decided: sessions are for contractors only. Belt training and Enhanced Direct Entry still get sold in the room, but the contractor signs their people up rather than bringing them", due: "2026-08-07", owner: "Chris", baseline: "done" }
     ]
   },
   {
     key: "D", title: "NSFCA partnership, Angela MacGillivray", owner: "Chris Garcelon and Kerri Marshall",
     intro: "Kerri sent the re-engagement proposal to Angela on July 17 and the indications are that NSFCA will accept. The pause was operational only, tied to the financial review. Angela is both a speaker at the sessions and the fastest route to a full room.",
     tasks: [
-      { id: "D1", name: "Confirm with Kerri that the MOU has been formally accepted", sub: "Everything else in this workstream sits behind a yes", due: "2026-07-30", owner: "Chris", flag: "crit" },
-      { id: "D2", name: "Book the meeting with Angela", sub: "Agenda: partnership restart, session co-promotion, her speaking slot, and the member list", due: "2026-08-01", owner: "Chris" },
+      { id: "D1", name: "Confirm with Kerri that the MOU has been formally accepted", sub: "Everything else in this workstream sits behind a yes", due: "2026-08-03", owner: "Chris", flag: "crit" },
+      { id: "D2", name: "Book the meeting with Angela", sub: "Agenda: partnership restart, session co-promotion, her speaking slot, and the member list", due: "2026-08-04", owner: "Chris" },
       { id: "D3", name: "Meet Angela", sub: "Kerri and I together, restarting the partnership and asking for promotion in the same conversation", due: "2026-08-07", owner: "Chris and Kerri" },
       { id: "D4", name: "Agree the co-promotion plan and the date NSFCA sends the invitation", sub: "Named channels and a date, not a general offer of support", due: "2026-08-07", owner: "Chris and Angela" },
       { id: "D5", name: "Get NSFCA membership status for the 14 contractors listed TBD", sub: "It changes how I approach each one. Members are an existing relationship, non-members are a door in", due: "2026-08-12", owner: "Angela" },
@@ -748,12 +746,10 @@ const BUDGET = [
 ];
 
 const RISKS = [
-  { sev: "high", what: "The session dates were due to be locked on July 24 and this tracker cannot confirm they were.",
-    mit: "Every downstream date depends on them: venue bookings, the invitation, the registration cut-off, and catering numbers. Closing A1 is the single highest value thing on this page." },
+  { sev: "high", what: "Filling three rooms depends on NSFCA promotion, and the MOU is expected but not yet formally accepted.",
+    mit: "Acceptance is expected, but until it is confirmed the highest leverage channel for filling the rooms is not available. The 44 known contractors fill less than half the seats on their own. If NSFCA promotion has not landed by mid August, either scale the target down or find a second channel quickly." },
   { sev: "high", what: "Port Hawkesbury on September 10 feeds a mentorship cohort starting September 22 in the same region.",
     mit: "Genevieve needs at least a week of pre-calls, so sign-ups have to reach her by roughly September 15, which is five working days after the session. Build the handoff into the session day routine rather than treating it as follow-up." },
-  { sev: "high", what: "Filling three rooms of 30 to 40 depends on NSFCA promotion, which depends on the MOU being accepted.",
-    mit: "The existing 33 contractors fill about a third of the seats. If NSFCA promotion does not land by mid August, either scale the target down or find a second channel quickly." },
   { sev: "med", what: "Contractors were told June and have not heard since, so the move to September is a four month slip.",
     mit: "Six were explicitly promised a call once the June date was confirmed. Get ahead of it with a consistent explanation and personal calls to those six before any mass invitation goes out." },
   { sev: "med", what: "Enhanced Direct Entry has no confirmed dates but is one of five things being sold in the room.",
@@ -765,6 +761,9 @@ const RISKS = [
 ];
 
 const DECISIONS = [
+  ["Session dates are locked", "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, and Truro Thursday September 17."],
+  ["All 11 Phase 1 contractors are invited", "Mentorship, GIS, belt training, and Enhanced Direct Entry are all new to them, and they help fill the rooms."],
+  ["Sessions are for contractors, not their staff", "Staff facing offers still get sold in the room, but the contractor signs their people up afterwards. This holds catering at 35 per session."],
   ["Phase 1 is complete as of July 17, 2026", "Declared with full agreement, and no project defense is required."],
   ["Kickoff reframed to advertising sessions", "No longer two sessions of 10 committed contractors, but three regional sessions open to 30 to 40 or more attendees."],
   ["Three regions, three dates, announced together", "Port Hawkesbury, Truro, and Bridgewater, published up front with a first and second choice question."],
@@ -852,9 +851,21 @@ function esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-function taskStatus(id) { return (state.tasks[id] && state.tasks[id].status) || "todo"; }
-function taskNote(id)   { return (state.tasks[id] && state.tasks[id].note)   || ""; }
-function allTasks()     { return WORKSTREAMS.flatMap(w => w.tasks); }
+function allTasks() { return WORKSTREAMS.flatMap(w => w.tasks); }
+
+// Tasks that were already settled when this tracker was baselined carry a
+// `baseline` status, so a fresh open shows them complete without anyone having
+// to tick them. A saved state always wins over the baseline.
+const TASK_BY_ID = new Map(allTasks().map(t => [t.id, t]));
+
+function taskStatus(id) {
+  const saved = state.tasks[id] && state.tasks[id].status;
+  if (saved) return saved;
+  const t = TASK_BY_ID.get(id);
+  return (t && t.baseline) || "todo";
+}
+
+function taskNote(id) { return (state.tasks[id] && state.tasks[id].note) || ""; }
 
 function isOverdue(t) {
   return taskStatus(t.id) !== "done" && daysBetween(TODAY, parseDate(t.due)) < 0;
