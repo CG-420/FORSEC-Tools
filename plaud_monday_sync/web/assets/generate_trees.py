@@ -82,10 +82,10 @@ def main():
     out = [
         f"<svg xmlns='http://www.w3.org/2000/svg' width='{STRIP_W:.0f}' "
         f"height='{STRIP_H:.0f}' viewBox='0 0 {STRIP_W:.0f} {STRIP_H:.0f}'>",
-        "<g fill='#3B6E4D' opacity='0.20'>",
+        "<g fill='#338A57' opacity='0.20'>",
     ]
     out.extend(f"<path d='{d}'/>" for d in back)
-    out.append("</g><g fill='#3B6E4D' opacity='0.32'>")
+    out.append("</g><g fill='#338A57' opacity='0.32'>")
     out.extend(f"<path d='{d}'/>" for d in front)
     out.append("</g></svg>")
     print("".join(out))
