@@ -404,16 +404,22 @@
       <h2>Needs a decision</h2>
       <span class="sec-note">Open items blocking work below</span>
     </div>
-    <div class="callout">
-      <h4>Waiting on Kerri, Brock, or a conversation with Angela</h4>
-      <ul id="questions"></ul>
+    <div class="two-col">
+      <div class="callout">
+        <h4>Decisions to make</h4>
+        <ul id="questions"></ul>
+      </div>
+      <div class="callout">
+        <h4>Records to reconcile</h4>
+        <ul id="records"></ul>
+      </div>
     </div>
   </section>
 
   <section>
     <div class="sec-head">
       <h2>Workstreams</h2>
-      <span class="sec-note no-print">Click a heading to open it, click a box to cycle not started, in progress, complete, blocked</span>
+      <span class="sec-note">Eight workstreams. <span class="no-print">Click a heading to open it, click a box to cycle not started, in progress, complete, blocked</span></span>
     </div>
     <div class="filters no-print">
       <span class="lab">Show:</span>
@@ -576,7 +582,9 @@ const MILESTONES = [
   { date: "2026-08-07", label: "Angela aligned and venues booked", note: "NSFCA promotion is the main channel for filling the rooms", state: "auto" },
   { date: "2026-08-14", label: "Invitation goes out", note: "All three dates announced together with a first and second choice question", state: "auto" },
   { date: "2026-09-03", label: "Registration cut-off", note: "Final headcounts drive catering and print runs", state: "auto" },
+  { date: "2026-09-08", label: "Everything ready for Port Hawkesbury", note: "Deck, handouts, forms, name tags, and the AV kit packed. Session 1 sets the template for the other two", state: "auto" },
   { date: "2026-09-10", label: "Session 1, Port Hawkesbury", note: "", state: "auto" },
+  { date: "2026-09-11", label: "Debrief and adjust", note: "The only clean day to fix anything before Bridgewater and Truro", state: "auto" },
   { date: "2026-09-15", label: "Mentorship sign-ups to Genevieve", note: "She needs a week of pre-calls before the September 22 cohort starts", state: "auto" },
   { date: "2026-09-16", label: "Session 2, Bridgewater", note: "", state: "auto" },
   { date: "2026-09-17", label: "Session 3, Truro", note: "", state: "auto" },
@@ -584,13 +592,21 @@ const MILESTONES = [
 ];
 
 const QUESTIONS = [
+  "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17 and acceptance is expected, but nothing is formal yet. Confirmation unlocks the co-promotion plan and the invitation timing.",
+  "<strong>Which funding stream carries the session costs?</strong> Kerri's call. I need it before the budget proposal can be finalised, so it goes in the same conversation as the approval.",
+  "<strong>Interest capture: email reply or a light registration form?</strong> A form captures region preference and dietary needs and feeds monday.com directly, which is why I leaned that way in the master plan.",
+  "<strong>Session staffing: who is where?</strong> Which of Kerri and Wavez attends which location, and who is the day-of logistics lead at each. Needed before the September 3 materials date.",
+  "<strong>What is the low-turnout trigger?</strong> A confirmed number and a date that makes collapsing or shifting a session an easy call rather than a judgement one. My own suggestion was fewer than six confirmed a week out.",
+  "<strong>Bridgewater to Truro: overnight or drive it?</strong> The two sessions are back to back, and an overnight means arriving fresh for Truro.",
+  "<strong>How does Enhanced Direct Entry appear on the sign-up sheet?</strong> Fall delivery is confirmed but the dates are not. If they land before the print run it is a normal sign-up, otherwise it becomes an interest list. Deciding late August."
+];
+
+const RECORDS = [
   "<strong>Ten of the 12 Phase 1 contractors have no region on record</strong>, so I cannot assign them to a session yet. Only Nick Carmichael and Luke McGrath do.",
   "<strong>Is Ralph Stewart Phase 1 or Phase 2?</strong> The April outreach report logs him as a Phase 1 check-in, but he is not on the Phase 1 board. He is currently in the table as a Phase 2 prospect at Port Hawkesbury.",
   "<strong>Is Brent MacInnis Phase 1 or a Phase 2 prospect?</strong> He is on the Phase 1 board, but I approached him as a new prospect in April. He is listed once, as Phase 1.",
   "<strong>Who is Lloyd?</strong> The outreach report names Luke and Lloyd as Phase 1 contractors in the Antigonish area, and Lloyd referred Ryan MacIsaac. Luke McGrath is on the board but no Lloyd is, so he may be missing from it.",
-  "<strong>Has the NSFCA MOU been formally accepted?</strong> Kerri sent it to Angela on July 17 and acceptance is expected, but nothing is formal yet. Confirmation unlocks the co-promotion plan and the invitation timing.",
-  "<strong>Which funding stream carries the session costs?</strong> Kerri's call. I need it before the budget proposal can be finalised, so it goes in the same conversation as the approval.",
-  "<strong>How does Enhanced Direct Entry appear on the sign-up sheet?</strong> Fall delivery is confirmed but the dates are not. If they land before the print run it is a normal sign-up, otherwise it becomes an interest list. Deciding late August."
+  "<strong>The board lists 12 Phase 1 contractors</strong>, but the May kickoff plan said 11 participated. Probably a stale count in the older document, but worth knowing which is right."
 ];
 
 const WORKSTREAMS = [
@@ -605,9 +621,10 @@ const WORKSTREAMS = [
       { id: "A5", name: "Book the Truro venue", sub: "Inn on Prince and Best Western were both shortlisted in May", due: "2026-08-07", owner: "Chris" },
       { id: "A6", name: "Build the run of show for the 11:00 AM to 3:00 PM format", sub: "Shorter and looser than the old four hour agenda, since people arrive and leave around work", due: "2026-08-14", owner: "Chris" },
       { id: "A7", name: "Confirm facilitation roles and speaking slots", sub: "I lead, Kerri opens, Angela opens for NSFCA, Tim and Brock support", due: "2026-08-14", owner: "Chris" },
-      { id: "A8", name: "Confirm catering at each venue", sub: "Simple lunch, dietary options, service window inside 11:00 AM to 3:00 PM", due: "2026-08-21", owner: "Chris" },
-      { id: "A9", name: "Confirm AV and connectivity at each venue", sub: "Projector, screen, power, and enough signal for digital sign-up in the room", due: "2026-08-28", owner: "Chris" },
-      { id: "A10", name: "Agree the contingency if a session under-registers", sub: "The July 17 decision was to collapse or shift sessions rather than run an empty room", due: "2026-09-03", owner: "Chris and Kerri" }
+      { id: "A8", name: "Confirm catering at each venue", sub: "Simple lunch served 12:00 to 12:30 so it does not stall the agenda. Capture dietary needs at registration, and order 10 to 15 percent over the confirmed count for walk-ins", due: "2026-08-21", owner: "Chris" },
+      { id: "A9", name: "Confirm AV and connectivity at each venue", sub: "Projector or large screen, HDMI, power, Wi-Fi strong enough for sign-up in the room, tables for the sign-up stations, parking for trucks, and step-free access", due: "2026-08-28", owner: "Chris" },
+      { id: "A10", name: "Set the low-turnout trigger", sub: "The July 17 decision was to collapse or shift a session rather than run an empty room. That needs a number and a date to act on, for example fewer than six confirmed a week out", due: "2026-09-03", owner: "Chris and Kerri", flag: "q" },
+      { id: "A11", name: "Hold a backup venue for each location", sub: "Cheap insurance. A fallback room per region in case a booking falls through close to the date", due: "2026-08-14", owner: "Chris" }
     ]
   },
   {
@@ -622,7 +639,9 @@ const WORKSTREAMS = [
       { id: "B6", name: "Re-approach the three not interested right now contractors", sub: "Kyle Ogilvie, Jeremy Simpson, and Marshall Bateman. An open session is a much lower ask than a site visit. Emmitt Peniston is deferred to a future round", due: "2026-08-15", owner: "Chris" },
       { id: "B7", name: "Final attempt on Jeff Tanner", sub: "Never reached across three attempts in May", due: "2026-08-15", owner: "Chris" },
       { id: "B8", name: "Source a working number for James Tanner", sub: "His line was out of service in May, so try NSFCA or John Tanner", due: "2026-08-15", owner: "Chris" },
-      { id: "B9", name: "Send the written invitation with all three dates", sub: "Announce all three locations up front with a first and second choice question, per the July 17 decision", due: "2026-08-14", owner: "Chris" },
+      { id: "B9", name: "Draft the contractor outreach email", sub: "Announce all three locations up front with a first and second choice question, per the July 17 decision", due: "2026-08-11", owner: "Chris" },
+      { id: "B9b", name: "Kerri and Angela review and approve the email", sub: "It goes out through NSFCA channels as well as FORSEC's, so Angela signs off too. Build the review time in rather than assuming same-day turnaround", due: "2026-08-13", owner: "Kerri and Angela" },
+      { id: "B9c", name: "Send the invitation via FORSEC and NSFCA channels", sub: "Roughly four weeks ahead of Port Hawkesbury", due: "2026-08-14", owner: "Chris and Angela" },
       { id: "B10", name: "Log every re-contact and stated preference in the table below", sub: "Ongoing through August", due: "2026-09-03", owner: "Chris" }
     ]
   },
@@ -659,8 +678,9 @@ const WORKSTREAMS = [
     intro: "The sessions sell five things and take sign-ups on the spot: Phase 1 tools, GIS and telematics, mentorship training, Lean Six Sigma belt training, and Enhanced Direct Entry. Every one of them needs something a contractor can read and something they can sign.",
     tasks: [
       { id: "E1", name: "Get a working annual production value for one harvester", sub: "The anchor number for every ROI conversation in the room, flagged as an action item on July 17", due: "2026-08-14", owner: "Chris", flag: "crit" },
-      { id: "E2", name: "Build the Phase 1 results deck", sub: "One or two slides per improvement with real numbers: ConnecTeam, Block Reconciliation, Team Fuel Incentive, FDAP, Sales Brochure, and the Job Board", due: "2026-08-21", owner: "Chris" },
-      { id: "E3", name: "Build sign-up sheets for all five offerings", sub: "They have to work on paper and on a phone, because venue signal is not guaranteed", due: "2026-08-21", owner: "Chris" },
+      { id: "E2", name: "Build the Phase 1 results deck", sub: "One or two slides per improvement with real numbers: ConnecTeam, Block Reconciliation, Team Fuel Incentive, FDAP, Sales Brochure, and the Job Board. Brock co-builds, especially the belt training content", due: "2026-08-21", owner: "Chris and Brock" },
+      { id: "E3", name: "Build one capture form per attendee", sub: "A single form with a checkbox for every offering, rather than a separate sheet per program. One contact record with all their interests is far easier to load into monday.com. Has to work on paper and on a phone, because venue signal is not guaranteed", due: "2026-08-21", owner: "Chris" },
+      { id: "E3b", name: "Add a what would make this worth your time line to the capture form", sub: "Catches pain points live, the way the site visits used to. Under the pull model this is the main chance to hear them", due: "2026-08-21", owner: "Chris" },
       { id: "E4", name: "Write a one-pager per offering", sub: "What it is, who it suits, what it costs, and when it runs. Nobody signs up for a title on a list", due: "2026-08-21", owner: "Chris" },
       { id: "E5", name: "Adapt Brock's belt training pricing blurbs for a contractor audience", sub: "From the write-up Brock delivered to Kerri on July 21", due: "2026-08-21", owner: "Chris and Brock" },
       { id: "E6", name: "Chase Enhanced Direct Entry dates", sub: "Fall delivery is confirmed but the dates are not. July 17 expected more detail after July 23, so there may be news already", due: "2026-08-18", owner: "Chris", flag: "block" },
@@ -668,7 +688,8 @@ const WORKSTREAMS = [
       { id: "E7", name: "Pull the Phase 1 kickoff improvement list for the group discussion", sub: "Including the items that were never acted on, since surfacing that honestly was the plan", due: "2026-08-21", owner: "Chris" },
       { id: "E8", name: "Language check every piece of material", sub: "Lead with a platform I designed for you, not AI, per the July 17 delivery note", due: "2026-08-25", owner: "Chris" },
       { id: "E9", name: "Print run for all three sessions", sub: "Agendas, one-pagers, sign-up sheets, and Phase 1 handouts, times three", due: "2026-09-03", owner: "Chris" },
-      { id: "E10", name: "Pack the FORSEC swag", sub: "Stickers and hats have opened more doors than anything else in this project so far", due: "2026-09-03", owner: "Chris" }
+      { id: "E10", name: "Pack the FORSEC swag", sub: "Stickers and hats have opened more doors than anything else in this project so far", due: "2026-09-03", owner: "Chris" },
+      { id: "E11", name: "Get comms approval on everything public facing", sub: "Every public facing piece has to acknowledge Canada and Nova Scotia funding, use approved branding, and clear comms review first. Covers the email, one-pagers, handouts, and any social post. Build the review time in", due: "2026-08-13", owner: "Chris and Kyle MacKay", flag: "crit" }
     ]
   },
   {
@@ -688,13 +709,29 @@ const WORKSTREAMS = [
     intro: "The sessions only pay off if the sign-ups they generate land somewhere. Sign-up volume is also the documented justification for an additional hire if Phase 2 demand exceeds one person's capacity.",
     tasks: [
       { id: "G1", name: "Decide the registration mechanism", sub: "Form, email reply, or NSFCA collected. I need this settled before I write the invitation", due: "2026-08-04", owner: "Chris" },
-      { id: "G2", name: "Set and communicate the registration cut-off", sub: "Proposed Thursday September 3, one week before the first session", due: "2026-08-12", owner: "Chris" },
+      { id: "G2", name: "Communicate the registration cut-off", sub: "Hard cut-off Thursday September 3, one week before the first session. Say so in the invitation so the date carries weight", due: "2026-08-12", owner: "Chris" },
       { id: "G3", name: "Update the monday.com CI Contractor Directory with Phase 2 entries", sub: "Status for every one of the 33 plus everyone added through expansion", due: "2026-08-22", owner: "Chris" },
       { id: "G4", name: "Confirmation and reminder emails", sub: "On registration, then at two weeks and three days out", due: "2026-09-03", owner: "Chris" },
       { id: "G5", name: "Final headcounts to each caterer", sub: "Port Hawkesbury by September 4, Bridgewater and Truro by September 11", due: "2026-09-04", owner: "Chris" },
       { id: "G6", name: "Capture sign-ups into monday.com within 48 hours of each session", sub: "A signed sheet left in a folder is a lost sign-up", due: "2026-09-18", owner: "Chris" },
       { id: "G7", name: "Hand Port Hawkesbury mentorship sign-ups to Genevieve", sub: "Cohort 1 starts September 22 and she needs at least a week of pre-calls, which is five working days after session 1", due: "2026-09-15", owner: "Chris", flag: "crit" },
       { id: "G8", name: "Report total sign-up numbers by offering and region", sub: "The evidence base for an additional hire, and for the Phase 3 plan", due: "2026-09-18", owner: "Chris" }
+    ]
+  },
+  {
+    key: "H", title: "Session day operations", owner: "Chris Garcelon",
+    intro: "Port Hawkesbury on September 10 runs a full week ahead of the other two, so it sets the template. Everything here has to work there first, and September 11 is the only day to fix anything before Bridgewater and Truro. This is the list to work from on the day.",
+    tasks: [
+      { id: "H1", name: "Name a day-of logistics lead for each session", sub: "Room, food, and sign-in desk, so I can focus on facilitating rather than running the building", due: "2026-08-28", owner: "Chris and Kerri", flag: "q" },
+      { id: "H2", name: "Build the door sign-in sheet", sub: "Name, company, email, phone, and a photo and social media consent tickbox. Separate from the capture form, and it catches everyone including walk-ins", due: "2026-08-21", owner: "Chris" },
+      { id: "H3", name: "Set up staffed sign-up stations", sub: "Tables at the back with someone on them, so signing up happens in the room rather than after people get home", due: "2026-09-03", owner: "Chris" },
+      { id: "H4", name: "Name tags and markers for each session", sub: "Blank tags and a marker is enough. It gets contractors talking to each other, which matters in a group room", due: "2026-09-03", owner: "Chris" },
+      { id: "H5", name: "Pack the AV kit", sub: "Laptop, clicker, HDMI and USB-C adapters, extension cord, and a power bar. Bring them rather than assuming the venue has them", due: "2026-09-08", owner: "Chris" },
+      { id: "H6", name: "Prepare an offline backup for any live tool demo", sub: "Screenshots or a recorded walk-through, in case the venue Wi-Fi is weak", due: "2026-09-03", owner: "Chris" },
+      { id: "H7", name: "Print backup handouts of the deck", sub: "If AV fails entirely, the session still has to run", due: "2026-09-03", owner: "Chris" },
+      { id: "H8", name: "Assign someone to capture photos and clips", sub: "Consent comes off the sign-in sheet. Ties to the operator feature idea flagged during the April outreach", due: "2026-09-03", owner: "Chris and Kyle MacKay" },
+      { id: "H9", name: "Decide the follow-up workflow before session 1", sub: "Who enters a sign-up, where it lands, and who books the follow-up call. Leads from advertising sessions go cold fast without a default next step", due: "2026-09-03", owner: "Chris" },
+      { id: "H10", name: "Debrief after Port Hawkesbury and adjust", sub: "The one clean day between session 1 and the other two. Fix the deck, the forms, and the run of show before Bridgewater", due: "2026-09-11", owner: "Chris and Brock", flag: "crit" }
     ]
   }
 ];
@@ -782,6 +819,10 @@ const RISKS = [
     mit: "Acceptance is expected, but until it is confirmed the highest leverage channel for filling the rooms is not available. The 44 known contractors fill less than half the seats on their own. If NSFCA promotion has not landed by mid August, either scale the target down or find a second channel quickly." },
   { sev: "high", what: "Port Hawkesbury on September 10 feeds a mentorship cohort starting September 22 in the same region.",
     mit: "Genevieve needs at least a week of pre-calls, so sign-ups have to reach her by roughly September 15, which is five working days after the session. Build the handoff into the session day routine rather than treating it as follow-up." },
+  { sev: "high", what: "August is peak harvest and vacation season, which is exactly when the outreach has to land.",
+    mit: "Phone answer rates will be low. Start the calls early, keep at them, and lean on Angela and referrals rather than cold calling alone. The plan looks like seven weeks but August realistically gives five usable ones." },
+  { sev: "med", what: "Port Hawkesbury runs a week ahead of the other two, so it sets the template for all three.",
+    mit: "Everything has to be finished for September 10, not September 17. September 11 is the only clean day to fix the deck, forms, or run of show before Bridgewater and Truro, so protect it as a debrief day rather than booking over it." },
   { sev: "med", what: "Contractors were told June and have not heard since, so the move to September is a four month slip.",
     mit: "Six were explicitly promised a call once the June date was confirmed. Get ahead of it with a consistent explanation and personal calls to those six before any mass invitation goes out." },
   { sev: "med", what: "Enhanced Direct Entry has no confirmed dates but is one of five things being sold in the room.",
@@ -796,6 +837,8 @@ const DECISIONS = [
   ["Session dates are locked", "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, and Truro Thursday September 17."],
   ["All 11 Phase 1 contractors are invited", "Mentorship, GIS, belt training, and Enhanced Direct Entry are all new to them, and they help fill the rooms."],
   ["Sessions are for contractors, not their staff", "Staff facing offers still get sold in the room, but the contractor signs their people up afterwards. This holds catering at 35 per session."],
+  ["Registration cut-off is hard, not soft", "Thursday September 3, one week ahead of the first session, stated in the invitation so the date carries weight. Catering still carries a 10 to 15 percent buffer for the walk-ins an open session attracts."],
+  ["All public facing material needs comms approval", "Canada and Nova Scotia funding acknowledgment plus approved branding, cleared before anything goes out."],
   ["Wavez facilitation carries no new cost", "Tim and Brock facilitating all three sessions is covered by the existing FORSEC and Wavez contract capacity."],
   ["Emmitt Peniston is deferred to a future round", "Not participating in Phase 2, but open to future rounds. Worth revisiting if mechanized PCT rate-setting moves forward."],
   ["Phase 1 is complete as of July 17, 2026", "Declared with full agreement, and no project defense is required."],
@@ -948,7 +991,7 @@ function renderTiles() {
   // Days to session 1 is deliberately not a tile here: the green countdown
   // band at the top of the page already carries it for all three sessions.
   const tiles = [
-    { v: Math.round(done / tasks.length * 100) + "%", l: "Tasks complete", f: done + " of " + tasks.length + " across 7 workstreams" },
+    { v: Math.round(done / tasks.length * 100) + "%", l: "Tasks complete", f: done + " of " + tasks.length + " across 8 workstreams" },
     { v: overdue, l: "Overdue", f: overdue ? "Past due and still open" : "Nothing past due", cls: overdue ? "alert" : "" },
     { v: next14, l: "Due in 14 days", f: "Open tasks landing before " + fmtDate(isoOffset(14)), cls: next14 ? "amber" : "" },
     { v: blocked, l: "Blocked", f: blocked ? "Waiting on someone else" : "Nothing blocked", cls: blocked ? "alert" : "" },
@@ -1001,6 +1044,7 @@ function renderTimeline() {
 
 function renderQuestions() {
   document.getElementById("questions").innerHTML = QUESTIONS.map(q => `<li>${q}</li>`).join("");
+  document.getElementById("records").innerHTML = RECORDS.map(q => `<li>${q}</li>`).join("");
 }
 
 function taskVisible(t) {
