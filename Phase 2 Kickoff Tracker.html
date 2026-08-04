@@ -564,7 +564,9 @@ const SESSIONS = [
     region: "Western Nova Scotia", venue: "",
     note: "Back to back with Truro, no recovery day between them" },
   { key: "TR", city: "Truro", date: "2026-09-17",
-    region: "Central Nova Scotia", venue: "Inn on Prince and Best Western were the May shortlist", note: "" }
+    region: "Central Nova Scotia",
+    venue: "Inn on Prince, Birch/Aspen room, held 8:00 AM to 5:00 PM, rounds for 40",
+    note: "Contract received and must be signed by August 5. Lea Bergano, 902-897-8006, lea@innonprince.com" }
 ];
 
 const MILESTONES = [
@@ -603,10 +605,13 @@ const WORKSTREAMS = [
       { id: "A2", name: "Confirm Kerri, Brock, and Tim are available on all three dates", due: "2026-08-04", owner: "Chris" },
       { id: "A3", name: "Book the Port Hawkesbury venue", sub: "Room for 40, 12:00 PM to 3:00 PM, projector and screen, parking for trucks", due: "2026-08-07", owner: "Chris" },
       { id: "A4", name: "Book the Bridgewater venue", sub: "Room for 40, same format", due: "2026-08-07", owner: "Chris" },
-      { id: "A5", name: "Book the Truro venue", sub: "Inn on Prince and Best Western were both shortlisted in May", due: "2026-08-07", owner: "Chris" },
+      { id: "A5", name: "Book the Truro venue", sub: "Inn on Prince has confirmed availability and sent the contract. Birch/Aspen room, rounds for 40, held 8:00 AM to 5:00 PM, $600 room rental", due: "2026-08-07", owner: "Chris", baseline: "doing" },
+      { id: "A5a", name: "Sign and return the Inn on Prince contract", sub: "The contract has to be back by August 5 to guarantee the room. Signing also needs the credit card authorisation form completed at the same time", due: "2026-08-05", owner: "Chris", flag: "crit" },
+      { id: "A5b", name: "Complete the credit card authorisation form", sub: "Required at signing to secure the booking. Handle it through Kerri and finance rather than storing card details anywhere in this tracker", due: "2026-08-05", owner: "Chris and Kerri", flag: "crit" },
+      { id: "A5c", name: "Return the Inn on Prince event information form", sub: "Setup style, AV selections, food and beverage times and numbers, dietary restrictions. Rounds for 40, projector and 96 inch screen, lunch from about 12:15", due: "2026-08-14", owner: "Chris" },
       { id: "A6", name: "Build the run of show for the 12:00 PM to 3:00 PM format", sub: "Short welcome at noon, then a networking lunch, then the content. The lunch is for contractors to talk to each other, not to sit through slides while they eat", due: "2026-08-14", owner: "Chris" },
       { id: "A7", name: "Confirm facilitation roles and speaking slots", sub: "I lead, Kerri opens, Angela opens for NSFCA, Tim and Brock support", due: "2026-08-14", owner: "Chris" },
-      { id: "A8", name: "Confirm catering at each venue", sub: "Soup and salad, kept simple and cheap, with a coffee and refreshment table. Served from about 12:15 as the networking portion. Capture dietary needs at registration and order 10 to 15 percent over the confirmed count for walk-ins", due: "2026-08-21", owner: "Chris" },
+      { id: "A8", name: "Confirm catering at each venue", sub: "Soup and salad, kept simple and cheap, served from about 12:15 as the networking portion. Capture dietary needs at registration. Note that Inn on Prince charges for every meal ordered whether or not people show, so order against confirmed numbers rather than optimistically", due: "2026-08-21", owner: "Chris" },
       { id: "A9", name: "Confirm AV and connectivity at each venue", sub: "Projector or large screen, HDMI, power, Wi-Fi strong enough for sign-up in the room, tables for the sign-up stations, parking for trucks, and step-free access", due: "2026-08-28", owner: "Chris" },
       { id: "A10", name: "Set the low-turnout trigger", sub: "The July 17 decision was to collapse or shift a session rather than run an empty room. That needs a number and a date to act on, for example fewer than six confirmed a week out", due: "2026-09-03", owner: "Chris and Kerri", flag: "q" },
       { id: "A11", name: "Hold a backup venue for each location", sub: "Cheap insurance. A fallback room per region in case a booking falls through close to the date", due: "2026-08-14", owner: "Chris" }
@@ -694,7 +699,7 @@ const WORKSTREAMS = [
       { id: "G2", name: "Communicate the registration cut-off", sub: "Hard cut-off Thursday September 3, one week before the first session. Say so in the invitation so the date carries weight", due: "2026-08-12", owner: "Chris" },
       { id: "G3", name: "Update the monday.com CI Contractor Directory with Phase 2 entries", sub: "Status for every one of the 33 plus everyone added through expansion", due: "2026-08-22", owner: "Chris" },
       { id: "G4", name: "Confirmation and reminder emails", sub: "On registration, then at two weeks and three days out", due: "2026-09-03", owner: "Chris" },
-      { id: "G5", name: "Final headcounts to each caterer", sub: "Port Hawkesbury by September 4, Bridgewater and Truro by September 11", due: "2026-09-04", owner: "Chris" },
+      { id: "G5", name: "Final headcounts and menu choices to each venue", sub: "Inn on Prince needs final numbers and catering choices by September 3, fourteen days out, and no changes are accepted after that. Port Hawkesbury and Bridgewater to match their own terms once booked", due: "2026-09-03", owner: "Chris", flag: "crit" },
       { id: "G6", name: "Capture sign-ups into monday.com within 48 hours of each session", sub: "A signed sheet left in a folder is a lost sign-up", due: "2026-09-18", owner: "Chris" },
       { id: "G7", name: "Hand Port Hawkesbury mentorship sign-ups to Genevieve", sub: "Cohort 1 starts September 22 and she needs at least a week of pre-calls, which is five working days after session 1", due: "2026-09-15", owner: "Chris", flag: "crit" },
       { id: "G8", name: "Report total sign-up numbers by offering and region", sub: "The evidence base for an additional hire, and for the Phase 3 plan", due: "2026-09-18", owner: "Chris" }
@@ -765,16 +770,24 @@ const CONTRACTORS = [
 const BUDGET_SPEC = [
   { key: "venue", item: "Venue rental", status: "Estimate, no quotes yet",
     basis: "Meeting room, half day, capacity 40",
-    PH: [350, 1], BW: [350, 1], TR: [300, 1] },
-  { key: "lunch", item: "Lunch catering", status: "Estimate, per person",
+    PH: [350, 1], BW: [350, 1], TR: [600, 1],
+    basisTR: "Inn on Prince, Birch/Aspen room, 8:00 AM to 5:00 PM, rounds for 40",
+    statusTR: "Quoted, contract received" },
+  { key: "lunch", item: "Lunch catering", status: "Estimate, per person", fnb: true,
     basis: "Soup and salad, per person",
-    PH: [18, 35], BW: [18, 35], TR: [18, 35] },
-  { key: "coffee", item: "Coffee and refreshment table", status: "Estimate, per person",
+    PH: [18, 35], BW: [18, 35], TR: [27, 35],
+    basisTR: "Working Lunch: soup, chef's salad, sandwiches and wraps, chips, cookies",
+    statusTR: "Menu priced, minimum 10" },
+  { key: "coffee", item: "Coffee and refreshment table", status: "Estimate, per person", fnb: true,
     basis: "Per person",
-    PH: [6, 35], BW: [6, 35], TR: [6, 35] },
+    PH: [6, 35], BW: [6, 35], TR: [0, 35],
+    basisTR: "Included with the lunch buffet, no separate charge",
+    statusTR: "Included in catering" },
   { key: "av", item: "AV rental", status: "May be included in venue",
     basis: "Projector and screen where the venue has none",
-    PH: [150, 1], BW: [150, 1], TR: [150, 1] },
+    PH: [150, 1], BW: [150, 1], TR: [135, 1],
+    basisTR: "Projector $90 plus 96 inch screen $45. Podium and first flip chart are free",
+    statusTR: "Priced from the AV list" },
   { key: "print", item: "Printed materials", status: "Estimate",
     basis: "Agendas, one-pagers, sign-up sheets, handouts",
     PH: [250, 1], BW: [250, 1], TR: [250, 1] },
@@ -792,6 +805,7 @@ const BUDGET_SPEC = [
     PH: [0, 1], BW: [0, 1], TR: [0, 1] }
 ];
 
+const SERVICE_RATE = 0.17;     // Inn on Prince gratuity on food and beverage
 const CONTINGENCY_RATE = 0.10;
 const HST_RATE = 0.14;   // Nova Scotia, as of 2026
 
@@ -802,17 +816,22 @@ function budgetLines(sessionKey) {
     const id = spec.key + "-" + sessionKey;
     const unit = state.budget[id] != null ? state.budget[id] : defUnit;
     const qty = (state.qty || {})[id] != null ? state.qty[id] : defQty;
-    const basis = (state.basis || {})[id] != null ? state.basis[id] : spec.basis;
-    return { id, item: spec.item, status: spec.status, basis, unit, qty, total: unit * qty };
+    const defBasis = spec["basis" + sessionKey] || spec.basis;
+    const basis = (state.basis || {})[id] != null ? state.basis[id] : defBasis;
+    const status = spec["status" + sessionKey] || spec.status;
+    return { id, item: spec.item, status, basis, unit, qty, fnb: !!spec.fnb, total: unit * qty };
   });
 }
 
 function sessionTotals(sessionKey) {
-  const subtotal = budgetLines(sessionKey).reduce((sum, l) => sum + l.total, 0);
-  const contingency = subtotal * CONTINGENCY_RATE;
-  const beforeTax = subtotal + contingency;
+  const lines = budgetLines(sessionKey);
+  const subtotal = lines.reduce((sum, l) => sum + l.total, 0);
+  // The hotel adds 17% to food and beverage only, not to room rental or AV.
+  const service = lines.filter(l => l.fnb).reduce((sum, l) => sum + l.total, 0) * SERVICE_RATE;
+  const contingency = (subtotal + service) * CONTINGENCY_RATE;
+  const beforeTax = subtotal + service + contingency;
   const hst = beforeTax * HST_RATE;
-  return { subtotal, contingency, beforeTax, hst, total: beforeTax + hst };
+  return { subtotal, service, contingency, beforeTax, hst, total: beforeTax + hst };
 }
 
 const RISKS = [
@@ -820,6 +839,8 @@ const RISKS = [
     mit: "Acceptance is expected, but until it is confirmed the highest leverage channel for filling the rooms is not available. The 32 known contractors fill roughly a third of the seats on their own. If NSFCA promotion has not landed by mid August, either scale the target down or find a second channel quickly." },
   { sev: "high", what: "Port Hawkesbury on September 10 feeds a mentorship cohort starting September 22 in the same region.",
     mit: "Genevieve needs at least a week of pre-calls, so sign-ups have to reach her by roughly September 15, which is five working days after the session. Build the handoff into the session day routine rather than treating it as follow-up." },
+  { sev: "high", what: "Signing the Inn on Prince contract now lands straight inside the 50 percent cancellation band.",
+    mit: "Their free cancellation window closed 45 days out, which was August 3. From now to August 18 a cancellation costs 50 percent of banquet charges, and after September 3 it costs 100 percent. Truro is the session most likely to fill, so the exposure is defensible, but it means the collapse-a-session fallback no longer applies to Truro without a cost." },
   { sev: "high", what: "August is peak harvest and vacation season, which is exactly when the outreach has to land.",
     mit: "Phone answer rates will be low. Start the calls early, keep at them, and lean on Angela and referrals rather than cold calling alone. The plan looks like seven weeks but August realistically gives five usable ones." },
   { sev: "med", what: "Port Hawkesbury runs a week ahead of the other two, so it sets the template for all three.",
@@ -834,6 +855,7 @@ const RISKS = [
 
 const DECISIONS = [
   ["Session dates are locked", "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, and Truro Thursday September 17."],
+  ["Truro is booked at the Inn on Prince", "Birch/Aspen room, rounds for 40, held 8:00 AM to 5:00 PM on September 17, $600 room rental plus catering. Contract due back August 5."],
   ["Three offerings take sign-ups", "Mentorship training, HR services, and the Phase 1 improvements. The telematics pilot gets mentioned as progress but has no spaces left, and Enhanced Direct Entry is not raised at all this round."],
   ["Phase 1 contractors are not invited to the kickoff sessions", "The improvements built with them keep developing, and the engaged ones hear about it through normal conversation. No formal invitation needed."],
   ["Sessions are for contractors, not their staff", "Staff facing offers still get sold in the room, but the contractor signs their people up afterwards. This holds catering at 35 per session."],
@@ -1267,6 +1289,7 @@ function sessionTable(key) {
     </tr>`).join("")}</tbody>
     <tfoot>
       <tr class="sub"><td colspan="4">Subtotal</td><td class="num">${money(t.subtotal)}</td><td>${esc(city)}</td></tr>
+      <tr class="sub"><td colspan="4">Service charge at 17 percent</td><td class="num">${money(t.service)}</td><td>Food and beverage only</td></tr>
       <tr class="sub"><td colspan="4">Contingency at 10 percent</td><td class="num">${money(t.contingency)}</td><td>Calculated</td></tr>
       <tr class="sub"><td colspan="4">HST at 14 percent</td><td class="num">${money(t.hst)}</td><td>Nova Scotia</td></tr>
       <tr><td colspan="4">Session total</td><td class="num">${money(t.total)}</td><td style="font-weight:normal; font-size:0.8rem;">${esc(city)}</td></tr>
@@ -1296,6 +1319,7 @@ function comparisonTable(keys) {
       row(spec.item, k => per[k][i].total, false)).join("")}</tbody>
     <tfoot>
       ${row("Subtotal", k => totals[k].subtotal, true)}
+      ${row("Service charge at 17 percent", k => totals[k].service, true)}
       ${row("Contingency at 10 percent", k => totals[k].contingency, true)}
       ${row("HST at 14 percent", k => totals[k].hst, true)}
       <tr>
