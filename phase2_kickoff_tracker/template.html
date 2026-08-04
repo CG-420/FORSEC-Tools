@@ -245,6 +245,12 @@
   tbody tr:nth-child(even) { background: #F2F2F2; }
   tbody tr:hover { background: var(--green-light); }
   tfoot td { font-weight: bold; background: var(--green-light); border-top: 2px solid var(--green); }
+  tfoot tr.sub td { background: #F4F8F5; border-top: 1px solid var(--border-strong); font-weight: normal; font-size: 0.82rem; color: var(--muted); }
+  tfoot tr.sub td.num { font-weight: bold; color: var(--text); }
+  .loc-picks { display: flex; gap: 0.45rem; margin-top: 0.3rem; }
+  .loc-picks label { display: flex; align-items: center; gap: 0.15rem; font-size: 0.72rem; color: var(--muted); cursor: pointer; }
+  .loc-picks .ck { width: 13px; height: 13px; }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-left: 0.5rem; }
   td.num, th.num { text-align: right; white-space: nowrap; }
 
   .tag { display: inline-block; font-size: 0.72rem; font-weight: bold; padding: 0.1rem 0.42rem; border-radius: 3px; white-space: nowrap; }
@@ -253,7 +259,6 @@
   .tag.no    { background: var(--grey-bg); color: var(--muted); }
   .tag.pend  { background: var(--amber-light); color: var(--amber-dark); }
   .tag.june  { background: var(--red-bg); color: var(--red); }
-  .tag.p1    { background: #E4EDF3; color: var(--blue); }
 
   .filters { display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem; }
   .filters .lab { font-size: 0.78rem; color: var(--muted); margin-right: 0.15rem; }
@@ -381,7 +386,7 @@
   <section>
     <div class="sec-head">
       <h2>The three sessions</h2>
-      <span class="sec-note">11:00 AM to 3:00 PM, simple lunch, open format with sign-up on the spot</span>
+      <span class="sec-note">12:00 PM to 3:00 PM, networking lunch, open format with sign-up on the spot</span>
     </div>
     <div class="sessions" id="sessions"></div>
     <div class="assump">
@@ -404,15 +409,9 @@
       <h2>Needs a decision</h2>
       <span class="sec-note">Open items blocking work below</span>
     </div>
-    <div class="two-col">
-      <div class="callout">
-        <h4>Decisions to make</h4>
-        <ul id="questions"></ul>
-      </div>
-      <div class="callout">
-        <h4>Records to reconcile</h4>
-        <ul id="records"></ul>
-      </div>
+    <div class="callout">
+      <h4>Waiting on Kerri, Brock, or a conversation with Angela</h4>
+      <ul id="questions"></ul>
     </div>
   </section>
 
@@ -436,7 +435,7 @@
   <section>
     <div class="sec-head">
       <h2>Contractor re-contact and registration</h2>
-      <span class="sec-note">44 contractors invited: 32 Phase 2 prospects from the April and May outreach, plus all 12 Phase 1 contractors</span>
+      <span class="sec-note">Phase 2 contractors from the April and May outreach, plus anyone added since</span>
     </div>
     <div class="filters no-print">
       <span class="lab">Session:</span>
@@ -445,8 +444,6 @@
       <button class="chip" data-cf="BW"   onclick="setContractorFilter('BW', this)">Bridgewater</button>
       <button class="chip" data-cf="TR"   onclick="setContractorFilter('TR', this)">Truro</button>
       <button class="chip" data-cf="june" onclick="setContractorFilter('june', this)">Owed a June call</button>
-      <button class="chip" data-cf="p1" onclick="setContractorFilter('p1', this)">Phase 1</button>
-      <button class="chip" data-cf="noregion" onclick="setContractorFilter('noregion', this)">Region needed</button>
       <button class="chip" data-cf="todo" onclick="setContractorFilter('todo', this)">Not yet re-contacted</button>
     </div>
     <div class="card" style="padding:0;">
@@ -459,7 +456,6 @@
               <th>Session</th>
               <th>Interest in May</th>
               <th>NSFCA</th>
-              <th style="text-align:center;">Told<br>June</th>
               <th style="text-align:center;">Re-<br>contacted</th>
               <th>Attending</th>
               <th>Notes</th>
@@ -467,6 +463,10 @@
           </thead>
           <tbody id="contractorBody"></tbody>
         </table>
+      </div>
+      <div class="no-print" style="padding:0.7rem 0.9rem; border-top:1px solid var(--border);">
+        <button class="primary" onclick="addContractor()">Add a contractor</button>
+        <span class="hint">New rows are fully editable. Everything saves in this browser.</span>
       </div>
     </div>
     <div class="assump">
@@ -504,8 +504,8 @@
       </div>
     </div>
     <div class="assump">
-      Built for 35 attendees per session across three sessions, an 11:00 AM to 3:00 PM format with a simple lunch, and
-      me plus one other FORSEC attendee travelling to each. The July 17 meeting set the expectation of short proposals
+      Built for 35 attendees per session across three sessions, a 12:00 PM to 3:00 PM format with a soup and salad networking
+      lunch, and me plus one other FORSEC attendee travelling to each. The July 17 meeting set the expectation of short proposals
       with intended outcome and estimated cost before travel-heavy or spend-heavy activities. This table is the cost
       half of that proposal.
     </div>
@@ -598,16 +598,9 @@ const QUESTIONS = [
   "<strong>Session staffing: who is where?</strong> Which of Kerri and Wavez attends which location, and who is the day-of logistics lead at each. Needed before the September 3 materials date.",
   "<strong>What is the low-turnout trigger?</strong> A confirmed number and a date that makes collapsing or shifting a session an easy call rather than a judgement one. My own suggestion was fewer than six confirmed a week out.",
   "<strong>Bridgewater to Truro: overnight or drive it?</strong> The two sessions are back to back, and an overnight means arriving fresh for Truro.",
-  "<strong>How does Enhanced Direct Entry appear on the sign-up sheet?</strong> Fall delivery is confirmed but the dates are not. If they land before the print run it is a normal sign-up, otherwise it becomes an interest list. Deciding late August."
+  "<strong>Is Lean Six Sigma belt training on the sign-up sheet?</strong> It was a sign-up offering and July 17 called it a strategic centrepiece, but the current three are mentorship training, HR services, and Phase 1 improvements. Flagging rather than dropping it silently."
 ];
 
-const RECORDS = [
-  "<strong>Ten of the 12 Phase 1 contractors have no region on record</strong>, so I cannot assign them to a session yet. Only Nick Carmichael and Luke McGrath do.",
-  "<strong>Is Ralph Stewart Phase 1 or Phase 2?</strong> The April outreach report logs him as a Phase 1 check-in, but he is not on the Phase 1 board. He is currently in the table as a Phase 2 prospect at Port Hawkesbury.",
-  "<strong>Is Brent MacInnis Phase 1 or a Phase 2 prospect?</strong> He is on the Phase 1 board, but I approached him as a new prospect in April. He is listed once, as Phase 1.",
-  "<strong>Who is Lloyd?</strong> The outreach report names Luke and Lloyd as Phase 1 contractors in the Antigonish area, and Lloyd referred Ryan MacIsaac. Luke McGrath is on the board but no Lloyd is, so he may be missing from it.",
-  "<strong>The board lists 12 Phase 1 contractors</strong>, but the May kickoff plan said 11 participated. Probably a stale count in the older document, but worth knowing which is right."
-];
 
 const WORKSTREAMS = [
   {
@@ -616,12 +609,12 @@ const WORKSTREAMS = [
     tasks: [
       { id: "A1", name: "Lock and publish the three session dates", sub: "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, Truro Thursday September 17", due: "2026-07-24", owner: "Chris", baseline: "done" },
       { id: "A2", name: "Confirm Kerri, Brock, and Tim are available on all three dates", due: "2026-08-04", owner: "Chris" },
-      { id: "A3", name: "Book the Port Hawkesbury venue", sub: "Room for 40, 11:00 AM to 3:00 PM, projector and screen, parking for trucks", due: "2026-08-07", owner: "Chris" },
+      { id: "A3", name: "Book the Port Hawkesbury venue", sub: "Room for 40, 12:00 PM to 3:00 PM, projector and screen, parking for trucks", due: "2026-08-07", owner: "Chris" },
       { id: "A4", name: "Book the Bridgewater venue", sub: "Room for 40, same format", due: "2026-08-07", owner: "Chris" },
       { id: "A5", name: "Book the Truro venue", sub: "Inn on Prince and Best Western were both shortlisted in May", due: "2026-08-07", owner: "Chris" },
-      { id: "A6", name: "Build the run of show for the 11:00 AM to 3:00 PM format", sub: "Shorter and looser than the old four hour agenda, since people arrive and leave around work", due: "2026-08-14", owner: "Chris" },
+      { id: "A6", name: "Build the run of show for the 12:00 PM to 3:00 PM format", sub: "Short welcome at noon, then a networking lunch, then the content. The lunch is for contractors to talk to each other, not to sit through slides while they eat", due: "2026-08-14", owner: "Chris" },
       { id: "A7", name: "Confirm facilitation roles and speaking slots", sub: "I lead, Kerri opens, Angela opens for NSFCA, Tim and Brock support", due: "2026-08-14", owner: "Chris" },
-      { id: "A8", name: "Confirm catering at each venue", sub: "Simple lunch served 12:00 to 12:30 so it does not stall the agenda. Capture dietary needs at registration, and order 10 to 15 percent over the confirmed count for walk-ins", due: "2026-08-21", owner: "Chris" },
+      { id: "A8", name: "Confirm catering at each venue", sub: "Soup and salad, kept simple and cheap, with a coffee and refreshment table. Served from about 12:15 as the networking portion. Capture dietary needs at registration and order 10 to 15 percent over the confirmed count for walk-ins", due: "2026-08-21", owner: "Chris" },
       { id: "A9", name: "Confirm AV and connectivity at each venue", sub: "Projector or large screen, HDMI, power, Wi-Fi strong enough for sign-up in the room, tables for the sign-up stations, parking for trucks, and step-free access", due: "2026-08-28", owner: "Chris" },
       { id: "A10", name: "Set the low-turnout trigger", sub: "The July 17 decision was to collapse or shift a session rather than run an empty room. That needs a number and a date to act on, for example fewer than six confirmed a week out", due: "2026-09-03", owner: "Chris and Kerri", flag: "q" },
       { id: "A11", name: "Hold a backup venue for each location", sub: "Cheap insurance. A fallback room per region in case a booking falls through close to the date", due: "2026-08-14", owner: "Chris" }
@@ -651,13 +644,12 @@ const WORKSTREAMS = [
     tasks: [
       { id: "C1", name: "Set the per-session attendance target and overall registration goal", sub: "The number the whole outreach effort is measured against", due: "2026-08-04", owner: "Chris and Kerri" },
       { id: "C2", name: "NSFCA member distribution via Angela", sub: "The single highest leverage channel for filling the rooms, and it depends on workstream D", due: "2026-08-14", owner: "Chris and Angela", flag: "crit" },
-      { id: "C3", name: "Assign the Phase 1 contractors to sessions", sub: "All 12 are in the table below. Ten still need a region before the invitation goes out, since only Nick Carmichael and Luke McGrath have one on record", due: "2026-08-12", owner: "Chris", flag: "q" },
       { id: "C4", name: "Referral ask on every call", sub: "Two names from each contractor, which is how most of the current list was built", due: "2026-08-22", owner: "Chris" },
       { id: "C5", name: "Re-open the hard to reach and lapsed contacts", sub: "Mitch Jamieson, Wayne Chisholm, and Glenmore Forestry. Repeated attempts in May, never a real conversation", due: "2026-08-15", owner: "Chris" },
       { id: "C6", name: "Deliberately recruit trucking contractors", sub: "The current 33 skew heavily to harvesting, but Phase 2 covers both", due: "2026-08-18", owner: "Chris" },
       { id: "C7", name: "Work the mill and supply chain connectors for names", sub: "Darryl Byers at Greenwood Meadows produced the Doug Denny lead, and mills know who cuts for them", due: "2026-08-18", owner: "Chris" },
       { id: "C8", name: "FORSEC communications push", sub: "Social, newsletter, and job board channels, timed with the invitation", due: "2026-08-14", owner: "Kyle MacKay" },
-      { id: "C9", name: "Word the invitation for contractors rather than their staff", sub: "Decided: sessions are for contractors only. Belt training and Enhanced Direct Entry still get sold in the room, but the contractor signs their people up rather than bringing them", due: "2026-08-07", owner: "Chris", baseline: "done" }
+      { id: "C9", name: "Word the invitation for contractors rather than their staff", sub: "Decided: sessions are for contractors only. Mentorship training is still sold in the room, but the contractor signs their people up rather than bringing them", due: "2026-08-07", owner: "Chris", baseline: "done" }
     ]
   },
   {
@@ -675,16 +667,15 @@ const WORKSTREAMS = [
   },
   {
     key: "E", title: "Session content and materials", owner: "Chris Garcelon",
-    intro: "The sessions sell five things and take sign-ups on the spot: Phase 1 tools, GIS and telematics, mentorship training, Lean Six Sigma belt training, and Enhanced Direct Entry. Every one of them needs something a contractor can read and something they can sign.",
+    intro: "Three things take sign-ups on the spot: mentorship training, HR services, and the Phase 1 improvements. The telematics pilot gets mentioned but has no spaces left, so it needs different wording. Every offering needs something a contractor can read and something they can sign.",
     tasks: [
       { id: "E1", name: "Get a working annual production value for one harvester", sub: "The anchor number for every ROI conversation in the room, flagged as an action item on July 17", due: "2026-08-14", owner: "Chris", flag: "crit" },
       { id: "E2", name: "Build the Phase 1 results deck", sub: "One or two slides per improvement with real numbers: ConnecTeam, Block Reconciliation, Team Fuel Incentive, FDAP, Sales Brochure, and the Job Board. Brock co-builds, especially the belt training content", due: "2026-08-21", owner: "Chris and Brock" },
-      { id: "E3", name: "Build one capture form per attendee", sub: "A single form with a checkbox for every offering, rather than a separate sheet per program. One contact record with all their interests is far easier to load into monday.com. Has to work on paper and on a phone, because venue signal is not guaranteed", due: "2026-08-21", owner: "Chris" },
+      { id: "E3", name: "Build one capture form per attendee", sub: "A single form with a checkbox for mentorship training, HR services, and Phase 1 improvements, rather than a separate sheet per program. One contact record with all their interests is far easier to load into monday.com. Has to work on paper and on a phone, because venue signal is not guaranteed", due: "2026-08-21", owner: "Chris" },
       { id: "E3b", name: "Add a what would make this worth your time line to the capture form", sub: "Catches pain points live, the way the site visits used to. Under the pull model this is the main chance to hear them", due: "2026-08-21", owner: "Chris" },
-      { id: "E4", name: "Write a one-pager per offering", sub: "What it is, who it suits, what it costs, and when it runs. Nobody signs up for a title on a list", due: "2026-08-21", owner: "Chris" },
+      { id: "E4", name: "Write a one-pager per offering", sub: "Mentorship training, HR services, and Phase 1 improvements. What it is, who it suits, what it costs, and when it runs. Nobody signs up for a title on a list", due: "2026-08-21", owner: "Chris" },
       { id: "E5", name: "Adapt Brock's belt training pricing blurbs for a contractor audience", sub: "From the write-up Brock delivered to Kerri on July 21", due: "2026-08-21", owner: "Chris and Brock" },
-      { id: "E6", name: "Chase Enhanced Direct Entry dates", sub: "Fall delivery is confirmed but the dates are not. July 17 expected more detail after July 23, so there may be news already", due: "2026-08-18", owner: "Chris", flag: "block" },
-      { id: "E6b", name: "Decide how Enhanced Direct Entry appears on the sheet", sub: "If dates have landed, it is a normal sign-up. If not, run it as an interest list so nobody signs up for something with no date attached. Decide by late August, ahead of the September 3 print run", due: "2026-08-25", owner: "Chris", flag: "q" },
+      { id: "E6", name: "Agree the wording for the telematics pilot", sub: "It gets mentioned but has no spaces left, so it has to land as progress rather than as an offer people cannot take up. Enhanced Direct Entry is not mentioned at all this round", due: "2026-08-18", owner: "Chris" },
       { id: "E7", name: "Pull the Phase 1 kickoff improvement list for the group discussion", sub: "Including the items that were never acted on, since surfacing that honestly was the plan", due: "2026-08-21", owner: "Chris" },
       { id: "E8", name: "Language check every piece of material", sub: "Lead with a platform I designed for you, not AI, per the July 17 delivery note", due: "2026-08-25", owner: "Chris" },
       { id: "E9", name: "Print run for all three sessions", sub: "Agendas, one-pagers, sign-up sheets, and Phase 1 handouts, times three", due: "2026-09-03", owner: "Chris" },
@@ -699,7 +690,6 @@ const WORKSTREAMS = [
       { id: "F1", name: "Build the session budget", sub: "Venue, catering, materials, travel, accommodation, swag, and contingency, which is the table below", due: "2026-08-05", owner: "Chris" },
       { id: "F2", name: "Write the short proposal with intended outcome and estimated cost", sub: "Framed so a funder question can be answered from it directly", due: "2026-08-05", owner: "Chris" },
       { id: "F3", name: "Submit to Kerri for approval", due: "2026-08-06", owner: "Chris" },
-      { id: "F4", name: "Ask Kerri which funding stream carries the session costs", sub: "Her call, not mine. The proposal cannot be finalised without it, so raise it in the same conversation as F3", due: "2026-08-06", owner: "Chris and Kerri", flag: "q" },
       { id: "F5", name: "Confirm whether Wavez facilitation sits inside existing contract capacity", sub: "Confirmed: Tim and Brock facilitating all three sessions is covered by the existing contract, so it carries no new cost", due: "2026-08-06", owner: "Chris", baseline: "done" },
       { id: "F6", name: "Record actuals against estimate after each session", sub: "It makes the Phase 3 budget an evidence-based number rather than another estimate", due: "2026-09-18", owner: "Chris" }
     ]
@@ -739,8 +729,8 @@ const WORKSTREAMS = [
 const CONTRACTORS = [
   { n: "Paul Delaney, Delaney and Son Pulpwood", loc: "Cheticamp", s: "PH", i: "int", m: "Yes", june: true, note: "Said early June worked for him. Needs a personal call about the move." },
   { n: "Landon Reginato, Mira Forestry", loc: "Albert Bridge", s: "PH", i: "int", m: "Yes", june: true, note: "Strong candidate. Confirm he received both Block Reconciliation versions." },
-  { n: "John and Jesse Gatza, Ryan River Lumber", loc: "River Ryan", s: "PH", i: "int", m: "TBD", june: true, note: "Operator shortage and automation interest, so a good fit for Enhanced Direct Entry and mentorship." },
-  { n: "Ralph Stewart, RES Forestry", loc: "Antigonish", s: "PH", i: "int", m: "No", june: false, note: "Logged as a Phase 1 check-in in April but not on the Phase 1 board, so confirm which he is. Very well connected either way, and his endorsement carries weight." },
+  { n: "John and Jesse Gatza, Ryan River Lumber", loc: "River Ryan", s: "PH", i: "int", m: "TBD", june: true, note: "Operator shortage and automation interest, so a good fit for mentorship training." },
+  { n: "Ralph Stewart, RES Forestry", loc: "Antigonish", s: "PH", i: "int", m: "No", june: false, note: "Very well connected in the industry, and his endorsement carries weight in the room." },
   { n: "Titus Campbell, Titus Campbell Logging", loc: "Inverness", s: "PH", i: "int", m: "No", june: false, note: "" },
   { n: "Kody Fraser, BP Fraser Forestry", loc: "Mabou", s: "PH", i: "visit", m: "Yes", june: false, note: "Caught at the airport in May, asked to be called back in early May." },
   { n: "Wayne Chisholm, Wayne Chisholm Forestry", loc: "Antigonish", s: "PH", i: "visit", m: "Yes", june: false, note: "Multiple attempts, never a real conversation. Try in person." },
@@ -749,7 +739,7 @@ const CONTRACTORS = [
   { n: "Charles Garland, Roy Garland Logging", loc: "Baddeck", s: "PH", i: "visit", m: "No", june: false, note: "" },
   { n: "Doug and Darrell Denny", loc: "Eskasoni", s: "PH", i: "visit", m: "TBD", june: false, note: "Firewood and road construction now. Darrell drives truck, so there is a possible second seat." },
 
-  { n: "Tim Amero, Cut Rite", loc: "Digby area", s: "BW", i: "int", m: "TBD", june: true, note: "Very engaged. Interested in telematics, Enhanced Direct Entry, and train the trainer." },
+  { n: "Tim Amero, Cut Rite", loc: "Digby area", s: "BW", i: "int", m: "TBD", june: true, note: "Very engaged. Interested in telematics and train the trainer." },
   { n: "Dana Rafuse, Dana Rafuse Forestry", loc: "Chester", s: "BW", i: "int", m: "No", june: true, note: "Excellent fit, family operation. Social media feature opportunity flagged for Sam and Kyle." },
   { n: "Leo Hankinson, Hankinson's Logging", loc: "Weymouth", s: "BW", i: "visit", m: "TBD", june: true, note: "Never actually met in person, so his interest is not fully established." },
   { n: "Josh and Kyle Millett", loc: "Chester Basin", s: "BW", i: "visit", m: "TBD", june: false, note: "Josh sounded interested on a poor reception call in April." },
@@ -772,44 +762,19 @@ const CONTRACTORS = [
   { n: "Jeff Tanner", loc: "Economy", s: "TR", i: "pend", m: "TBD", june: false, note: "Never reached across three attempts. Possibly related to John Tanner." },
   { n: "Marshall Bateman, ABL Timber", loc: "New Glasgow", s: "TR", i: "no", m: "Yes", june: false, note: "NSFCA member, so Angela may be the better route in." },
   { n: "Emmitt Peniston, Emmitt's Tree Service", loc: "Sheet Harbour", s: "TR", i: "no", m: "No", june: false, excluded: true,
-    note: "Not participating this round, but open to future rounds. Keep on the radar for Phase 3, especially if mechanized PCT rate-setting moves forward." },
-
-  // Phase 1 contractors, from the monday.com Contractor Information board.
-  // All 12 are invited to the September sessions. Region is only filled in
-  // where the outreach report actually states it, so the rest need assigning
-  // before the invitation goes out (task C3).
-  { n: "Nick Carmichael", loc: "Margaree area", s: "PH", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Too busy for a check-in in April. Left a FORSEC hat on his door. Worth a low pressure session invite." },
-  { n: "Luke McGrath", loc: "Antigonish area", s: "PH", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Lower engagement in Phase 1, scheduling was difficult. Connected to Ryan MacIsaac through Lloyd." },
-  { n: "Cody Carter", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true, note: "" },
-  { n: "Kevin Eisnor", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Referred Luke Smith at Fine Cuts, so he is willing to open doors." },
-  { n: "Gerald Battist", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Team Fuel Incentive contractor. Meeting his new hire, with handoff targeted January 2027." },
-  { n: "Brent MacDougall", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true, note: "" },
-  { n: "Brent MacInnis", loc: "Central NS", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Listed as Phase 1 here but approached as a Phase 2 prospect in April, and very hard to reach either way. Worth confirming which he is." },
-  { n: "Mark Ross", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Alex Phillips runs this operation." },
-  { n: "Alex Phillips", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Mark Ross's operation. Block Reconciliation V3 demo and ConnecTeam piloting pending. Direct AI conversation is fine here." },
-  { n: "Mark Bannerman", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "Direct AI conversation is fine here." },
-  { n: "Chris Weare", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true, note: "" },
-  { n: "Ryan Scott", loc: "", s: "", i: "p1", m: "TBD", june: false, phase1: true,
-    note: "S and S Forestry. Interested in building an LSS culture, white belt as the entry point, so a strong belt training prospect." }
+    note: "Not participating this round, but open to future rounds. Keep on the radar for Phase 3, especially if mechanized PCT rate-setting moves forward." }
 ];
+
 
 const BUDGET = [
   { id: "b1", item: "Venue rental", basis: "Meeting room, half day, capacity 40", unit: 350, qty: 3, status: "Estimate, no quotes yet" },
-  { id: "b2", item: "Lunch catering", basis: "Simple lunch, headcount times three sessions", unit: 28, qty: 105, status: "Estimate, per person" },
-  { id: "b3", item: "Arrival coffee and refreshments", basis: "Per person, three sessions", unit: 6, qty: 105, status: "Estimate, per person" },
+  { id: "b2", item: "Lunch catering", basis: "Soup and salad, headcount times three sessions", unit: 18, qty: 105, status: "Estimate, per person" },
+  { id: "b3", item: "Coffee and refreshment table", basis: "Per person, three sessions", unit: 6, qty: 105, status: "Estimate, per person" },
   { id: "b4", item: "AV rental", basis: "Projector and screen where the venue has none", unit: 150, qty: 3, status: "May be included in venue" },
   { id: "b5", item: "Printed materials", basis: "Agendas, one-pagers, sign-up sheets, handouts", unit: 250, qty: 3, status: "Estimate" },
   { id: "b6", item: "FORSEC swag", basis: "Stickers, hats, branded items per session", unit: 400, qty: 3, status: "Check existing stock first" },
   { id: "b7", item: "Travel and mileage", basis: "Roughly 1,400 km across three regions", unit: 0.72, qty: 1400, status: "Confirm current rate" },
-  { id: "b8", item: "Accommodation", basis: "Port Hawkesbury and Bridgewater, two rooms, one night each", unit: 180, qty: 4, status: "Estimate" },
+  { id: "b8", item: "Accommodation", basis: "Bridgewater only, two rooms, one night. Port Hawkesbury is a day trip", unit: 180, qty: 2, status: "Estimate" },
   { id: "b9", item: "Wavez facilitation", basis: "Tim and Brock across three sessions", unit: 0, qty: 1, status: "Confirmed inside existing contract, no new cost" },
   { id: "b10", item: "Contingency", basis: "10 percent of the lines above", unit: 0, qty: 1, status: "Calculated", auto: true }
 ];
@@ -825,8 +790,6 @@ const RISKS = [
     mit: "Everything has to be finished for September 10, not September 17. September 11 is the only clean day to fix the deck, forms, or run of show before Bridgewater and Truro, so protect it as a debrief day rather than booking over it." },
   { sev: "med", what: "Contractors were told June and have not heard since, so the move to September is a four month slip.",
     mit: "Six were explicitly promised a call once the June date was confirmed. Get ahead of it with a consistent explanation and personal calls to those six before any mass invitation goes out." },
-  { sev: "med", what: "Enhanced Direct Entry has no confirmed dates but is one of five things being sold in the room.",
-    mit: "Either secure dates by late August or present it as an expression of interest list rather than a sign-up, so nobody feels they signed up for something that never appeared." },
   { sev: "med", what: "Three sessions of 30 to 40 could produce well over 100 sign-ups against one person's delivery capacity.",
     mit: "July 17 anticipated this as the justification for an additional hire. It only works as an argument if the sign-up numbers are captured cleanly, which is G6 and G8." },
   { sev: "low", what: "Bridgewater on September 16 and Truro on September 17 are back to back with travel in between.",
@@ -835,7 +798,8 @@ const RISKS = [
 
 const DECISIONS = [
   ["Session dates are locked", "Port Hawkesbury Thursday September 10, Bridgewater Wednesday September 16, and Truro Thursday September 17."],
-  ["All 11 Phase 1 contractors are invited", "Mentorship, GIS, belt training, and Enhanced Direct Entry are all new to them, and they help fill the rooms."],
+  ["Three offerings take sign-ups", "Mentorship training, HR services, and the Phase 1 improvements. The telematics pilot gets mentioned as progress but has no spaces left, and Enhanced Direct Entry is not raised at all this round."],
+  ["Phase 1 contractors are not invited to the kickoff sessions", "The improvements built with them keep developing, and the engaged ones hear about it through normal conversation. No formal invitation needed."],
   ["Sessions are for contractors, not their staff", "Staff facing offers still get sold in the room, but the contractor signs their people up afterwards. This holds catering at 35 per session."],
   ["Registration cut-off is hard, not soft", "Thursday September 3, one week ahead of the first session, stated in the invitation so the date carries weight. Catering still carries a 10 to 15 percent buffer for the walk-ins an open session attracts."],
   ["All public facing material needs comms approval", "Canada and Nova Scotia funding acknowledgment plus approved branding, cleared before anything goes out."],
@@ -844,7 +808,7 @@ const DECISIONS = [
   ["Phase 1 is complete as of July 17, 2026", "Declared with full agreement, and no project defense is required."],
   ["Kickoff reframed to advertising sessions", "No longer two sessions of 10 committed contractors, but three regional sessions open to 30 to 40 or more attendees."],
   ["Three regions, three dates, announced together", "Port Hawkesbury, Truro, and Bridgewater, published up front with a first and second choice question."],
-  ["Sessions run 11:00 AM to 3:00 PM with a simple lunch", "Shorter than the four hour agenda drafted in May."],
+  ["Sessions run 12:00 PM to 3:00 PM with a networking lunch", "Short welcome, then a soup and salad lunch for contractors to talk to each other, then the content. Deliberately not a working lunch."],
   ["Sign-up happens on the spot", "Phase 1 tools, telematics, mentorship training, belt training, and new skills training, all signable in the room."],
   ["Phase 2 delivery shifts to a pull model", "Contractors sign up for what they want, and more than half of delivery is expected to be online."],
   ["NSFCA re-engagement confirmed", "The pause was operational only, tied to the financial review. Re-engagement was always the intention."],
@@ -878,9 +842,9 @@ let state = loadState();
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return Object.assign({ tasks: {}, contractors: {}, budget: {}, open: {} }, JSON.parse(raw));
+    if (raw) return Object.assign({ tasks: {}, contractors: {}, budget: {}, basis: {}, added: [], open: {} }, JSON.parse(raw));
   } catch (e) { /* storage blocked or corrupt, fall through to defaults */ }
-  return { tasks: {}, contractors: {}, budget: {}, open: {} };
+  return { tasks: {}, contractors: {}, budget: {}, basis: {}, added: [], open: {} };
 }
 
 function saveState() {
@@ -890,7 +854,7 @@ function saveState() {
 
 function resetState() {
   if (!confirm("Clear every tick, note, and budget edit on this page?")) return;
-  state = { tasks: {}, contractors: {}, budget: {}, open: {} };
+  state = { tasks: {}, contractors: {}, budget: {}, basis: {}, added: [], open: {} };
   saveState();
   location.reload();
 }
@@ -933,7 +897,7 @@ function allTasks() { return WORKSTREAMS.flatMap(w => w.tasks); }
 // Contractors deferred to a future round stay in the table for the record but
 // drop out of every count, so the outreach numbers reflect who is actually
 // being invited to these sessions.
-const ACTIVE = CONTRACTORS.filter(c => !c.excluded);
+function activeContractors() { return contractorList().filter(c => !c.excluded); }
 
 // Tasks that were already settled when this tracker was baselined carry a
 // `baseline` status, so a fresh open shows them complete without anyone having
@@ -983,9 +947,10 @@ function renderTiles() {
     return taskStatus(t.id) !== "done" && d >= 0 && d <= 14;
   }).length;
 
-  const contacted = ACTIVE.filter(c => (state.contractors[c.n] || {}).contacted).length;
-  const attending = ACTIVE.filter(c => (state.contractors[c.n] || {}).attending === "Yes").length;
-  const juneOwed = ACTIVE.filter(c => c.june && !(state.contractors[c.n] || {}).contacted).length;
+  const active = activeContractors();
+  const contacted = active.filter(c => (state.contractors[c.n] || {}).contacted).length;
+  const attending = active.filter(c => (state.contractors[c.n] || {}).attending === "Yes").length;
+  const juneOwed = active.filter(c => c.june && !(state.contractors[c.n] || {}).contacted).length;
   const blocked = tasks.filter(t => taskStatus(t.id) === "blocked").length;
 
   // Days to session 1 is deliberately not a tile here: the green countdown
@@ -996,7 +961,7 @@ function renderTiles() {
     { v: next14, l: "Due in 14 days", f: "Open tasks landing before " + fmtDate(isoOffset(14)), cls: next14 ? "amber" : "" },
     { v: blocked, l: "Blocked", f: blocked ? "Waiting on someone else" : "Nothing blocked", cls: blocked ? "alert" : "" },
     { v: juneOwed, l: "June calls owed", f: "Promised a call once the June date was set", cls: juneOwed ? "alert" : "" },
-    { v: contacted + " of " + ACTIVE.length, l: "Re-contacted", f: "Told about the move to September" },
+    { v: contacted + " of " + active.length, l: "Re-contacted", f: "Told about the move to September" },
     { v: attending, l: "Confirmed attending", f: "Target is 30 to 40 per session" }
   ];
 
@@ -1010,13 +975,18 @@ function renderTiles() {
 
 function renderSessions() {
   document.getElementById("sessions").innerHTML = SESSIONS.map(s => {
-    const assigned = ACTIVE.filter(c => c.s === s.key).length;
-    const yes = ACTIVE.filter(c => c.s === s.key && (state.contractors[c.n] || {}).attending === "Yes").length;
+    const active = activeContractors();
+    const assigned = active.filter(c => c.s === s.key).length;
+    // Confirmed counts follow the location the contractor actually ticked.
+    const yes = active.filter(c => {
+      const st = state.contractors[c.n] || {};
+      return st.attending === "Yes" && (st.at || c.s) === s.key;
+    }).length;
     return `<div class="session">
       <h3>${esc(s.city)}</h3>
       <div class="date">${fmtLongDate(s.date)}</div>
       <div class="det">
-        <div>11:00 AM to 3:00 PM, lunch provided</div>
+        <div>12:00 PM to 3:00 PM, networking lunch</div>
         <div>Draws from ${esc(s.region)}</div>
         <div>${assigned} known contractors in region, ${yes} confirmed</div>
         <div>Venue: ${s.venue ? esc(s.venue) : "<strong>not yet booked</strong>"}</div>
@@ -1044,7 +1014,6 @@ function renderTimeline() {
 
 function renderQuestions() {
   document.getElementById("questions").innerHTML = QUESTIONS.map(q => `<li>${q}</li>`).join("");
-  document.getElementById("records").innerHTML = RECORDS.map(q => `<li>${q}</li>`).join("");
 }
 
 function taskVisible(t) {
@@ -1066,7 +1035,7 @@ function renderWorkstreams() {
     const done = w.tasks.filter(t => taskStatus(t.id) === "done").length;
     const pct = Math.round(done / w.tasks.length * 100);
     const late = w.tasks.filter(isOverdue).length;
-    const isOpen = state.open[w.key] !== false;
+    const isOpen = state.open[w.key] === true;
 
     const rows = visible.map(t => {
       const status = taskStatus(t.id);
@@ -1118,8 +1087,7 @@ const INTEREST = {
   int:   ["int",   "Interested"],
   visit: ["visit", "Call to arrange visit"],
   no:    ["no",    "Not right now"],
-  pend:  ["pend",  "Never reached"],
-  p1:    ["p1",    "Phase 1 contractor"]
+  pend:  ["pend",  "Never reached"]
 };
 
 function contractorVisible(c) {
@@ -1128,27 +1096,32 @@ function contractorVisible(c) {
     case "PH": case "BW": case "TR": return c.s === contractorFilter;
     case "june": return !!c.june;
     case "todo": return !st.contacted && !c.excluded;
-    case "p1": return !!c.phase1;
-    case "noregion": return !c.s && !c.excluded;
     default: return true;
   }
 }
 
+function contractorList() {
+  // Rows added through the page live in saved state and sit after the
+  // baseline list, so the two are edited through the same code path.
+  return CONTRACTORS.concat(state.added || []);
+}
+
 function renderContractors() {
   const body = document.getElementById("contractorBody");
-  const rows = CONTRACTORS.filter(contractorVisible);
+  const all = contractorList();
+  const rows = all.filter(contractorVisible);
   const sessionName = { PH: "Port Hawkesbury", BW: "Bridgewater", TR: "Truro" };
 
   if (!rows.length) {
-    body.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--muted); padding:1rem;">No contractors match this filter.</td></tr>';
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--muted); padding:1rem;">No contractors match this filter.</td></tr>';
     return;
   }
 
-  body.innerHTML = rows.map((c, idx) => {
+  body.innerHTML = rows.map(c => {
     const st = state.contractors[c.n] || {};
-    const [cls, label] = INTEREST[c.i];
+    const [cls, label] = INTEREST[c.i] || INTEREST.pend;
     const note = st.note != null ? st.note : c.note;
-    const i = CONTRACTORS.indexOf(c);
+    const i = all.indexOf(c);
 
     // Deferred contractors stay visible for the record, but greyed back with
     // their controls disabled so they cannot be counted or ticked by mistake.
@@ -1156,22 +1129,50 @@ function renderContractors() {
       return `<tr style="opacity:0.6;">
         <td><strong>${esc(c.n)}</strong></td>
         <td>${esc(c.loc)}</td>
-        <td colspan="4"><span class="tag no">Deferred to a future round</span></td>
+        <td colspan="3"><span class="tag no">Deferred to a future round</span></td>
         <td colspan="2" style="color:var(--muted); font-size:0.8rem;">Not invited to these sessions</td>
-        <td style="min-width:230px; color:var(--muted); font-size:0.8rem;">${esc(note)}</td>
+        <td style="min-width:220px; color:var(--muted); font-size:0.8rem;">${esc(note)}</td>
       </tr>`;
     }
 
+    // The three location ticks only appear once someone has said yes, and
+    // they are single-choice so per-session headcounts stay clean.
+    const picks = st.attending === "Yes"
+      ? '<div class="loc-picks">' + SESSIONS.map(sn =>
+          `<label title="${esc(sn.city)}">
+             <input type="checkbox" class="ck" ${st.at === sn.key ? "checked" : ""}
+                    onchange="pickLocation(${i}, '${sn.key}', this.checked)">
+             ${esc(sn.key)}</label>`).join("") + "</div>"
+      : "";
+
+    const editable = c.added;
+    const cell = (field, value, width) => editable
+      ? `<input type="text" class="cell" style="min-width:${width}" value="${esc(value)}"
+                onchange="editAdded(${i}, '${field}', this.value)">`
+      : esc(value);
+
     return `<tr>
-      <td><strong>${esc(c.n)}</strong></td>
-      <td>${esc(c.loc)}</td>
-      <td>${c.s
-        ? esc(sessionName[c.s]) + '<br><span style="color:var(--muted); font-size:0.78rem;">' +
-          fmtDate(SESSIONS.find(s => s.key === c.s).date) + "</span>"
-        : '<span class="tag pend">region needed</span>'}</td>
-      <td><span class="tag ${cls}">${esc(label)}</span></td>
-      <td>${esc(c.m)}</td>
-      <td style="text-align:center;">${c.june ? '<span class="tag june">yes</span>' : ""}</td>
+      <td>${editable
+        ? `<input type="text" class="cell" style="min-width:150px; font-weight:bold;" value="${esc(c.n)}"
+                  onchange="editAdded(${i}, 'n', this.value)">`
+        : "<strong>" + esc(c.n) + "</strong>"}</td>
+      <td>${cell("loc", c.loc, "90px")}</td>
+      <td>${editable
+        ? `<select onchange="editAdded(${i}, 's', this.value)">` +
+            SESSIONS.map(sn => `<option value="${sn.key}" ${c.s === sn.key ? "selected" : ""}>${esc(sn.city)}</option>`).join("") +
+          "</select>"
+        : esc(sessionName[c.s]) + '<br><span style="color:var(--muted); font-size:0.78rem;">' +
+          fmtDate(SESSIONS.find(x => x.key === c.s).date) + "</span>"}</td>
+      <td>${editable
+        ? `<select onchange="editAdded(${i}, 'i', this.value)">` +
+            Object.entries(INTEREST).map(([k, v]) => `<option value="${k}" ${c.i === k ? "selected" : ""}>${esc(v[1])}</option>`).join("") +
+          "</select>"
+        : `<span class="tag ${cls}">${esc(label)}</span>`}</td>
+      <td>${editable
+        ? `<select onchange="editAdded(${i}, 'm', this.value)">` +
+            ["TBD", "Yes", "No"].map(v => `<option ${c.m === v ? "selected" : ""}>${v}</option>`).join("") +
+          "</select>"
+        : esc(c.m)}</td>
       <td style="text-align:center;">
         <input type="checkbox" class="ck" ${st.contacted ? "checked" : ""}
                onchange="setContractor(${i}, 'contacted', this.checked)"></td>
@@ -1181,15 +1182,20 @@ function renderContractors() {
           <option value="Yes"   ${st.attending === "Yes" ? "selected" : ""}>Yes</option>
           <option value="Maybe" ${st.attending === "Maybe" ? "selected" : ""}>Maybe</option>
           <option value="No"    ${st.attending === "No" ? "selected" : ""}>No</option>
-        </select></td>
-      <td style="min-width:230px;">
+        </select>${picks}</td>
+      <td style="min-width:220px;">
         <input type="text" class="cell" value="${esc(note)}"
-               onchange="setContractor(${i}, 'note', this.value)"></td>
+               onchange="setContractor(${i}, 'note', this.value)">
+        ${editable ? `<button class="tiny no-print" style="margin-top:0.25rem;" onclick="removeAdded(${i})">Remove</button>` : ""}
+      </td>
     </tr>`;
   }).join("");
 }
 
-function budgetUnit(b) { return state.budget[b.id] != null ? state.budget[b.id] : b.unit; }
+function budgetUnit(b)  { return state.budget[b.id] != null ? state.budget[b.id] : b.unit; }
+function budgetBasis(b) { return (state.basis || {})[b.id] != null ? state.basis[b.id] : b.basis; }
+
+const HST_RATE = 0.14;   // Nova Scotia, as of 2026
 
 function renderBudget() {
   let subtotal = 0;
@@ -1202,12 +1208,15 @@ function renderBudget() {
 
   const contingencyDef = BUDGET.find(b => b.auto);
   const contingency = Math.round(subtotal * 0.10);
+  const beforeTax = subtotal + contingency;
+  const hst = Math.round(beforeTax * HST_RATE);
 
   document.getElementById("budgetBody").innerHTML =
     lines.map(({ b, unit, total }) =>
       `<tr>
         <td><strong>${esc(b.item)}</strong></td>
-        <td style="color:var(--muted);">${esc(b.basis)}</td>
+        <td><input type="text" class="cell" style="min-width:250px;" value="${esc(budgetBasis(b))}"
+              onchange="setBasis('${b.id}', this.value)"></td>
         <td class="num"><input type="number" class="money" step="0.01" value="${unit}"
               onchange="setBudget('${b.id}', this.value)"></td>
         <td class="num">${b.qty.toLocaleString("en-CA")}</td>
@@ -1216,20 +1225,36 @@ function renderBudget() {
       </tr>`).join("") +
     `<tr>
       <td><strong>${esc(contingencyDef.item)}</strong></td>
-      <td style="color:var(--muted);">${esc(contingencyDef.basis)}</td>
+      <td><input type="text" class="cell" value="${esc(budgetBasis(contingencyDef))}"
+            onchange="setBasis('${contingencyDef.id}', this.value)"></td>
       <td class="num" style="color:var(--muted);">10%</td>
       <td class="num">n/a</td>
       <td class="num"><strong>${money(contingency)}</strong></td>
       <td style="color:var(--muted); font-size:0.8rem;">${esc(contingencyDef.status)}</td>
     </tr>`;
 
-  const grand = subtotal + contingency;
   document.getElementById("budgetFoot").innerHTML =
-    `<tr>
+    `<tr class="sub">
+      <td colspan="4">Subtotal</td>
+      <td class="num">${money(beforeTax)}</td>
+      <td>Including contingency</td>
+    </tr>
+    <tr class="sub">
+      <td colspan="4">HST at 14 percent</td>
+      <td class="num">${money(hst)}</td>
+      <td>Nova Scotia</td>
+    </tr>
+    <tr>
       <td colspan="4">Estimated total, three sessions</td>
-      <td class="num">${money(grand)}</td>
-      <td style="font-weight:normal; font-size:0.8rem;">${money(Math.round(grand / 3))} per session</td>
+      <td class="num">${money(beforeTax + hst)}</td>
+      <td style="font-weight:normal; font-size:0.8rem;">${money(Math.round((beforeTax + hst) / 3))} per session</td>
     </tr>`;
+}
+
+function setBasis(id, value) {
+  state.basis = state.basis || {};
+  state.basis[id] = value;
+  saveState();
 }
 
 function renderRisks() {
@@ -1298,9 +1323,58 @@ function setContractorFilter(f, btn) {
 }
 
 function setContractor(index, field, value) {
-  const name = CONTRACTORS[index].n;
+  const name = contractorList()[index].n;
   state.contractors[name] = Object.assign({}, state.contractors[name], { [field]: value });
   saveState();
+  renderTiles();
+  renderSessions();
+  if (field === "attending") renderContractors();
+}
+
+// Single choice: ticking one location clears any other, so a contractor is
+// only ever counted against one session.
+function pickLocation(index, key, checked) {
+  const name = contractorList()[index].n;
+  state.contractors[name] = Object.assign({}, state.contractors[name], { at: checked ? key : "" });
+  saveState();
+  renderContractors();
+  renderSessions();
+  renderTiles();
+}
+
+function addContractor() {
+  state.added = state.added || [];
+  state.added.push({ n: "New contractor", loc: "", s: "TR", i: "pend", m: "TBD",
+                     june: false, note: "", added: true });
+  saveState();
+  renderContractors();
+  renderTiles();
+  renderSessions();
+}
+
+function editAdded(index, field, value) {
+  const c = contractorList()[index];
+  if (!c.added) return;
+  // Saved ticks and notes are keyed by name, so move them with a rename.
+  if (field === "n" && state.contractors[c.n]) {
+    state.contractors[value] = state.contractors[c.n];
+    delete state.contractors[c.n];
+  }
+  c[field] = value;
+  saveState();
+  renderContractors();
+  renderTiles();
+  renderSessions();
+}
+
+function removeAdded(index) {
+  const c = contractorList()[index];
+  if (!c.added) return;
+  if (!confirm(`Remove ${c.n} from the list?`)) return;
+  state.added.splice(state.added.indexOf(c), 1);
+  delete state.contractors[c.n];
+  saveState();
+  renderContractors();
   renderTiles();
   renderSessions();
 }
