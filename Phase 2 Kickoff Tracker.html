@@ -481,33 +481,25 @@
   <section>
     <div class="sec-head">
       <h2>Session budget</h2>
-      <span class="sec-note">Three sessions, figures are placeholders to overwrite</span>
+      <span class="sec-note">Costed per session, figures are placeholders to overwrite</span>
     </div>
     <div class="callout red" style="margin-bottom:0.85rem;">
       <h4>Every dollar figure below is an estimate, not a quote</h4>
       They are here so the shape of the budget and the arithmetic are ready to go. Replace them with real numbers
       before this goes to Kerri or into a funding conversation. Editable cells save in this browser.
     </div>
+    <div class="filters no-print" id="budgetTabs"></div>
     <div class="card" style="padding:0;">
       <div class="tbl-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Line item</th><th>Basis</th>
-              <th class="num">Unit</th><th class="num">Qty</th>
-              <th class="num">Estimate</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="budgetBody"></tbody>
-          <tfoot id="budgetFoot"></tfoot>
-        </table>
+        <table id="budgetTable"></table>
       </div>
     </div>
     <div class="assump">
-      Built for 35 attendees per session across three sessions, a 12:00 PM to 3:00 PM format with a soup and salad networking
-      lunch, and me plus one other FORSEC attendee travelling to each. The July 17 meeting set the expectation of short proposals
-      with intended outcome and estimated cost before travel-heavy or spend-heavy activities. This table is the cost
-      half of that proposal.
+      Built for 35 attendees per session, a 12:00 PM to 3:00 PM format with a soup and salad networking lunch, and me plus one
+      other FORSEC attendee travelling to each. Each session is costed on its own tab, since the real spend differs:
+      Port Hawkesbury is a long day trip with no overnight, Bridgewater needs rooms, and Truro is local. Edit a session on its
+      own tab; the All three view is read-only. The July 17 meeting set the expectation of short proposals with intended
+      outcome and estimated cost before travel-heavy or spend-heavy activities, and this table is the cost half of that.
     </div>
   </section>
 
@@ -640,7 +632,7 @@ const WORKSTREAMS = [
   },
   {
     key: "C", title: "Expanding the invite list", owner: "Chris Garcelon",
-    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100. The 32 Phase 2 prospects plus the 12 Phase 1 contractors give me 44 known names, which still fills less than half the room.",
+    intro: "The sessions were resized from two rooms of 10 committed contractors to three rooms of 30 to 40 open attendees. That is a jump from 20 seats to well over 100, and with Phase 1 contractors not invited I have 32 known names to work from. Most of the room has to come from somewhere else.",
     tasks: [
       { id: "C1", name: "Set the per-session attendance target and overall registration goal", sub: "The number the whole outreach effort is measured against", due: "2026-08-04", owner: "Chris and Kerri" },
       { id: "C2", name: "NSFCA member distribution via Angela", sub: "The single highest leverage channel for filling the rooms, and it depends on workstream D", due: "2026-08-14", owner: "Chris and Angela", flag: "crit" },
@@ -766,22 +758,66 @@ const CONTRACTORS = [
 ];
 
 
-const BUDGET = [
-  { id: "b1", item: "Venue rental", basis: "Meeting room, half day, capacity 40", unit: 350, qty: 3, status: "Estimate, no quotes yet" },
-  { id: "b2", item: "Lunch catering", basis: "Soup and salad, headcount times three sessions", unit: 18, qty: 105, status: "Estimate, per person" },
-  { id: "b3", item: "Coffee and refreshment table", basis: "Per person, three sessions", unit: 6, qty: 105, status: "Estimate, per person" },
-  { id: "b4", item: "AV rental", basis: "Projector and screen where the venue has none", unit: 150, qty: 3, status: "May be included in venue" },
-  { id: "b5", item: "Printed materials", basis: "Agendas, one-pagers, sign-up sheets, handouts", unit: 250, qty: 3, status: "Estimate" },
-  { id: "b6", item: "FORSEC swag", basis: "Stickers, hats, branded items per session", unit: 400, qty: 3, status: "Check existing stock first" },
-  { id: "b7", item: "Travel and mileage", basis: "Roughly 1,400 km across three regions", unit: 0.72, qty: 1400, status: "Confirm current rate" },
-  { id: "b8", item: "Accommodation", basis: "Bridgewater only, two rooms, one night. Port Hawkesbury is a day trip", unit: 180, qty: 2, status: "Estimate" },
-  { id: "b9", item: "Wavez facilitation", basis: "Tim and Brock across three sessions", unit: 0, qty: 1, status: "Confirmed inside existing contract, no new cost" },
-  { id: "b10", item: "Contingency", basis: "10 percent of the lines above", unit: 0, qty: 1, status: "Calculated", auto: true }
+// Budget lines are specified once and instantiated per session, because the
+// real costs differ: Port Hawkesbury is a long day trip with no overnight,
+// Bridgewater needs rooms, and Truro is local. Each session's unit, quantity,
+// and basis edit independently and save under their own key.
+const BUDGET_SPEC = [
+  { key: "venue", item: "Venue rental", status: "Estimate, no quotes yet",
+    basis: "Meeting room, half day, capacity 40",
+    PH: [350, 1], BW: [350, 1], TR: [300, 1] },
+  { key: "lunch", item: "Lunch catering", status: "Estimate, per person",
+    basis: "Soup and salad, per person",
+    PH: [18, 35], BW: [18, 35], TR: [18, 35] },
+  { key: "coffee", item: "Coffee and refreshment table", status: "Estimate, per person",
+    basis: "Per person",
+    PH: [6, 35], BW: [6, 35], TR: [6, 35] },
+  { key: "av", item: "AV rental", status: "May be included in venue",
+    basis: "Projector and screen where the venue has none",
+    PH: [150, 1], BW: [150, 1], TR: [150, 1] },
+  { key: "print", item: "Printed materials", status: "Estimate",
+    basis: "Agendas, one-pagers, sign-up sheets, handouts",
+    PH: [250, 1], BW: [250, 1], TR: [250, 1] },
+  { key: "swag", item: "FORSEC swag", status: "Check existing stock first",
+    basis: "Stickers, hats, branded items",
+    PH: [400, 1], BW: [400, 1], TR: [400, 1] },
+  { key: "travel", item: "Travel and mileage", status: "Confirm current rate",
+    basis: "Return trip from Truro Heights, per km",
+    PH: [0.72, 400], BW: [0.72, 340], TR: [0.72, 20] },
+  { key: "rooms", item: "Accommodation", status: "Estimate",
+    basis: "Two rooms, one night",
+    PH: [180, 0], BW: [180, 2], TR: [180, 0] },
+  { key: "wavez", item: "Wavez facilitation", status: "Confirmed inside existing contract, no new cost",
+    basis: "Tim and Brock",
+    PH: [0, 1], BW: [0, 1], TR: [0, 1] }
 ];
+
+const CONTINGENCY_RATE = 0.10;
+const HST_RATE = 0.14;   // Nova Scotia, as of 2026
+
+// A line's saved edits are keyed by session so the three stay independent.
+function budgetLines(sessionKey) {
+  return BUDGET_SPEC.map(spec => {
+    const [defUnit, defQty] = spec[sessionKey];
+    const id = spec.key + "-" + sessionKey;
+    const unit = state.budget[id] != null ? state.budget[id] : defUnit;
+    const qty = (state.qty || {})[id] != null ? state.qty[id] : defQty;
+    const basis = (state.basis || {})[id] != null ? state.basis[id] : spec.basis;
+    return { id, item: spec.item, status: spec.status, basis, unit, qty, total: unit * qty };
+  });
+}
+
+function sessionTotals(sessionKey) {
+  const subtotal = budgetLines(sessionKey).reduce((sum, l) => sum + l.total, 0);
+  const contingency = subtotal * CONTINGENCY_RATE;
+  const beforeTax = subtotal + contingency;
+  const hst = beforeTax * HST_RATE;
+  return { subtotal, contingency, beforeTax, hst, total: beforeTax + hst };
+}
 
 const RISKS = [
   { sev: "high", what: "Filling three rooms depends on NSFCA promotion, and the MOU is expected but not yet formally accepted.",
-    mit: "Acceptance is expected, but until it is confirmed the highest leverage channel for filling the rooms is not available. The 44 known contractors fill less than half the seats on their own. If NSFCA promotion has not landed by mid August, either scale the target down or find a second channel quickly." },
+    mit: "Acceptance is expected, but until it is confirmed the highest leverage channel for filling the rooms is not available. The 32 known contractors fill roughly a third of the seats on their own. If NSFCA promotion has not landed by mid August, either scale the target down or find a second channel quickly." },
   { sev: "high", what: "Port Hawkesbury on September 10 feeds a mentorship cohort starting September 22 in the same region.",
     mit: "Genevieve needs at least a week of pre-calls, so sign-ups have to reach her by roughly September 15, which is five working days after the session. Build the handoff into the session day routine rather than treating it as follow-up." },
   { sev: "high", what: "August is peak harvest and vacation season, which is exactly when the outreach has to land.",
@@ -837,14 +873,15 @@ const STORE_KEY = "forsec-p2-kickoff-v1";
 const TODAY = startOfDay(new Date());
 let filter = "all";
 let contractorFilter = "all";
+let budgetView = "ALL";
 let state = loadState();
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) return Object.assign({ tasks: {}, contractors: {}, budget: {}, basis: {}, added: [], open: {} }, JSON.parse(raw));
+    if (raw) return Object.assign({ tasks: {}, contractors: {}, budget: {}, qty: {}, basis: {}, added: [], open: {} }, JSON.parse(raw));
   } catch (e) { /* storage blocked or corrupt, fall through to defaults */ }
-  return { tasks: {}, contractors: {}, budget: {}, basis: {}, added: [], open: {} };
+  return { tasks: {}, contractors: {}, budget: {}, qty: {}, basis: {}, added: [], open: {} };
 }
 
 function saveState() {
@@ -854,7 +891,7 @@ function saveState() {
 
 function resetState() {
   if (!confirm("Clear every tick, note, and budget edit on this page?")) return;
-  state = { tasks: {}, contractors: {}, budget: {}, basis: {}, added: [], open: {} };
+  state = { tasks: {}, contractors: {}, budget: {}, qty: {}, basis: {}, added: [], open: {} };
   saveState();
   location.reload();
 }
@@ -1192,69 +1229,98 @@ function renderContractors() {
   }).join("");
 }
 
-function budgetUnit(b)  { return state.budget[b.id] != null ? state.budget[b.id] : b.unit; }
-function budgetBasis(b) { return (state.basis || {})[b.id] != null ? state.basis[b.id] : b.basis; }
-
-const HST_RATE = 0.14;   // Nova Scotia, as of 2026
-
 function renderBudget() {
-  let subtotal = 0;
-  const lines = BUDGET.filter(b => !b.auto).map(b => {
-    const unit = budgetUnit(b);
-    const total = unit * b.qty;
-    subtotal += total;
-    return { b, unit, total };
-  });
+  const keys = SESSIONS.map(s => s.key);
 
-  const contingencyDef = BUDGET.find(b => b.auto);
-  const contingency = Math.round(subtotal * 0.10);
-  const beforeTax = subtotal + contingency;
-  const hst = Math.round(beforeTax * HST_RATE);
+  document.getElementById("budgetTabs").innerHTML =
+    `<span class="lab">Show:</span>` +
+    `<button class="chip ${budgetView === "ALL" ? "on" : ""}" onclick="setBudgetView('ALL')">All three</button>` +
+    SESSIONS.map(s =>
+      `<button class="chip ${budgetView === s.key ? "on" : ""}" onclick="setBudgetView('${s.key}')">${esc(s.city)}</button>`
+    ).join("");
 
-  document.getElementById("budgetBody").innerHTML =
-    lines.map(({ b, unit, total }) =>
-      `<tr>
-        <td><strong>${esc(b.item)}</strong></td>
-        <td><input type="text" class="cell" style="min-width:250px;" value="${esc(budgetBasis(b))}"
-              onchange="setBasis('${b.id}', this.value)"></td>
-        <td class="num"><input type="number" class="money" step="0.01" value="${unit}"
-              onchange="setBudget('${b.id}', this.value)"></td>
-        <td class="num">${b.qty.toLocaleString("en-CA")}</td>
-        <td class="num"><strong>${money(total)}</strong></td>
-        <td style="color:var(--muted); font-size:0.8rem;">${esc(b.status)}</td>
-      </tr>`).join("") +
-    `<tr>
-      <td><strong>${esc(contingencyDef.item)}</strong></td>
-      <td><input type="text" class="cell" value="${esc(budgetBasis(contingencyDef))}"
-            onchange="setBasis('${contingencyDef.id}', this.value)"></td>
-      <td class="num" style="color:var(--muted);">10%</td>
-      <td class="num">n/a</td>
-      <td class="num"><strong>${money(contingency)}</strong></td>
-      <td style="color:var(--muted); font-size:0.8rem;">${esc(contingencyDef.status)}</td>
-    </tr>`;
-
-  document.getElementById("budgetFoot").innerHTML =
-    `<tr class="sub">
-      <td colspan="4">Subtotal</td>
-      <td class="num">${money(beforeTax)}</td>
-      <td>Including contingency</td>
-    </tr>
-    <tr class="sub">
-      <td colspan="4">HST at 14 percent</td>
-      <td class="num">${money(hst)}</td>
-      <td>Nova Scotia</td>
-    </tr>
-    <tr>
-      <td colspan="4">Estimated total, three sessions</td>
-      <td class="num">${money(beforeTax + hst)}</td>
-      <td style="font-weight:normal; font-size:0.8rem;">${money(Math.round((beforeTax + hst) / 3))} per session</td>
-    </tr>`;
+  document.getElementById("budgetTable").innerHTML =
+    budgetView === "ALL" ? comparisonTable(keys) : sessionTable(budgetView);
 }
 
-function setBasis(id, value) {
-  state.basis = state.basis || {};
-  state.basis[id] = value;
+// One session: editable unit, quantity, and basis.
+function sessionTable(key) {
+  const lines = budgetLines(key);
+  const t = sessionTotals(key);
+  const city = SESSIONS.find(s => s.key === key).city;
+
+  return `<thead><tr>
+      <th>Line item</th><th>Basis</th>
+      <th class="num">Unit</th><th class="num">Qty</th>
+      <th class="num">Estimate</th><th>Status</th>
+    </tr></thead>
+    <tbody>${lines.map(l => `<tr>
+      <td><strong>${esc(l.item)}</strong></td>
+      <td><input type="text" class="cell" style="min-width:230px;" value="${esc(l.basis)}"
+            onchange="setBudgetField('basis', '${l.id}', this.value)"></td>
+      <td class="num"><input type="number" class="money" step="0.01" value="${l.unit}"
+            onchange="setBudgetField('budget', '${l.id}', this.value)"></td>
+      <td class="num"><input type="number" class="money" style="width:64px;" step="1" value="${l.qty}"
+            onchange="setBudgetField('qty', '${l.id}', this.value)"></td>
+      <td class="num"><strong>${money(l.total)}</strong></td>
+      <td style="color:var(--muted); font-size:0.8rem;">${esc(l.status)}</td>
+    </tr>`).join("")}</tbody>
+    <tfoot>
+      <tr class="sub"><td colspan="4">Subtotal</td><td class="num">${money(t.subtotal)}</td><td>${esc(city)}</td></tr>
+      <tr class="sub"><td colspan="4">Contingency at 10 percent</td><td class="num">${money(t.contingency)}</td><td>Calculated</td></tr>
+      <tr class="sub"><td colspan="4">HST at 14 percent</td><td class="num">${money(t.hst)}</td><td>Nova Scotia</td></tr>
+      <tr><td colspan="4">Session total</td><td class="num">${money(t.total)}</td><td style="font-weight:normal; font-size:0.8rem;">${esc(city)}</td></tr>
+    </tfoot>`;
+}
+
+// All three side by side, read-only. Edit a session on its own tab.
+function comparisonTable(keys) {
+  const per = {};
+  keys.forEach(k => { per[k] = budgetLines(k); });
+  const totals = {};
+  keys.forEach(k => { totals[k] = sessionTotals(k); });
+
+  const row = (label, pick, isFooter) =>
+    `<tr${isFooter ? ' class="sub"' : ""}>
+      <td>${isFooter ? esc(label) : "<strong>" + esc(label) + "</strong>"}</td>
+      ${keys.map(k => `<td class="num">${money(pick(k))}</td>`).join("")}
+      <td class="num"><strong>${money(keys.reduce((sum, k) => sum + pick(k), 0))}</strong></td>
+    </tr>`;
+
+  return `<thead><tr>
+      <th>Line item</th>
+      ${keys.map(k => `<th class="num">${esc(SESSIONS.find(s => s.key === k).city)}</th>`).join("")}
+      <th class="num">All three</th>
+    </tr></thead>
+    <tbody>${BUDGET_SPEC.map((spec, i) =>
+      row(spec.item, k => per[k][i].total, false)).join("")}</tbody>
+    <tfoot>
+      ${row("Subtotal", k => totals[k].subtotal, true)}
+      ${row("Contingency at 10 percent", k => totals[k].contingency, true)}
+      ${row("HST at 14 percent", k => totals[k].hst, true)}
+      <tr>
+        <td>Estimated total</td>
+        ${keys.map(k => `<td class="num">${money(totals[k].total)}</td>`).join("")}
+        <td class="num">${money(keys.reduce((sum, k) => sum + totals[k].total, 0))}</td>
+      </tr>
+    </tfoot>`;
+}
+
+function setBudgetView(view) {
+  budgetView = view;
+  renderBudget();
+}
+
+function setBudgetField(bucket, id, value) {
+  state[bucket] = state[bucket] || {};
+  if (bucket === "basis") {
+    state[bucket][id] = value;
+  } else {
+    const n = parseFloat(value);
+    state[bucket][id] = isNaN(n) ? 0 : n;
+  }
   saveState();
+  renderBudget();
 }
 
 function renderRisks() {
@@ -1379,12 +1445,6 @@ function removeAdded(index) {
   renderSessions();
 }
 
-function setBudget(id, value) {
-  const n = parseFloat(value);
-  state.budget[id] = isNaN(n) ? 0 : n;
-  saveState();
-  renderBudget();
-}
 
 /* ===========================================================================
    BOOT
