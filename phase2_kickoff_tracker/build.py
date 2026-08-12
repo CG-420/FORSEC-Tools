@@ -30,6 +30,9 @@ GREEN = "#3B6E4D"
 
 LOGO_CANDIDATES = [
     os.path.expanduser(
+        "~/.claude/skills/synced/forsec-document-standards/assets/"
+        "Forestry_Sector_Council_Full_Colour_Logo_RGB.png"),
+    os.path.expanduser(
         "~/.claude/skills/forsec-document-standards/assets/"
         "Forestry_Sector_Council_Full_Colour_Logo_RGB.png"),
     os.path.join(HERE, "Forestry_Sector_Council_Full_Colour_Logo_RGB.png"),
