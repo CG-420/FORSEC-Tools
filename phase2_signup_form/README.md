@@ -50,19 +50,19 @@ Paper and online ask the same questions in the same order.
 | Sheet | Form question | Column | Column ID |
 |---|---|---|---|
 | Business name | Business name *(required)* | Name | `name` |
-| Your name | Your name | Contact Name | `text_mm6wdey6` |
+| Your name | Your name *(required)* | Contact Name | `text_mm6wdey6` |
 | Email | Email | Email | `email_mm6kpn6x` |
 | Phone | Phone *(required)* | Phone | `phone_mm6k2z1r` |
-| Location | Location | Location | `text_mm6kwrbd` |
-| Tick boxes | What would you like? | Offerings Requested | `dropdown_mm6mswx6` |
-| write-in line | Anything else we should know? | Notes | `long_text_mm6k389k` |
-| *(not on the sheet)* | Can we call you for a starting point conversation? | Baseline Consent | `color_mm6m16ar` |
+| Location | Location *(required)* | Location | `text_mm6kwrbd` |
+| Tick boxes | What are you interested in learning more about? | Offerings Requested | `dropdown_mm6mswx6` |
+| write-in line | Anything else we should know? *(last)* | Notes | `long_text_mm6k389k` |
 
 Hidden on the form, set by hand or by automation when processing:
 
 | Column | Value |
 |---|---|
 | Session `color_mm6khndk` | which session they came from |
+| Baseline Consent `color_mm6m16ar` | the starting-point call is assumed, not asked, so this is set when the call happens |
 | Engagement Stage `color_mm6k7kyr` | Signed Up |
 | Type `color_mm6ve85t` | Contractor |
 | Last Contact `date_mm6ksjs` | submission date |
@@ -77,7 +77,7 @@ case below.
 Two labels were renamed on 4 September so contractors read plain language,
 on both the dropdown and the matching Offering Catalogue items:
 
-- FDAP - Digital Adoption → **Website Help**
+- FDAP - Digital Adoption → **Website Creation / Help**
 - Performa Rental Rate Calculator → **Rental Rate Calculator**
 
 Two stay on the dropdown but are hidden on the form:
@@ -127,9 +127,9 @@ on Signups `18428276319` with:
   but prefilling a hidden question is unverified and testing it means putting a
   real row on a live board. Setting Session by hand while processing costs
   nothing extra, since the merge is manual anyway.
-- **Email is not required** on the form; business name and phone are. Some
-  contractors genuinely have no email, so this is probably right, but it is a
-  deliberate difference from the original spec.
+- **Email is the only optional contact field.** Business name, contact name,
+  phone and location are all required; some contractors genuinely have no
+  email, so that one is not.
 - **Lean Training** is on both forms. The catalogue has it as *In development /
   Demo only*. It is there to gauge interest before it is confirmed.
 - **Mentorship Training** cohort 1 starts 22 September and Port Hawkesbury

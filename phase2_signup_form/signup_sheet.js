@@ -125,7 +125,7 @@ const TOOLS = [
    "A written process for hiring, orienting and keeping new people, instead of starting over every time."],
   ["Sales Brochure",
    "A brochure you put your own logo and photos on, to win work straight from private woodlot owners."],
-  ["Website Help",
+  ["Website Creation / Help",
    "Get a website built so woodlot owners can find you. 13 done for contractors so far."],
   ["Job Board",
    "Post operator and driver openings on a forestry-only board, free, with a social media post for each one."],
