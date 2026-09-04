@@ -14,6 +14,53 @@ skill; load it before producing any FORSEC-branded output.
   action items. See `plaud_monday_sync/README.md` for the full board and
   column mapping, routing rules, and design rationale. Read that before
   changing anything in there.
+- `phase2_signup_form/` - the contractor sign-up, paper and online. Read
+  `phase2_signup_form/README.md` before touching either.
+
+---
+
+# Before building anything for Phase 2, read this
+
+Most of Phase 2 already exists on monday.com. It was built across several
+sessions and it is easy to miss, which has already cost real time once.
+
+**Check monday.com before proposing to build anything there.** `get_board_info`
+with `filters.columns.only` suppresses the `views` array, so a board that
+already carries a form looks like a bare board. Query `views` explicitly:
+
+```graphql
+{ boards(ids: [BOARD_ID]) { views { id name type view_specific_data_str } } }
+```
+
+`view_specific_data_str` carries the form token, which `get_form`,
+`update_form` and `update_form_question` all need.
+
+**The Phase 2 boards**, all in the Continuous Improvement workspace
+(`16763083`), folder `21217377`:
+
+| Board | ID | What it is |
+|---|---|---|
+| Contractor Directory (Phase 2) | `18428276306` | One row per contractor. Carries the sign-up form. |
+| Offering Catalogue | `18428276304` | The 17 offerings, with a baseline metric on each. |
+| Signups | `18428276319` | Junction. One row = one contractor wanting one offering. |
+| Site Visits | `18428276327` | |
+| Action Items | `18428276296` | |
+| CI Activity Log (Phase 2) | `18428276309` | |
+| Phase 2 Kickoff Registration | `18426462650` | **Different thing.** See below. |
+
+**Two forms exist and they are not the same form.** Confusing them is the
+mistake that has already been made:
+
+- **Phase 2 Kickoff Registration** (`18426462650`, form view `275339033`) is
+  for registering to *attend* an information session. It asks which session
+  you can attend. It had 38 registrations as of 4 September.
+- **Sign-Up** (form view `277840698` on the Contractor Directory, short link
+  `https://wkf.ms/3UIP6nj`) is what a contractor fills in *after* the session
+  to ask for the offerings they want.
+
+The Offering Catalogue is the source of truth for offering names, status and
+delivery partner. Read it before writing any contractor-facing list of what
+FORSEC provides. Do not write that list from memory.
 
 ---
 
