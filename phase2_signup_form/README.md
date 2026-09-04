@@ -43,6 +43,20 @@ one contractor wanting one offering, so a single submission with six boxes
 ticked becomes six Signups rows. A monday form creates one item per submission
 and cannot fan out. That step is manual, and is described at the bottom.
 
+## Editing the form through the API
+
+Use `update_form_question` for one question at a time. It is safe.
+
+`update_form` with a `questions` array reorders, and it is not. Each entry is a
+`QuestionOrderInput` of `{id, page_block_id}`, and `page_block_id` is optional
+in the schema but not in practice: omit it and monday writes null over every
+question's page block, detaching them from the page the form renders. The form
+then shows the title and the name question and nothing else, while a plain
+`questions { id title visible }` query still looks perfectly healthy. This has
+happened once. Always send `page_block_id: "page_block__classic_default"` on
+every entry except the page block itself, and check `page_block_id` in the
+response rather than trusting the mutation succeeded.
+
 ## Field mapping
 
 Paper and online ask the same questions in the same order.
