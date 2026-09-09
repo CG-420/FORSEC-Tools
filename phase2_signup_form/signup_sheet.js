@@ -8,6 +8,7 @@ const GREEN = "338A57";      // FORSEC Green
 const DARKGREEN = "3B6E4D";  // Dark Green
 const MUTED = "5F6B62";
 const LOGO = "/root/.claude/skills/synced/207078e9-4d33-4dad-99a8-2b791688b599_a0b28c24-3dcb-4ca8-9b5e-dd26fbc6e188/forsec-document-standards/assets/Forestry_Sector_Council_Full_Colour_Logo_RGB.png";
+const QR = __dirname + "/QR_SignUp_Green.png";   // regenerate with make_qr.py
 
 const NONE = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
 const noBorders = { top: NONE, bottom: NONE, left: NONE, right: NONE };
@@ -28,7 +29,7 @@ const p = (children, opts = {}) =>
 const section = (text) =>
   new Paragraph({
     children: [new TextRun({ text, font: "Arial", size: 24, bold: true, color: GREEN })],
-    spacing: { before: 200, after: 100 },
+    spacing: { before: 165, after: 90 },
     border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: GREEN, space: 2 } },
   });
 
@@ -89,7 +90,7 @@ const spacerRow = () => new TableRow({
     width: { size: convertInchesToTwip(i === 0 ? BOX_W : TEXT_W), type: WidthType.DXA },
     borders: noBorders,
     margins: { top: 0, bottom: 0, left: 0, right: 0 },
-    children: [new Paragraph({ children: [t("", { size: 12 })], spacing: { after: 0 } })],
+    children: [new Paragraph({ children: [t("", { size: 10 })], spacing: { after: 0 } })],
   })),
 });
 
@@ -153,7 +154,7 @@ const doc = new Document({
       page: {
         size: { width: 12240, height: 15840 },           // US Letter
         margin: {
-          top: convertInchesToTwip(0.5), bottom: convertInchesToTwip(0.5),
+          top: convertInchesToTwip(0.5), bottom: convertInchesToTwip(0.4),
           left: convertInchesToTwip(0.5), right: convertInchesToTwip(0.5),
         },
       },
@@ -195,14 +196,49 @@ const doc = new Document({
         children: [t("GIS and Telematics: limited seats.  ", { bold: true, color: DARKGREEN }),
                    t("This one needs more detail than fits on this sheet, so it works as an application rather than a sign-up. Tick the box and I will be in touch shortly to take those details.",
                      { color: DARKGREEN })],
-        spacing: { before: 220, after: 140 },
+        spacing: { before: 180, after: 120 },
         indent: { left: convertInchesToTwip(0.14) },
         border: { left: { style: BorderStyle.SINGLE, size: 14, color: GREEN, space: 9 } },
       }),
 
-      new Paragraph({
-        children: [t("What happens next:  ", { bold: true }),
-                   t("I will get in touch to set you up with whatever you have ticked.")],
+      // Footer: the QR sits beside the closing text rather than under it, so
+      // it costs about half an inch of page instead of a full row. The typed
+      // link is there for anyone who will not point a phone at a square.
+      new Table({
+        columnWidths: [convertInchesToTwip(0.95), convertInchesToTwip(WIDTH - 0.95)],
+        width: { size: convertInchesToTwip(WIDTH), type: WidthType.DXA },
+        borders: { ...noBorders, insideHorizontal: NONE, insideVertical: NONE },
+        rows: [new TableRow({
+          children: [
+            new TableCell({
+              width: { size: convertInchesToTwip(0.95), type: WidthType.DXA },
+              borders: noBorders,
+              margins: { top: 0, bottom: 0, left: 0, right: 120 },
+              children: [new Paragraph({
+                children: [new ImageRun({ type: "png", data: fs.readFileSync(QR),
+                  transformation: { width: 54, height: 54 } })],
+                spacing: { after: 0 },
+              })],
+            }),
+            new TableCell({
+              width: { size: convertInchesToTwip(WIDTH - 0.95), type: WidthType.DXA },
+              borders: noBorders,
+              margins: { top: 40, bottom: 0, left: 0, right: 0 },
+              children: [
+                new Paragraph({
+                  children: [t("What happens next:  ", { bold: true }),
+                             t("I will get in touch to set you up with whatever you have ticked.")],
+                  spacing: { after: 60 },
+                }),
+                new Paragraph({
+                  children: [t("Would rather do this online? Scan the code, or go to ", { size: 19, color: MUTED }),
+                             t("wkf.ms/3UIP6nj", { size: 19, bold: true, color: DARKGREEN })],
+                  spacing: { after: 0 },
+                }),
+              ],
+            }),
+          ],
+        })],
       }),
     ],
   }],
