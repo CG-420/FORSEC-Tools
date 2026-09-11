@@ -84,7 +84,7 @@ Workspace: Continuous Improvement (`16763083`), folder "Phase 2".
 | Contractor | `board_relation_mm6ksnqf` | to Contractor Directory (Phase 2) |
 | Related Signup | `board_relation_mm6knrtv` | |
 | link to Action Items | `board_relation_mm6kkqbz` | auto-fills from the Action Items side |
-| Source Recording | `link_mm6kfzs2` | see "Source Recording" below |
+| Source Recording | `link_mm6kfzs2` | `https://web.plaud.ai/file/<file_id>` |
 
 **Action Items** `18428276296`, group `topics` (Open Items)
 
@@ -98,7 +98,7 @@ Workspace: Continuous Improvement (`16763083`), folder "Phase 2".
 | Entry Source | `color_mm6khq9w` | AI Pipeline 0, Manual 1 |
 | Review State | `color_mm6kgnmv` | Needs Review 0, Confirmed 1 |
 | Raw Owner Text | `text_mm6knbbe` | always populate with the name as written |
-| Source Recording | `link_mm6ks8hq` | |
+| Source Recording | `link_mm6ks8hq` | same URL as the parent meeting |
 
 Other Phase 2 boards, not yet wired in: Contractor Directory (Phase 2)
 `18428276306`, CI Work Plan `18428276313`, Signups `18428276319`, Site Visits
@@ -145,9 +145,25 @@ Church `105734480`, Zoe Croke `81506160`, Brock `99172273`.
 
 ## Source Recording
 
-Left blank so far. Plaud's API only returns a presigned S3 URL that expires,
-and no permanent app URL format has been confirmed. Do not invent one - find
-the real format first.
+Confirmed 2026-09-11. The permanent link is:
+
+```
+https://web.plaud.ai/file/<file_id>
+```
+
+where `<file_id>` is exactly the `id` that `list_files` and `get_note`
+already return, so no extra lookup is needed - build the URL from the id in
+hand and populate it on both boards.
+
+Do not use anything the API hands back as a URL. `presigned_url` from
+`get_file` and `data_link` from `get_note` are both expiring S3 links, not
+durable references.
+
+The link goes in `link_mm6kfzs2` on the meeting record and `link_mm6ks8hq`
+on each action item. monday link columns take
+`{"url": "https://...", "text": "label"}`. **Untested through this
+connector** - given that status columns silently accept a bad value and
+write index 0 instead, read the column back on first use before trusting it.
 
 ## The Python tool
 
@@ -205,4 +221,3 @@ Muted: 18403119396, 18403117952, 18403125589, 18373208940, 18403136567,
   Strategic Work Plan workspace. Safe to delete in monday.com.
 - **Samantha Chu plans to review her Training board.** Only affects the Python
   tool, which is not in use.
-- **Source Recording link format** still unknown, see above.
