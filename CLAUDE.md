@@ -62,6 +62,41 @@ Suggested opening for the next session:
 If the Plaud tools are missing, the connector needs a fresh session to load;
 starting a new one picks it up.
 
+## monday.com notifications muted (2026-09-11)
+
+Chris was still getting daily overdue-item emails from the Phase 1 CI
+boards. Root cause: **those boards were never actually archived.** Moving a
+board into a folder named "Archive" does not archive it - the board stays
+active and its automations keep firing. All seven were `state: active`.
+
+The automations sending them, all notifying Chris:
+  - Improvement Steps `7918000318` "Overdue Step Alert", daily 8:30 Halifax
+  - Improvements `7918000411` "Overdue Improvement Alert", daily 8:30
+  - Contractor Participation `7918495988` "Overdue Contractor Target Alert",
+    daily 8:30; plus `7918000807` High Adoption Risk and `7918495884`
+    Contractor Blocked, both status-triggered rather than date-triggered
+  - CI Project `502211326` "Original Target Date has passed", daily 12:30
+
+Deactivating the automations was not possible: the monday MCP connector
+returns USER_UNAUTHORIZED on workflow writes, and `502211326` is an
+older-style automation the API cannot modify at all. Instead every Phase 1
+board was set to `CURRENT_USER_MUTE_ALL` via `update_mute_board_settings`.
+That is a per-user mute - reversible, affects only Chris, leaves the
+automations intact for whenever Phase 1 is revisited, and covers every
+notification source rather than only the ones enumerated above.
+
+Muted: 18403119396, 18403117952, 18403125589, 18373208940, 18403136567,
+18403818341, 18403133772. Reverse with the same mutation and `NOT_MUTED`.
+
+## Phase 2 boards exist - the tool still points at Phase 1
+
+The Continuous Improvement workspace now has a "Phase 2" folder holding
+CI Activity Log (Phase 2) `18428276309`, Contractor Directory (Phase 2)
+`18428276306`, CI Work Plan, Action Items, Site Visits, Signups and
+Offering Catalogue. `plaud_monday_sync.py` still targets the Phase 1 board
+ids. If Phase 1 is genuinely retired the mapping needs repointing - raised
+with Chris 2026-09-11, not yet decided.
+
 ## Also outstanding
 
 - **Chris has not yet updated his 12 Plaud templates.** Ready-to-paste text
